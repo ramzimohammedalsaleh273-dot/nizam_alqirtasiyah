@@ -76,7 +76,16 @@ class PartyPaymentService:
         with get_session() as s:
             try:
                 PermissionService.ensure_schema(s)
-                user_id = cashier_id or PermissionService.default_user_id()
+                user_id = cashier_id
+                if user_id is None:
+                    user_id = s.execute(text("""
+                        SELECT u.id
+                        FROM users u
+                        JOIN erp_user_roles ur ON ur.user_id=u.id
+                        JOIN erp_roles r ON r.id=ur.role_id
+                        WHERE COALESCE(r.is_active,1)=1
+                        ORDER BY u.id LIMIT 1
+                    """)).scalar()
                 if not PermissionService.has_in_session(s, user_id, "treasury.receipt"):
                     raise PermissionError("لا توجد صلاحية لتحصيل مبالغ من العملاء")
 
@@ -171,7 +180,16 @@ class PartyPaymentService:
         with get_session() as s:
             try:
                 PermissionService.ensure_schema(s)
-                user_id = cashier_id or PermissionService.default_user_id()
+                user_id = cashier_id
+                if user_id is None:
+                    user_id = s.execute(text("""
+                        SELECT u.id
+                        FROM users u
+                        JOIN erp_user_roles ur ON ur.user_id=u.id
+                        JOIN erp_roles r ON r.id=ur.role_id
+                        WHERE COALESCE(r.is_active,1)=1
+                        ORDER BY u.id LIMIT 1
+                    """)).scalar()
                 if not PermissionService.has_in_session(s, user_id, "treasury.payment"):
                     raise PermissionError("لا توجد صلاحية لدفع مبالغ من الخزينة")
 
