@@ -1,9 +1,10 @@
 
 from PySide6.QtWidgets import (
     QWidget,QVBoxLayout,QTabWidget,QTableWidget,
-    QTableWidgetItem,QLabel
+    QTableWidgetItem,QLabel,QPushButton,QHBoxLayout,QInputDialog,QMessageBox
 )
 from app.services.party_service import PartyService
+from app.services.party_master_service import PartyMasterService
 
 class PartiesWindow(QWidget):
 
@@ -17,6 +18,14 @@ class PartiesWindow(QWidget):
         title=QLabel("إدارة الأطراف")
         title.setStyleSheet("font-size:28px;font-weight:bold")
         layout.addWidget(title)
+
+        bar=QHBoxLayout()
+        add_customer=QPushButton("إضافة عميل")
+        add_supplier=QPushButton("إضافة مورد")
+        add_customer.clicked.connect(self.add_customer)
+        add_supplier.clicked.connect(self.add_supplier)
+        bar.addWidget(add_customer); bar.addWidget(add_supplier); bar.addStretch()
+        layout.addLayout(bar)
 
         tabs=QTabWidget()
 
@@ -37,6 +46,22 @@ class PartiesWindow(QWidget):
 
         layout.addWidget(tabs)
         self.load()
+
+    def add_party_dialog(self, supplier=False):
+        code, ok=QInputDialog.getText(self, "إضافة مورد" if supplier else "إضافة عميل", "الكود:")
+        if not ok: return
+        name, ok=QInputDialog.getText(self, "إضافة طرف", "الاسم:")
+        if not ok: return
+        phone, ok=QInputDialog.getText(self, "إضافة طرف", "الهاتف (اختياري):")
+        if not ok: return
+        try:
+            if supplier: PartyMasterService.create_supplier(code,name,phone or None)
+            else: PartyMasterService.create_customer(code,name,phone or None)
+            self.load()
+        except Exception as exc: QMessageBox.critical(self,"فشل الحفظ",str(exc))
+
+    def add_customer(self): self.add_party_dialog(False)
+    def add_supplier(self): self.add_party_dialog(True)
 
     def load(self):
         self.customers.setRowCount(0)
