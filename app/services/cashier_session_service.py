@@ -63,9 +63,9 @@ class CashierSessionService:
             sales_cash=Decimal(str(s.execute(text("""
                 SELECT COALESCE(SUM(sp.amount),0) FROM sale_payments sp
                 JOIN sales sl ON sl.id=sp.sale_id
-                WHERE sp.payment_method='cash' AND sl.created_at>=:opened
+                WHERE sp.payment_method='cash' AND sl.created_at>=:opened AND (sl.cashier_id=:cashier OR :cashier IS NULL)
                   AND sl.status NOT IN ('VOID','CANCELLED')
-            """),{"opened":row.opened_at}).scalar() or 0))
+            """),{"opened":row.opened_at,"cashier":s.execute(text("SELECT cashier_id FROM cashier_sessions WHERE id=:id"),{"id":session_id}).scalar()}).scalar() or 0))
             expected=Decimal(str(row.opening_amount or 0))+sales_cash
             difference=actual-expected
             s.execute(text("""
