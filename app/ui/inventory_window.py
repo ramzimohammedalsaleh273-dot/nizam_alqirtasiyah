@@ -1,10 +1,10 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton,
     QTableWidget, QTableWidgetItem, QLabel, QMessageBox,
-    QHeaderView
-)
+    QHeaderView, QDialog, QFormLayout, QDialogButtonBox, QDoubleSpinBox
 from PySide6.QtCore import Qt
 from app.services.inventory_service import InventoryService
+from app.services.product_service import ProductService
 
 
 class InventoryWindow(QWidget):
@@ -31,6 +31,10 @@ class InventoryWindow(QWidget):
 
         search_button = QPushButton("بحث")
         search_button.clicked.connect(self.load)
+
+        add_button = QPushButton("إضافة صنف")
+        add_button.clicked.connect(self.add_product)
+        bar.addWidget(add_button)
 
         refresh_button = QPushButton("تحديث")
         refresh_button.clicked.connect(lambda: self.load(""))
@@ -59,6 +63,22 @@ class InventoryWindow(QWidget):
         layout.addWidget(self.status)
 
         self.load("")
+
+    def add_product(self):
+        dialog=QDialog(self); dialog.setWindowTitle("إضافة صنف جديد")
+        form=QFormLayout(dialog)
+        sku=QLineEdit(); name=QLineEdit(); barcode=QLineEdit()
+        cost=QDoubleSpinBox(); sale=QDoubleSpinBox()
+        for x in (cost,sale): x.setMaximum(999999999); x.setDecimals(2)
+        form.addRow("رمز الصنف:",sku); form.addRow("اسم المنتج:",name); form.addRow("الباركود:",barcode)
+        form.addRow("التكلفة:",cost); form.addRow("سعر البيع:",sale)
+        buttons=QDialogButtonBox(QDialogButtonBox.Ok|QDialogButtonBox.Cancel)
+        buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject); form.addRow(buttons)
+        if dialog.exec()!=QDialog.Accepted: return
+        try:
+            ProductService.create_product(sku.text(),name.text(),cost.value(),sale.value(),barcode.text() or None)
+            QMessageBox.information(self,"تم","تم إنشاء الصنف بنجاح"); self.load("")
+        except Exception as exc: QMessageBox.critical(self,"فشل إنشاء الصنف",str(exc))
 
     def load(self, term=None):
         if term is None:
