@@ -1,6 +1,8 @@
-from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QPushButton,QLabel,QInputDialog,QMessageBox
+from PySide6.QtWidgets import QWidget,QVBoxLayout,QPushButton,QLabel,QInputDialog,QMessageBox
 from app.services.party_payment_service import PartyPaymentService
 from app.services.cashier_session_service import CashierSessionService
+from app.services.permission_service import PermissionService
+
 
 class TreasuryOperationsWindow(QWidget):
     def __init__(self,parent=None):
@@ -24,6 +26,12 @@ class TreasuryOperationsWindow(QWidget):
         value,ok=QInputDialog.getDouble(self,title,"المبلغ:",0,0,999999999,2)
         return value if ok else None
 
+    def _user(self):
+        uid=PermissionService.default_user_id()
+        if uid is None:
+            raise ValueError("لا يوجد مستخدم فعّال في النظام")
+        return uid
+
     def receive_customer(self):
         cid,ok=QInputDialog.getInt(self,"تحصيل","رقم العميل:",1,1,2147483647)
         if not ok:return
@@ -32,7 +40,8 @@ class TreasuryOperationsWindow(QWidget):
         method,ok=QInputDialog.getItem(self,"طريقة التحصيل","الطريقة:",["cash","card","bank_transfer"],0,False)
         if not ok:return
         try:
-            r=PartyPaymentService.receive_from_customer(cid,amount,method)
+            uid=self._user()
+            r=PartyPaymentService.receive_from_customer(cid,amount,method,cashier_id=uid)
             QMessageBox.information(self,"تم",f"تم التحصيل بنجاح\nالرصيد الجديد: {r['balance']:.2f}")
         except Exception as e: QMessageBox.critical(self,"فشل التحصيل",str(e))
 
@@ -44,7 +53,8 @@ class TreasuryOperationsWindow(QWidget):
         method,ok=QInputDialog.getItem(self,"طريقة الدفع","الطريقة:",["cash","card","bank_transfer"],0,False)
         if not ok:return
         try:
-            r=PartyPaymentService.pay_supplier(sid,amount,method)
+            uid=self._user()
+            r=PartyPaymentService.pay_supplier(sid,amount,method,cashier_id=uid)
             QMessageBox.information(self,"تم",f"تم الدفع بنجاح\nالرصيد الجديد: {r['balance']:.2f}")
         except Exception as e: QMessageBox.critical(self,"فشل الدفع",str(e))
 
@@ -65,5 +75,13 @@ class TreasuryOperationsWindow(QWidget):
         if amount is None:return
         try:
             r=CashierSessionService.close(sid,amount)
-            QMessageBox.information(self,"تم",f"المتوقع: {r['expected']:.2f}\nالفعلي: {r['actual']:.2f}\nالفرق: {r['difference']:.2f}")
+            QMessageBox.information(
+                self,"تم",
+                f"المتوقع: {r['expected']:.2f}\n"
+                f"الفعلي: {r['actual']:.2f}\n"
+                f"الفرق: {r['difference']:.2f}\n\n"
+                f"مبيعات نقدية: {r['sales_cash']:.2f}\n"
+                f"تحصيلات عملاء: {r['customer_receipts']:.2f}\n"
+                f"مدفوعات موردين: {r['supplier_payments']:.2f}"
+            )
         except Exception as e: QMessageBox.critical(self,"فشل الإغلاق",str(e))
