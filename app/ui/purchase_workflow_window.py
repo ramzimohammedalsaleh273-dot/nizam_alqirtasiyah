@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QTableWidget,QTabl
 from sqlalchemy import text
 from app.database.connection import get_session
 from app.services.purchase_workflow_service import PurchaseWorkflowService
+from app.services.permission_service import PermissionService
 
 
 class PurchaseWorkflowWindow(QWidget):
@@ -48,7 +49,7 @@ class PurchaseWorkflowWindow(QWidget):
         qty,ok=QInputDialog.getDouble(self,"طلب شراء","الكمية:",1,0.01,999999,2)
         if not ok:return
         try:
-            PurchaseWorkflowService.create_request([{"product_id":product,"quantity":qty}])
+            PurchaseWorkflowService.create_request([{"product_id":product,"quantity":qty}], requester_id=PermissionService.default_user_id())
             self.load(); QMessageBox.information(self,"تم","تم إنشاء طلب شراء فعلي وحفظه في قاعدة البيانات.")
         except Exception as e: QMessageBox.critical(self,"فشل",str(e))
 
@@ -57,7 +58,7 @@ class PurchaseWorkflowWindow(QWidget):
         if not row:return
         if row[1]!="طلب شراء": QMessageBox.warning(self,"تنبيه","اختر طلب شراء."); return
         try:
-            PurchaseWorkflowService.approve_request(int(row[0]),1)
+            PurchaseWorkflowService.approve_request(int(row[0]), PermissionService.default_user_id())
             self.load()
         except Exception as e: QMessageBox.critical(self,"فشل الاعتماد",str(e))
 
