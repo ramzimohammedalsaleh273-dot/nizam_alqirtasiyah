@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 import sqlite3
 
-from app.core.config import DATABASE_PATH
+from app.core.config import DATABASE_PATH, PROJECT_ROOT
 
 
 class BackupService:
@@ -14,7 +14,7 @@ class BackupService:
         if not source.exists():
             raise FileNotFoundError(f"قاعدة البيانات غير موجودة: {source}")
 
-        target_dir = Path(destination_dir)
+        target_dir = Path(destination_dir) if destination_dir else PROJECT_ROOT / "backups"
         target_dir.mkdir(parents=True, exist_ok=True)
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
