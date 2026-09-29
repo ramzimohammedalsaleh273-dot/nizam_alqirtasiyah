@@ -3,6 +3,7 @@ from sqlalchemy import text
 from app.database.connection import get_session
 from app.services.document_number_service import DocumentNumberService
 from app.services.audit_service import AuditService
+from app.services.accounting_service import AccountingService
 
 class PurchaseService:
     @staticmethod
@@ -64,7 +65,13 @@ class PurchaseService:
                             if c in mc:f.append(c);v.append(":"+c);d[c]=val
                         if "created_at" in mc:f.append("created_at");v.append("CURRENT_TIMESTAMP")
                         s.execute(text(f"INSERT INTO stock_movements({','.join(f)}) VALUES({','.join(v)})"),d)
-                AuditService.log(s,"PURCHASE_POSTED","purchase_invoice",iid);s.commit();return {"id":iid,"invoice_number":invoice,"total":float(total),"paid":float(paid),"due":float(due)}
+                accounting = AccountingService.post_purchase(
+                    s, iid, invoice, total, paid, due, supplier_id,
+                    tax_amount=Decimal("0.00"), payment_method="cash"
+                )
+                AuditService.log(s,"PURCHASE_POSTED","purchase_invoice",iid)
+                s.commit()
+                return {"id":iid,"invoice_number":invoice,"total":float(total),"paid":float(paid),"due":float(due),"journal":accounting}
             except Exception:s.rollback();raise
     @staticmethod
     def supplier_balance(supplier_id):
