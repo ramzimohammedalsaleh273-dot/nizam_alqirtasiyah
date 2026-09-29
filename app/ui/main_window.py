@@ -153,6 +153,7 @@ class MainWindow(QMainWindow):
                 ("المبيعات", summary["sales"]),
                 ("المشتريات", summary["purchase_invoices"]),
                 ("المخزون", summary["stock"]),
+                ("أصناف منخفضة", summary["low_stock"]),
             ]
 
             for name, value in data:
