@@ -4,6 +4,7 @@ from app.database.connection import get_session
 from app.services.audit_service import AuditService
 from app.services.document_number_service import DocumentNumberService
 from app.services.purchase_service import PurchaseService
+from app.services.permission_service import PermissionService
 
 
 class PurchaseWorkflowService:
@@ -65,6 +66,7 @@ class PurchaseWorkflowService:
         with get_session() as s:
             try:
                 cls.ensure_schema(s)
+                PermissionService.ensure_schema(s)
                 n = DocumentNumberService.next_number(s, "PURCHASE_REQUEST", "PRQ", 6)
                 s.execute(text("""
                     INSERT INTO purchase_requests
@@ -90,6 +92,11 @@ class PurchaseWorkflowService:
         with get_session() as s:
             try:
                 cls.ensure_schema(s)
+                PermissionService.ensure_schema(s)
+                if approved_by is None:
+                    raise PermissionError("يجب تحديد المستخدم المعتمد")
+                if not PermissionService.has(int(approved_by), "purchase.request.approve"):
+                    raise PermissionError("المستخدم لا يملك صلاحية اعتماد طلبات الشراء")
                 row=s.execute(text("SELECT * FROM purchase_requests WHERE id=:id"),{"id":request_id}).fetchone()
                 if not row: raise ValueError("طلب الشراء غير موجود")
                 if row.status!="SUBMITTED": raise ValueError("الطلب ليس في حالة انتظار الاعتماد")
