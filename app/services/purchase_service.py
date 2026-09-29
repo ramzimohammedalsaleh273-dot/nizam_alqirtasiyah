@@ -80,7 +80,6 @@ class PurchaseService:
                         WHERE id=:id
                     """), {"amount":float(due),"id":supplier_id})
                 AuditService.log(s,"PURCHASE_POSTED","purchase_invoice",iid)
-                s.commit()
                 return {"id":iid,"invoice_number":invoice,"subtotal":float(total),"tax":float(tax),"total":float(grand_total),"paid":float(paid),"due":float(due),"journal":accounting}
         except Exception:
             raise
