@@ -253,3 +253,56 @@ class AccountingService:
             "debit": float(debit_total),
             "credit": float(credit_total),
         }
+
+    @classmethod
+    def post_purchase(cls, session, purchase_id, invoice_number, total_amount,
+                      paid_amount, due_amount, supplier_id, tax_amount=0,
+                      payment_method="cash"):
+        """ترحيل فاتورة شراء: مخزون/ضريبة مدين، والمورد أو وسيلة الدفع دائن."""
+        total_amount = cls.money(total_amount)
+        paid_amount = cls.money(paid_amount)
+        due_amount = cls.money(due_amount)
+        tax_amount = cls.money(tax_amount)
+        if cls.money(paid_amount + due_amount) != total_amount:
+            raise ValueError("مدفوع + آجل لا يساوي إجمالي المشتريات")
+
+        inventory_account = cls.get_account_id(session, "1400")
+        vat_input_account = cls.get_account_id(session, "1500") if tax_amount > 0 else None
+        supplier_account = cls.get_account_id(session, "2100")
+        lines = []
+        net = cls.money(total_amount - tax_amount)
+        if net > 0:
+            lines.append({"account_id": inventory_account, "debit": net, "credit": Decimal("0"), "description": f"إضافة مخزون فاتورة {invoice_number}"})
+        if tax_amount > 0:
+            lines.append({"account_id": vat_input_account, "debit": tax_amount, "credit": Decimal("0"), "description": f"ضريبة مدخلات فاتورة {invoice_number}"})
+        if paid_amount > 0:
+            method = payment_method if payment_method in cls.PAYMENT_ACCOUNTS else "cash"
+            lines.append({"account_id": cls.get_account_id(session, cls.PAYMENT_ACCOUNTS[method]), "debit": Decimal("0"), "credit": paid_amount, "description": f"دفع {method} لفاتورة شراء {invoice_number}"})
+        if due_amount > 0:
+            if not supplier_id:
+                raise ValueError("المشتريات الآجلة تحتاج إلى مورد")
+            lines.append({"account_id": supplier_account, "debit": Decimal("0"), "credit": due_amount, "description": f"ذمم المورد لفاتورة {invoice_number}"})
+
+        debit = cls.money(sum((x["debit"] for x in lines), Decimal("0")))
+        credit = cls.money(sum((x["credit"] for x in lines), Decimal("0")))
+        if debit != credit:
+            raise ValueError(f"قيد المشتريات غير متوازن: مدين={debit} دائن={credit}")
+
+        entry_number = cls.next_entry_number(session)
+        session.execute(text("""
+            INSERT INTO journal_entries
+            (entry_number, entry_date, description, source_type, source_id, status,
+             fiscal_period_id, created_by, created_at)
+            VALUES (:n, :d, :desc, 'PURCHASE', :sid, 'POSTED', NULL, NULL, CURRENT_TIMESTAMP)
+        """), {"n": entry_number, "d": datetime.now().strftime("%Y-%m-%d"),
+               "desc": f"ترحيل فاتورة شراء {invoice_number}", "sid": purchase_id})
+        entry_id = int(session.execute(text("SELECT last_insert_rowid()")).scalar())
+        for line in lines:
+            session.execute(text("""
+                INSERT INTO journal_entry_lines
+                (journal_entry_id, account_id, cost_center_id, description, debit, credit)
+                VALUES (:eid, :aid, NULL, :desc, :debit, :credit)
+            """), {"eid": entry_id, "aid": line["account_id"], "desc": line["description"],
+                   "debit": float(line["debit"]), "credit": float(line["credit"])})
+        return {"journal_entry_id": entry_id, "entry_number": entry_number,
+                "debit": float(debit), "credit": float(credit)}
