@@ -1,0 +1,846 @@
+=== STDOUT ===
+======================================================================
+DATABASE FULL AUDIT
+======================================================================
+
+[1] INTEGRITY
+INTEGRITY: ok
+FOREIGN_KEYS: []
+
+[2] TABLES: 179
+
+TABLE: account_balances
+ ROWS: 10
+ COLUMNS: id,account_id,fiscal_period_id,debit,credit,balance
+ RELATIONS: fiscal_period_id -> fiscal_periods.id; account_id -> accounts.id
+
+TABLE: account_types
+ ROWS: 6
+ COLUMNS: id,code,name,normal_balance
+
+TABLE: accounting_event_rules
+ ROWS: 8
+ COLUMNS: id,event_code,event_name,debit_account,credit_account,is_active
+
+TABLE: accounting_links
+ ROWS: 1
+ COLUMNS: id,event_code,source_type,source_id,debit_account,credit_account,amount,status,created_at
+
+TABLE: accounting_periods
+ ROWS: 1
+ COLUMNS: id,fiscal_year_id,name,start_date,end_date,status
+ RELATIONS: fiscal_year_id -> fiscal_years.id
+
+TABLE: accounts
+ ROWS: 21
+ COLUMNS: id,account_code,account_name,account_type,parent_id,is_active,allow_posting,opening_balance,created_at
+
+TABLE: analytics_alerts
+ ROWS: 1
+ COLUMNS: id,alert_type,title,message,severity,status,created_at
+
+TABLE: analytics_metrics
+ ROWS: 8
+ COLUMNS: id,code,name,category,calculation,is_active
+
+TABLE: analytics_snapshots
+ ROWS: 0
+ COLUMNS: id,metric_id,metric_date,value,dimension,dimension_value,created_at
+
+TABLE: application_versions
+ ROWS: 1
+ COLUMNS: id,version,release_name,release_date,status
+
+TABLE: approval_actions
+ ROWS: 0
+ COLUMNS: id,request_id,step_id,user_id,action,comment,created_at
+
+TABLE: approval_requests
+ ROWS: 0
+ COLUMNS: id,request_no,workflow_id,entity_type,entity_id,requested_by,current_step,status,created_at,completed_at
+
+TABLE: asset_categories
+ ROWS: 5
+ COLUMNS: id,name
+
+TABLE: asset_depreciation
+ ROWS: 0
+ COLUMNS: id,asset_id,period,amount,book_value,created_at
+
+TABLE: assets
+ ROWS: 1
+ COLUMNS: id,asset_no,name,category_id,purchase_date,cost,salvage_value,useful_life_months,status,location
+
+TABLE: audit_log
+ ROWS: 1
+ COLUMNS: id,user_id,action,table_name,record_id,description,old_values,new_values,ip_address,created_at
+
+TABLE: audit_logs
+ ROWS: 1
+ COLUMNS: id,user_id,action,module,entity_type,entity_id,old_data,new_data,details,created_at
+ RELATIONS: user_id -> users.id
+
+TABLE: backup_history
+ ROWS: 1
+ COLUMNS: id,backup_path,backup_type,status,created_at
+
+TABLE: backup_jobs
+ ROWS: 1
+ COLUMNS: id,backup_type,destination,status,started_at,completed_at,file_size,checksum
+
+TABLE: backup_settings
+ ROWS: 4
+ COLUMNS: id,setting_key,setting_value
+
+TABLE: bank_accounts
+ ROWS: 1
+ COLUMNS: id,bank_id,branch_id,account_name,account_number,iban,currency_code,opening_balance,current_balance,is_active
+ RELATIONS: branch_id -> branches.id; bank_id -> banks.id
+
+TABLE: bank_reconciliations
+ ROWS: 0
+ COLUMNS: id,bank_account_id,statement_date,statement_balance,system_balance,difference,status,notes,created_at
+ RELATIONS: bank_account_id -> bank_accounts.id
+
+TABLE: bank_transactions
+ ROWS: 1
+ COLUMNS: id,bank_account_id,transaction_type,amount,reference_type,reference_id,description,transaction_date
+ RELATIONS: bank_account_id -> bank_accounts.id
+
+TABLE: banks
+ ROWS: 1
+ COLUMNS: id,name,code,is_active
+
+TABLE: branch_sequences
+ ROWS: 1
+ COLUMNS: id,branch_id,sequence_type,prefix,current_number
+
+TABLE: branch_settings
+ ROWS: 1
+ COLUMNS: id,branch_id,setting_key,setting_value
+
+TABLE: branch_users
+ ROWS: 1
+ COLUMNS: branch_id,user_id
+
+TABLE: branches
+ ROWS: 1
+ COLUMNS: id,company_id,name,code,phone,address,is_active,created_at,updated_at
+ RELATIONS: company_id -> companies.id
+
+TABLE: brands
+ ROWS: 14
+ COLUMNS: id,name,description,is_active
+
+TABLE: cash_payments
+ ROWS: 1
+ COLUMNS: id,payment_number,supplier_id,amount,payment_method,reference_number,notes,payment_date
+ RELATIONS: supplier_id -> suppliers.id
+
+TABLE: cash_receipts
+ ROWS: 1
+ COLUMNS: id,receipt_number,customer_id,amount,payment_method,reference_number,notes,receipt_date
+ RELATIONS: customer_id -> customers.id
+
+TABLE: cash_registers
+ ROWS: 2
+ COLUMNS: id,branch_id,name,code,is_active
+ RELATIONS: branch_id -> branches.id
+
+TABLE: cash_sessions
+ ROWS: 1
+ COLUMNS: id,register_id,user_id,opening_balance,expected_balance,actual_balance,difference,opened_at,closed_at,status
+ RELATIONS: user_id -> users.id; register_id -> cash_registers.id
+
+TABLE: cash_transactions
+ ROWS: 4
+ COLUMNS: id,cash_session_id,transaction_type,amount,reference_type,reference_id,notes,created_at
+ RELATIONS: cash_session_id -> cash_sessions.id
+
+TABLE: chart_of_accounts
+ ROWS: 18
+ COLUMNS: id,code,name,account_type_id,parent_id,level,is_group,is_active
+ RELATIONS: parent_id -> chart_of_accounts.id; account_type_id -> account_types.id
+
+TABLE: companies
+ ROWS: 2
+ COLUMNS: id,name,tax_number,phone,email,address,country,city,currency_code,is_active,created_at,updated_at
+
+TABLE: contract_documents
+ ROWS: 0
+ COLUMNS: id,contract_id,document_id
+
+TABLE: contract_payments
+ ROWS: 0
+ COLUMNS: id,contract_id,due_date,amount,status,paid_at
+
+TABLE: contract_types
+ ROWS: 5
+ COLUMNS: id,name
+
+TABLE: contracts
+ ROWS: 1
+ COLUMNS: id,contract_no,title,contract_type_id,party_type,party_id,start_date,end_date,value,status,terms
+
+TABLE: cost_centers
+ ROWS: 1
+ COLUMNS: id,code,name,parent_id,is_active
+ RELATIONS: parent_id -> cost_centers.id
+
+TABLE: coupon_redemptions
+ ROWS: 0
+ COLUMNS: id,coupon_id,customer_id,sale_id,discount_amount,redeemed_at
+ RELATIONS: sale_id -> sales.id; customer_id -> customers.id; coupon_id -> coupons.id
+
+TABLE: coupons
+ ROWS: 1
+ COLUMNS: id,code,promotion_id,usage_limit,used_count,start_date,end_date,is_active
+ RELATIONS: promotion_id -> promotions.id
+
+TABLE: currencies
+ ROWS: 1
+ COLUMNS: id,code,name,symbol,decimal_places,is_base,is_active
+
+TABLE: customer_account_transactions
+ ROWS: 2
+ COLUMNS: id,customer_id,transaction_type,reference_type,reference_id,debit,credit,balance,description,transaction_date
+ RELATIONS: customer_id -> customers.id
+
+TABLE: customer_addresses
+ ROWS: 28
+ COLUMNS: id,customer_id,address_type,address,city,district,postal_code
+ RELATIONS: customer_id -> customers.id
+
+TABLE: customer_collections
+ ROWS: 1
+ COLUMNS: id,collection_number,customer_id,amount,payment_method,reference_number,notes,collection_date
+ RELATIONS: customer_id -> customers.id
+
+TABLE: customer_credit_limits
+ ROWS: 28
+ COLUMNS: id,customer_id,old_limit,new_limit,reason,approved_by,created_at
+ RELATIONS: approved_by -> users.id; customer_id -> customers.id
+
+TABLE: customer_groups
+ ROWS: 4
+ COLUMNS: id,name,discount_percent,price_type,is_active
+
+TABLE: customer_notes
+ ROWS: 28
+ COLUMNS: id,customer_id,user_id,note,created_at
+ RELATIONS: user_id -> users.id; customer_id -> customers.id
+
+TABLE: customer_payments
+ ROWS: 1
+ COLUMNS: id,customer_id,amount,payment_method,reference_number,notes,created_at
+ RELATIONS: customer_id -> customers.id
+
+TABLE: customer_transactions
+ ROWS: 1
+ COLUMNS: id,customer_id,transaction_type,amount,reference_type,reference_id,balance_after,created_at
+ RELATIONS: customer_id -> customers.id
+
+TABLE: customers
+ ROWS: 28
+ COLUMNS: id,customer_code,name,customer_type,group_id,phone,email,tax_number,credit_limit,opening_balance,current_balance,is_active,created_at,updated_at
+ RELATIONS: group_id -> customer_groups.id
+
+TABLE: dashboard_widgets
+ ROWS: 1
+ COLUMNS: id,code,title,widget_type,configuration,is_active
+
+TABLE: departments
+ ROWS: 11
+ COLUMNS: id,name,is_active
+
+TABLE: document_links
+ ROWS: 0
+ COLUMNS: id,document_id,entity_type,entity_id
+
+TABLE: document_sequences
+ ROWS: 11
+ COLUMNS: id,branch_id,document_type,prefix,current_number,padding
+ RELATIONS: branch_id -> branches.id
+
+TABLE: document_versions
+ ROWS: 0
+ COLUMNS: id,document_id,version_no,file_path,file_hash,created_by,created_at
+
+TABLE: documents
+ ROWS: 1
+ COLUMNS: id,document_no,title,document_type,entity_type,entity_id,file_name,file_path,mime_type,file_size,description,created_by,created_at
+
+TABLE: e_invoice_lines
+ ROWS: 1
+ COLUMNS: id,e_invoice_id,product_id,description,quantity,unit_price,tax_rate,tax_amount,line_total
+ RELATIONS: e_invoice_id -> e_invoices.id
+
+TABLE: e_invoices
+ ROWS: 1
+ COLUMNS: id,invoice_number,invoice_type,sale_id,customer_id,uuid,issue_date,subtotal,tax_amount,total_amount,status,qr_data,xml_data
+
+TABLE: ecommerce_orders
+ ROWS: 1
+ COLUMNS: id,external_order_id,platform,customer_name,order_status,subtotal,tax,total,payload,created_at
+
+TABLE: employee_attendance
+ ROWS: 0
+ COLUMNS: id,employee_id,attendance_date,check_in,check_out,status,notes
+
+TABLE: employee_leaves
+ ROWS: 0
+ COLUMNS: id,employee_id,leave_type,start_date,end_date,status,reason
+
+TABLE: employees
+ ROWS: 7
+ COLUMNS: id,employee_no,full_name,phone,email,department_id,position_id,hire_date,status,basic_salary
+
+TABLE: erp_login_sessions
+ ROWS: 6
+ COLUMNS: id,user_id,login_at,logout_at,status
+
+TABLE: erp_permissions
+ ROWS: 13
+ COLUMNS: id,code,name,module,is_active
+
+TABLE: erp_print_templates
+ ROWS: 6
+ COLUMNS: id,code,name,document_type,is_default,is_active
+
+TABLE: erp_report_catalog
+ ROWS: 10
+ COLUMNS: id,report_code,report_name,report_type,is_active
+
+TABLE: erp_report_exports
+ ROWS: 1
+ COLUMNS: id,report_code,file_format,file_path,created_at,status
+
+TABLE: erp_role_permissions
+ ROWS: 13
+ COLUMNS: id,role_id,permission_id
+ RELATIONS: permission_id -> erp_permissions.id; role_id -> erp_roles.id
+
+TABLE: erp_roles
+ ROWS: 5
+ COLUMNS: id,code,name,is_active
+
+TABLE: erp_user_roles
+ ROWS: 1
+ COLUMNS: id,user_id,role_id
+ RELATIONS: role_id -> erp_roles.id; user_id -> users.id
+
+TABLE: fiscal_periods
+ ROWS: 1
+ COLUMNS: id,period_name,start_date,end_date,status
+
+TABLE: fiscal_years
+ ROWS: 1
+ COLUMNS: id,name,start_date,end_date,status
+
+TABLE: forecasts
+ ROWS: 1
+ COLUMNS: id,metric_code,period,predicted_value,method,confidence,created_at
+
+TABLE: goods_receipt_items
+ ROWS: 0
+ COLUMNS: id,receipt_id,product_id,ordered_quantity,received_quantity,rejected_quantity,unit_cost
+ RELATIONS: product_id -> products.id; receipt_id -> goods_receipts.id
+
+TABLE: goods_receipts
+ ROWS: 0
+ COLUMNS: id,receipt_number,purchase_order_id,warehouse_id,supplier_id,status,received_at,notes
+ RELATIONS: supplier_id -> suppliers.id; warehouse_id -> warehouses.id; purchase_order_id -> purchase_orders.id
+
+TABLE: held_sales
+ ROWS: 1
+ COLUMNS: id,hold_number,branch_id,cashier_id,customer_id,data_json,created_at
+ RELATIONS: cashier_id -> users.id; branch_id -> branches.id
+
+TABLE: integration_logs
+ ROWS: 1
+ COLUMNS: id,integration_id,direction,endpoint,request_data,response_data,status_code,status,created_at
+
+TABLE: integrations
+ ROWS: 3
+ COLUMNS: id,code,name,integration_type,base_url,status,configuration
+
+TABLE: interbranch_transfers
+ ROWS: 0
+ COLUMNS: id,transfer_no,from_branch_id,to_branch_id,status,notes,created_at
+
+TABLE: job_positions
+ ROWS: 8
+ COLUMNS: id,name,department_id,base_salary,is_active
+
+TABLE: journal_entries
+ ROWS: 8
+ COLUMNS: id,entry_number,entry_date,description,source_type,source_id,status,fiscal_period_id,created_by,created_at
+ RELATIONS: created_by -> users.id; fiscal_period_id -> accounting_periods.id
+
+TABLE: journal_entry_lines
+ ROWS: 31
+ COLUMNS: id,journal_entry_id,account_id,cost_center_id,description,debit,credit
+ RELATIONS: cost_center_id -> cost_centers.id; account_id -> chart_of_accounts.id; journal_entry_id -> journal_entries.id
+
+TABLE: login_attempts
+ ROWS: 1
+ COLUMNS: id,username,success,ip_address,attempted_at,reason
+
+TABLE: login_sessions
+ ROWS: 0
+ COLUMNS: id,user_id,login_at,logout_at,status
+
+TABLE: loyalty_accounts
+ ROWS: 28
+ COLUMNS: id,customer_id,points_balance,tier,created_at
+ RELATIONS: customer_id -> customers.id
+
+TABLE: loyalty_rules
+ ROWS: 1
+ COLUMNS: id,name,points_per_currency,minimum_purchase,points_value,is_active,start_date,end_date
+
+TABLE: loyalty_transactions
+ ROWS: 0
+ COLUMNS: id,loyalty_account_id,transaction_type,points,reference_type,reference_id,balance_after,created_at
+ RELATIONS: loyalty_account_id -> loyalty_accounts.id
+
+TABLE: maintenance_orders
+ ROWS: 1
+ COLUMNS: id,order_no,asset_id,maintenance_type,description,cost,status,opened_at,closed_at
+
+TABLE: notification_rules
+ ROWS: 1
+ COLUMNS: id,code,name,condition_expression,is_active
+
+TABLE: notification_types
+ ROWS: 6
+ COLUMNS: id,code,name,severity,is_active
+
+TABLE: notifications
+ ROWS: 1
+ COLUMNS: id,type_id,title,message,user_id,entity_type,entity_id,is_read,created_at,read_at
+
+TABLE: offline_operations
+ ROWS: 1
+ COLUMNS: id,operation_code,operation_type,payload,status,created_at
+
+TABLE: operation_center_tasks
+ ROWS: 1
+ COLUMNS: id,task_type,title,entity_type,entity_id,priority,status,assigned_user_id,created_at
+
+TABLE: payroll_items
+ ROWS: 0
+ COLUMNS: id,run_id,employee_id,basic_salary,allowances,overtime,deductions,tax,net_salary
+
+TABLE: payroll_periods
+ ROWS: 1
+ COLUMNS: id,name,start_date,end_date,status
+
+TABLE: payroll_runs
+ ROWS: 0
+ COLUMNS: id,period_id,run_no,status,created_at
+
+TABLE: permissions
+ ROWS: 15
+ COLUMNS: id,code,name,module,action,description
+
+TABLE: posting_batches
+ ROWS: 1
+ COLUMNS: id,batch_no,source_type,source_id,status,posted_at
+
+TABLE: print_jobs
+ ROWS: 1
+ COLUMNS: id,order_id,file_name,file_path,copies,paper_size,color_mode,status,created_at
+
+TABLE: print_templates
+ ROWS: 1
+ COLUMNS: id,name,template_type,content,is_active
+
+TABLE: printing_orders
+ ROWS: 1
+ COLUMNS: id,order_no,customer_id,service_id,quantity,unit_price,discount,tax,total,status,notes,created_at
+
+TABLE: printing_services
+ ROWS: 5
+ COLUMNS: id,code,name,service_type,unit,base_price,tax_rate,is_active
+
+TABLE: product_barcodes
+ ROWS: 32
+ COLUMNS: id,product_id,barcode,is_primary
+ RELATIONS: product_id -> products.id
+
+TABLE: product_categories
+ ROWS: 32
+ COLUMNS: id,parent_id,name,code,description,is_active
+ RELATIONS: parent_id -> product_categories.id
+
+TABLE: product_channel_links
+ ROWS: 1
+ COLUMNS: id,product_id,platform,external_product_id,external_sku,is_active
+
+TABLE: product_images
+ ROWS: 1
+ COLUMNS: id,product_id,file_path,is_primary
+ RELATIONS: product_id -> products.id
+
+TABLE: product_locations
+ ROWS: 32
+ COLUMNS: id,product_id,warehouse_id,bin_id,quantity
+ RELATIONS: bin_id -> warehouse_bins.id; warehouse_id -> warehouses.id; product_id -> products.id
+
+TABLE: product_prices
+ ROWS: 1
+ COLUMNS: id,product_id,price_type,price,min_quantity,start_date,end_date,is_active
+ RELATIONS: product_id -> products.id
+
+TABLE: product_supplier_links
+ ROWS: 1
+ COLUMNS: id,product_id,supplier_id,supplier_sku,purchase_price,lead_time_days,is_preferred
+ RELATIONS: product_id -> products.id
+
+TABLE: product_units
+ ROWS: 62
+ COLUMNS: id,product_id,unit_id,conversion_factor,is_base
+ RELATIONS: unit_id -> units.id; product_id -> products.id
+
+TABLE: products
+ ROWS: 62
+ COLUMNS: id,sku,name_ar,name_en,category_id,brand_id,unit_id,product_type,description,cost_price,sale_price,wholesale_price,school_price,corporate_price,min_price,reorder_point,min_stock,max_stock,is_active,created_at,updated_at
+ RELATIONS: unit_id -> units.id; brand_id -> brands.id; category_id -> product_categories.id
+
+TABLE: promotion_items
+ ROWS: 0
+ COLUMNS: id,promotion_id,product_id,category_id,minimum_quantity
+ RELATIONS: category_id -> product_categories.id; product_id -> products.id; promotion_id -> promotions.id
+
+TABLE: promotions
+ ROWS: 1
+ COLUMNS: id,name,promotion_type,value,minimum_amount,maximum_discount,start_date,end_date,is_active,description
+
+TABLE: purchase_invoice_items
+ ROWS: 3
+ COLUMNS: id,invoice_id,product_id,quantity,unit_cost,tax_amount,line_total,purchase_invoice_id
+ RELATIONS: product_id -> products.id; invoice_id -> purchase_invoices.id
+
+TABLE: purchase_invoices
+ ROWS: 6
+ COLUMNS: id,invoice_number,supplier_id,purchase_order_id,subtotal,tax_amount,total_amount,paid_amount,due_amount,status,invoice_date,due_date
+ RELATIONS: purchase_order_id -> purchase_orders.id; supplier_id -> suppliers.id
+
+TABLE: purchase_order_items
+ ROWS: 6
+ COLUMNS: id,order_id,product_id,quantity,unit_cost,tax_amount,line_total,purchase_order_id
+ RELATIONS: product_id -> products.id; order_id -> purchase_orders.id
+
+TABLE: purchase_orders
+ ROWS: 6
+ COLUMNS: id,order_number,branch_id,supplier_id,status,subtotal,discount_amount,tax_amount,total_amount,notes,created_at
+ RELATIONS: supplier_id -> suppliers.id; branch_id -> branches.id
+
+TABLE: purchase_request_items
+ ROWS: 0
+ COLUMNS: id,request_id,product_id,quantity,estimated_cost
+ RELATIONS: product_id -> products.id; request_id -> purchase_requests.id
+
+TABLE: purchase_requests
+ ROWS: 1
+ COLUMNS: id,request_number,branch_id,requested_by,status,notes,created_at
+ RELATIONS: requested_by -> users.id; branch_id -> branches.id
+
+TABLE: purchase_returns
+ ROWS: 0
+ COLUMNS: id,return_number,supplier_id,invoice_id,reason,total_amount,status,created_at
+ RELATIONS: invoice_id -> purchase_invoices.id; supplier_id -> suppliers.id
+
+TABLE: quick_actions
+ ROWS: 5
+ COLUMNS: id,code,name,route,required_permission,is_active
+
+TABLE: report_definitions
+ ROWS: 10
+ COLUMNS: id,code,name,category,query_sql,format,is_active
+
+TABLE: report_exports
+ ROWS: 0
+ COLUMNS: id,report_code,file_format,file_path,created_at,status
+
+TABLE: report_runs
+ ROWS: 0
+ COLUMNS: id,report_id,parameters,output_path,status,created_at
+
+TABLE: restore_jobs
+ ROWS: 1
+ COLUMNS: id,backup_file,status,started_at,completed_at,message
+
+TABLE: role_permissions
+ ROWS: 15
+ COLUMNS: role_id,permission_id
+ RELATIONS: permission_id -> permissions.id; role_id -> roles.id
+
+TABLE: roles
+ ROWS: 16
+ COLUMNS: id,name,description,is_active
+
+TABLE: rollback_points
+ ROWS: 1
+ COLUMNS: id,version,database_backup,application_backup,created_at
+
+TABLE: salary_components
+ ROWS: 4
+ COLUMNS: id,code,name,component_type,is_active
+
+TABLE: sale_items
+ ROWS: 4
+ COLUMNS: id,sale_id,product_id,quantity,unit_price,discount_amount,tax_amount,line_total
+ RELATIONS: product_id -> products.id; sale_id -> sales.id
+
+TABLE: sale_payments
+ ROWS: 4
+ COLUMNS: id,sale_id,payment_method,amount,reference_number,notes
+ RELATIONS: sale_id -> sales.id
+
+TABLE: sale_return_items
+ ROWS: 0
+ COLUMNS: id,return_id,sale_item_id,product_id,quantity,unit_price,total_amount
+ RELATIONS: product_id -> products.id; sale_item_id -> sale_items.id; return_id -> sale_returns.id
+
+TABLE: sale_returns
+ ROWS: 1
+ COLUMNS: id,return_number,sale_id,customer_id,reason,status,total_amount,created_by,created_at
+ RELATIONS: created_by -> users.id; customer_id -> customers.id; sale_id -> sales.id
+
+TABLE: sales
+ ROWS: 4
+ COLUMNS: id,invoice_number,branch_id,warehouse_id,customer_id,cashier_id,status,subtotal,discount_amount,tax_amount,total_amount,paid_amount,due_amount,notes,created_at
+ RELATIONS: cashier_id -> users.id; customer_id -> customers.id; warehouse_id -> warehouses.id; branch_id -> branches.id
+
+TABLE: schema_versions
+ ROWS: 1
+ COLUMNS: id,stage_number,version,applied_at
+
+TABLE: search_index
+ ROWS: 62
+ COLUMNS: id,entity_type,entity_id,search_text,updated_at
+
+TABLE: security_audit
+ ROWS: 1
+ COLUMNS: id,check_code,check_name,status,checked_at
+
+TABLE: stock
+ ROWS: 62
+ COLUMNS: id,product_id,warehouse_id,quantity,reserved_quantity,available_quantity,average_cost,updated_at
+ RELATIONS: warehouse_id -> warehouses.id; product_id -> products.id
+
+TABLE: stock_adjustments
+ ROWS: 1
+ COLUMNS: id,warehouse_id,status,reason,created_by,approved_by,created_at
+ RELATIONS: warehouse_id -> warehouses.id
+
+TABLE: stock_balances
+ ROWS: 62
+ COLUMNS: id,product_id,warehouse_id,quantity,reserved_quantity,average_cost,last_movement_at
+ RELATIONS: warehouse_id -> warehouses.id; product_id -> products.id
+
+TABLE: stock_movements
+ ROWS: 8
+ COLUMNS: id,product_id,warehouse_id,movement_type,quantity,unit_cost,reference_type,reference_id,notes,created_at
+ RELATIONS: warehouse_id -> warehouses.id; product_id -> products.id
+
+TABLE: stocktake_items
+ ROWS: 0
+ COLUMNS: id,stocktake_id,product_id,system_quantity,counted_quantity,difference
+ RELATIONS: product_id -> products.id; stocktake_id -> stocktakes.id
+
+TABLE: stocktakes
+ ROWS: 1
+ COLUMNS: id,warehouse_id,status,started_at,completed_at,notes
+ RELATIONS: warehouse_id -> warehouses.id
+
+TABLE: supplier_evaluations
+ ROWS: 18
+ COLUMNS: id,supplier_id,quality_score,price_score,delivery_score,shortage_score,notes,evaluated_at
+ RELATIONS: supplier_id -> suppliers.id
+
+TABLE: supplier_groups
+ ROWS: 2
+ COLUMNS: id,name,description
+
+TABLE: supplier_prices
+ ROWS: 62
+ COLUMNS: id,supplier_id,product_id,price,minimum_quantity,valid_from,valid_to
+ RELATIONS: product_id -> products.id; supplier_id -> suppliers.id
+
+TABLE: supplier_products
+ ROWS: 62
+ COLUMNS: id,supplier_id,product_id,supplier_sku,preferred
+ RELATIONS: product_id -> products.id; supplier_id -> suppliers.id
+
+TABLE: supplier_transactions
+ ROWS: 6
+ COLUMNS: id,supplier_id,transaction_type,amount,reference_type,reference_id,balance_after,created_at
+ RELATIONS: supplier_id -> suppliers.id
+
+TABLE: suppliers
+ ROWS: 18
+ COLUMNS: id,supplier_code,name,supplier_type,phone,email,tax_number,address,credit_limit,current_balance,group_id,is_active,created_at
+ RELATIONS: group_id -> supplier_groups.id
+
+TABLE: sync_conflicts
+ ROWS: 1
+ COLUMNS: id,entity_type,entity_id,local_data,remote_data,resolution,created_at
+
+TABLE: sync_devices
+ ROWS: 0
+ COLUMNS: id,device_id,device_name,last_sync_at,status
+
+TABLE: sync_queue
+ ROWS: 1
+ COLUMNS: id,entity_type,entity_id,operation,payload,status,retry_count,created_at,processed_at
+
+TABLE: system_audit_log
+ ROWS: 2
+ COLUMNS: id,action,entity_type,entity_id,description,created_at
+
+TABLE: system_info
+ ROWS: 1
+ COLUMNS: id,system_name,version
+
+TABLE: system_settings
+ ROWS: 25
+ COLUMNS: id,setting_key,setting_value,value_type,description,updated_at
+
+TABLE: system_test_runs
+ ROWS: 1
+ COLUMNS: id,test_code,test_name,status,executed_at,details
+
+TABLE: tax_config
+ ROWS: 1
+ COLUMNS: id,tax_number,vat_rate,currency,country_code,invoice_prefix,is_active
+
+TABLE: tax_invoices
+ ROWS: 1
+ COLUMNS: id,invoice_no,source_type,source_id,subtotal,tax_amount,total_amount,tax_number,uuid,qr_code,xml_path,clearance_status,created_at
+
+TABLE: tax_rates
+ ROWS: 6
+ COLUMNS: id,code,name,rate,is_active
+
+TABLE: tax_transactions
+ ROWS: 1
+ COLUMNS: id,invoice_id,tax_code,tax_rate,taxable_amount,tax_amount
+
+TABLE: treasury_sequences
+ ROWS: 3
+ COLUMNS: id,sequence_type,last_number
+
+TABLE: units
+ ROWS: 18
+ COLUMNS: id,name,symbol,is_active
+
+TABLE: update_history
+ ROWS: 1
+ COLUMNS: id,from_version,to_version,action,status,message,created_at
+
+TABLE: update_packages
+ ROWS: 1
+ COLUMNS: id,version,package_path,checksum,status,created_at
+
+TABLE: user_roles
+ ROWS: 1
+ COLUMNS: user_id,role_id
+ RELATIONS: role_id -> roles.id; user_id -> users.id
+
+TABLE: user_sessions
+ ROWS: 1
+ COLUMNS: id,user_id,session_token,login_at,last_activity_at,expires_at,logout_at,is_active
+ RELATIONS: user_id -> users.id
+
+TABLE: users
+ ROWS: 1
+ COLUMNS: id,username,password_hash,full_name,phone,email,is_active,is_locked,failed_login_attempts,last_login_at,password_changed_at,auto_lock_minutes,created_at,updated_at
+
+TABLE: warehouse_aisles
+ ROWS: 0
+ COLUMNS: id,zone_id,name,code
+ RELATIONS: zone_id -> warehouse_zones.id
+
+TABLE: warehouse_bins
+ ROWS: 0
+ COLUMNS: id,shelf_id,name,code
+ RELATIONS: shelf_id -> warehouse_shelves.id
+
+TABLE: warehouse_shelves
+ ROWS: 0
+ COLUMNS: id,aisle_id,name,code
+ RELATIONS: aisle_id -> warehouse_aisles.id
+
+TABLE: warehouse_zones
+ ROWS: 1
+ COLUMNS: id,warehouse_id,name,code
+ RELATIONS: warehouse_id -> warehouses.id
+
+TABLE: warehouses
+ ROWS: 1
+ COLUMNS: id,branch_id,name,code,warehouse_type,is_active
+ RELATIONS: branch_id -> branches.id
+
+TABLE: workflow_steps
+ ROWS: 0
+ COLUMNS: id,workflow_id,step_no,step_name,required_role_id
+
+TABLE: workflows
+ ROWS: 4
+ COLUMNS: id,code,name,entity_type,is_active
+
+TABLE: zatca_documents
+ ROWS: 0
+ COLUMNS: id,invoice_id,document_type,hash,previous_hash,xml_content,submission_status,response_code,response_message,submitted_at
+
+TABLE: zatca_settings
+ ROWS: 1
+ COLUMNS: id,environment,compliance_status,csr_status,reporting_status,clearance_status
+
+[3] ORPHAN FOREIGN KEYS
+TOTAL_ORPHANS: 0
+
+[4] IMPORTANT DATA
+companies : 2
+branches : 1
+warehouses : 1
+products : 62
+product_barcodes : 32
+stock_balances : 62
+customers : 28
+suppliers : 18
+employees : 7
+accounts : 21
+journal_entries : 8
+journal_entry_lines : 31
+sales : 4
+sale_items : 4
+sale_payments : 4
+purchase_invoices : 6
+purchase_invoice_items : 3
+
+[5] ACCOUNTING
+journal_entry_lines DEBIT: 1229.8 CREDIT: 1229.8 DIFF: 0.0
+
+[6] PRODUCT/BARCODE
+PRODUCTS: 62
+BARCODES: 32
+BARCODES_WITHOUT_PRODUCT: 0
+
+[7] STOCK
+STOCK_ROWS: 62
+NEGATIVE_STOCK: 0
+
+[8] NULL REQUIRED FIELDS
+TOTAL_NULL_REQUIRED: 0
+
+======================================================================
+AUDIT FINISHED � NO DATABASE CHANGES
+======================================================================
+
+=== STDERR ===
+
+=== EXIT CODE: 0 ===

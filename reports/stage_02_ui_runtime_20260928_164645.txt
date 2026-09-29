@@ -1,0 +1,113 @@
+================================================================================
+STAGE 02 - UI FOUNDATION + RUNTIME DIAGNOSTIC
+================================================================================
+ROOT: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah
+PYTHON: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah\.venv\Scripts\python.exe
+PYTHON VERSION: 3.12.2 (tags/v3.12.2:6abddd9, Feb  6 2024, 21:26:36) [MSC v.1937 64 bit (AMD64)]
+
+[1] REQUIRED FILES
+OK: app\ui\main_window.py
+OK: app\ui\pos_window.py
+OK: app\services\inventory_service.py
+OK: app\services\erp_engine.py
+OK: app\services\pos_service.py
+OK: app\database\connection.py
+
+[2] BACKUPS
+BACKUP: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah\backups\stage_02_before_main_window_20260928_164645.py
+BACKUP: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah\backups\stage_02_before_pos_window_20260928_164645.py
+
+[3] MAIN WINDOW ANALYSIS
+QApplication: True
+QMainWindow: True
+MainWindow class: True
+run function: True
+main guard: True
+window.show: True
+app.exec: True
+Arabic: True
+
+[4] ENCODING / MOJIBAKE CHECK
+NO COMMON MOJIBAKE MARKERS FOUND
+IMPORTANT: NO AUTOMATIC GLOBAL ENCODING REWRITE WAS PERFORMED.
+
+[5] PYTHON COMPILE
+COMPILE OK: app\ui\main_window.py
+COMPILE OK: app\ui\pos_window.py
+COMPILE OK: app\services\inventory_service.py
+COMPILE OK: app\services\erp_engine.py
+COMPILE OK: app\services\pos_service.py
+COMPILE OK: app\database\connection.py
+
+[6] IMPORT TEST
+MAIN_WINDOW_IMPORT_OK
+POS_WINDOW_IMPORT_OK
+INVENTORY_SERVICE_IMPORT_OK
+ERP_ENGINE_IMPORT_OK
+
+[7] ENTRYPOINT CHECK
+MAIN GUARD PRESENT
+POST-GUARD COMPILE EXIT: 0
+
+[8] RUN FUNCTION STRUCTURE
+RUN FUNCTION FOUND:
+def run():
+
+    from PySide6.QtWidgets import QApplication
+
+    import sys
+
+
+
+    app = QApplication(sys.argv)
+
+    app.setLayoutDirection(Qt.RightToLeft)
+
+
+
+    window = MainWindow()
+
+    window.show()
+
+
+
+    sys.exit(app.exec())
+
+
+
+[9] DATABASE READ-ONLY HEALTH
+DATABASE: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah\database\nizam_alqirtasiyah.db
+INTEGRITY: ok
+FOREIGN KEY ERRORS: 0
+TABLE COUNT: 179
+
+IMPORTANT TABLE COUNTS:
+products: 62
+product_barcodes: 32
+customers: 28
+suppliers: 18
+sales: 4
+sale_items: 4
+purchase_orders: 6
+purchase_invoices: 6
+stock: 62
+stock_balances: 62
+stock_movements: 8
+journal_entries: 8
+journal_entry_lines: 31
+workflow_steps: 0
+payroll_periods: 1
+payroll_runs: 0
+bank_reconciliations: 0
+asset_depreciation: 0
+loyalty_transactions: 0
+interbranch_transfers: 0
+zatca_documents: 0
+
+ACCOUNTING DEBIT: 1229.8
+ACCOUNTING CREDIT: 1229.8
+ACCOUNTING DIFFERENCE: 0.0
+
+================================================================================
+STAGE 02 DIAGNOSTIC SUCCESS
+================================================================================

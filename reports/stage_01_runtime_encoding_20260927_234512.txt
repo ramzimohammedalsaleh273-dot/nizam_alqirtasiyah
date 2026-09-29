@@ -1,0 +1,40 @@
+======================================================================
+STAGE 01 - RUNTIME + SAFE ENCODING VERIFICATION
+======================================================================
+ROOT: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah
+PYTHON: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah\.venv\Scripts\python.exe
+PYTHON VERSION: 3.12.2 (tags/v3.12.2:6abddd9, Feb  6 2024, 21:26:36) [MSC v.1937 64 bit (AMD64)]
+BACKUP: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah\backups\before_stage_01_main_window_20260927_234512.py
+MAIN BYTES: 5366
+UTF8 BOM: False
+MAIN DECODE: UTF-8/UTF-8-BOM READABLE
+RUN FUNCTION: True
+MAIN GUARD: False
+MAIN GUARD: ADDED
+MAIN PY_COMPILE EXIT: 0
+RESULT: MAIN WINDOW COMPILATION OK
+
+======================================================================
+PYTHON SOURCE VERIFICATION
+======================================================================
+PYTHON FILES: 64
+COMPILE OK: 64
+COMPILE FAILED: 0
+FILES WITH UTF8 BOM: 8
+
+======================================================================
+IMPORT TEST
+======================================================================
+IMPORT EXIT: 0
+IMPORT_MAIN_WINDOW_OK
+
+======================================================================
+DATABASE READ-ONLY CHECK
+======================================================================
+DB: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah\database\nizam_alqirtasiyah.db
+INTEGRITY: ok
+FOREIGN KEY ERRORS: 0
+
+======================================================================
+STAGE 01 SUCCESS
+======================================================================

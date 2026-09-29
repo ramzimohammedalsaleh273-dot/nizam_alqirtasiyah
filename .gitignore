@@ -1,0 +1,87 @@
+﻿# ============================================================
+# نظام القرطاسية - Git Ignore
+# ============================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.coverage
+htmlcov/
+.pytype/
+
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+secrets/
+secret/
+credentials/
+credentials.json
+
+# SQLite / local databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+database/*.db
+database/*.sqlite
+database/*.sqlite3
+
+# Backups
+backups/
+*.bak
+*.backup
+*.dump
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.cache
+~*
+
+# Build / distribution
+build/
+dist/
+*.spec
+
+# IDE / editors
+.vscode/
+.idea/
+*.code-workspace
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Generated reports / exports
+exports/
+reports/generated/
+documents/generated/
+
+# Local audit output
+PROJECT_FULL_AUDIT/
+Nizam_AlQirtasiyah_FULL_AUDIT/
+FULL_PROJECT_AUDIT/
+*.audit

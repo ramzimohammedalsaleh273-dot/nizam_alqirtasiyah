@@ -1,0 +1,4627 @@
+PROJECT MASTER AUDIT
+نظام القرطاسية
+TIME: 2026-09-27T23:37:54.395466
+ROOT: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah
+PYTHON: 3.12.2 (tags/v3.12.2:6abddd9, Feb  6 2024, 21:26:36) [MSC v.1937 64 bit (AMD64)]
+NOTE: This audit does not modify project files or database data.
+
+==========================================================================================
+1. PROJECT STRUCTURE
+==========================================================================================
+FILES: 258
+.lulu_state\build_history.json | 188 bytes
+.lulu_state\build_state.json | 168 bytes
+.pytest_cache\.gitignore | 37 bytes
+.pytest_cache\CACHEDIR.TAG | 191 bytes
+.pytest_cache\README.md | 302 bytes
+.pytest_cache\v\cache\lastfailed | 40 bytes
+.pytest_cache\v\cache\nodeids | 1041 bytes
+_make_master_audit.py | 14658 bytes
+app\__init__.py | 31 bytes
+app\analytics\__init__.py | 0 bytes
+app\core\__init__.py | 31 bytes
+app\core\config.py | 358 bytes
+app\core\logging_setup.py | 605 bytes
+app\database\__init__.py | 31 bytes
+app\database\connection.py | 1248 bytes
+app\database\create_tables.py | 228 bytes
+app\database\inspect_schema.py | 1767 bytes
+app\integrations\__init__.py | 0 bytes
+app\models\__init__.py | 0 bytes
+app\models\core.py | 3047 bytes
+app\modules\accounting\__init__.py | 0 bytes
+app\modules\approvals\__init__.py | 0 bytes
+app\modules\assets\__init__.py | 0 bytes
+app\modules\backup\__init__.py | 0 bytes
+app\modules\banking\__init__.py | 0 bytes
+app\modules\branches\__init__.py | 0 bytes
+app\modules\contracts\__init__.py | 0 bytes
+app\modules\customers\__init__.py | 0 bytes
+app\modules\dashboard\__init__.py | 0 bytes
+app\modules\documents\__init__.py | 0 bytes
+app\modules\hr\__init__.py | 0 bytes
+app\modules\inventory\__init__.py | 0 bytes
+app\modules\notifications\__init__.py | 0 bytes
+app\modules\operations\__init__.py | 0 bytes
+app\modules\payroll\__init__.py | 0 bytes
+app\modules\pos\__init__.py | 0 bytes
+app\modules\purchases\__init__.py | 0 bytes
+app\modules\reports\__init__.py | 0 bytes
+app\modules\sales\__init__.py | 0 bytes
+app\modules\search\__init__.py | 0 bytes
+app\modules\settings\__init__.py | 0 bytes
+app\modules\suppliers\__init__.py | 0 bytes
+app\modules\tax\__init__.py | 0 bytes
+app\modules\treasury\__init__.py | 0 bytes
+app\notifications\__init__.py | 0 bytes
+app\reports\__init__.py | 0 bytes
+app\repositories\__init__.py | 0 bytes
+app\security\__init__.py | 0 bytes
+app\services\__init__.py | 31 bytes
+app\services\accounting_service.py | 8482 bytes
+app\services\accounting_service.py.backup_20260923_191848 | 7952 bytes
+app\services\dashboard\__init__.py | 0 bytes
+app\services\dashboard\dashboard_service.py | 1477 bytes
+app\services\dashboard\test_dashboard_service.py | 555 bytes
+app\services\erp_engine.py | 25865 bytes
+app\services\erp_service.py | 5686 bytes
+app\services\inventory_service.py | 2273 bytes
+app\services\party_service.py | 1338 bytes
+app\services\pos_search_service.py | 2111 bytes
+app\services\pos_service.py | 18328 bytes
+app\services\sales_service.py | 4332 bytes
+app\services\security_service.py | 2089 bytes
+app\services\system_service.py | 1637 bytes
+app\ui\__init__.py | 31 bytes
+app\ui\dashboard\__init__.py | 0 bytes
+app\ui\main_window.py | 5366 bytes
+app\ui\operations_center.py | 11325 bytes
+app\ui\parties_window.py | 2274 bytes
+app\ui\pos_window.py | 4549 bytes
+app\ui\purchases_window.py | 2733 bytes
+app\ui\sales_window.py | 2680 bytes
+app\ui\widgets\__init__.py | 31 bytes
+app\utils\__init__.py | 31 bytes
+audit_financial_links.py | 1190 bytes
+audit_purchase_seed.py | 927 bytes
+audit_stock_gl_difference.py | 1758 bytes
+build_application_core.py | 13635 bytes
+build_pos_core.py | 15719 bytes
+build_sales_purchases_core.py | 16732 bytes
+build_stock_v2.py | 5642 bytes
+check_products.py | 207 bytes
+config.py | 0 bytes
+connection_dump.txt | 844 bytes
+create_supplier_transactions.py | 2558 bytes
+database\_erp_integration_test.db | 1232896 bytes
+database\_erp_test_copy.db | 1425408 bytes
+database\database.py | 969 bytes
+database\database\nizam_alqirtasiyah.db | 118784 bytes
+database\metadata\database_schema.json | 267755 bytes
+database\nizam_alqirtasiyah.db | 1429504 bytes
+database\pos_test.db | 1425408 bytes
+database\TABLE_CONTENTS_FOR_CHAT.txt | 0 bytes
+DATABASE_FULL_AUDIT.txt | 331352 bytes
+deep_inventory_audit.py | 1353 bytes
+enrich_database.py | 11160 bytes
+enrich_database_v2.py | 4977 bytes
+ERP_FINAL_REPORT.txt | 5181 bytes
+fix_duplicate_stock_movements.py | 3338 bytes
+fix_opening_stock_and_valuation.py | 5625 bytes
+fix_party_balances.py | 2447 bytes
+fix_purchase_schema.py | 7397 bytes
+fix_purchase_seed.py | 2007 bytes
+fix_test_environment.py | 2725 bytes
+FULL_PROJECT_STATE_AUDIT.txt | 1053372 bytes
+full_system_audit.py | 10780 bytes
+inspect_accounting_links.py | 1110 bytes
+inspect_accounting_schema.py | 1869 bytes
+inspect_links.py | 308 bytes
+inspect_opening_accounts.py | 884 bytes
+inspect_parties_accounts.py | 647 bytes
+inspect_stock_links.py | 407 bytes
+installer\build_release.ps1 | 270 bytes
+installer\README.txt | 198 bytes
+installer\run_system.bat | 73 bytes
+link_customers_v2.py | 1859 bytes
+link_suppliers_v2.py | 2765 bytes
+link_transactions.py | 3570 bytes
+main.py | 221 bytes
+pos_service_dump.txt | 7504 bytes
+pos_tests_dump.txt | 451 bytes
+pos_window_dump.txt | 5045 bytes
+pytest.ini | 70 bytes
+reconcile_stock_valuation.py | 3217 bytes
+reports\comprehensive_repair_20260927_171626.txt | 1359 bytes
+reports\full_database_audit_20260926_213928.txt | 25466 bytes
+reports\full_database_audit_20260927_171310.txt | 25466 bytes
+reports\full_erp_schema_audit.json | 11882 bytes
+reports\sales_report.csv | 316 bytes
+requirements.txt | 84 bytes
+scripts\accounting_repair.py | 2327 bytes
+scripts\activate_permissions.py | 1753 bytes
+scripts\activate_security_layer.py | 3851 bytes
+scripts\add_purchase_engine.py | 1672 bytes
+scripts\BUILD_COMPLETE_ERP_UI.py | 21864 bytes
+scripts\build_inventory_sales_stage.py | 13958 bytes
+scripts\build_operations_center.py | 12628 bytes
+scripts\build_products_stage.py | 12638 bytes
+scripts\build_purchases_stage.py | 15579 bytes
+scripts\build_real_pos.py | 8722 bytes
+scripts\check_database.py | 773 bytes
+scripts\comprehensive_auto_repair.py | 10369 bytes
+scripts\connect_pos_button.py | 2691 bytes
+scripts\connect_pos_ui_search.py | 5631 bytes
+scripts\core_erp_check.py | 757 bytes
+scripts\current_status.py | 1278 bytes
+scripts\database_schema_report.py | 602 bytes
+scripts\erp_balance_audit.py | 3256 bytes
+scripts\extract_tables.py | 3132 bytes
+scripts\fill_master_data.py | 11410 bytes
+scripts\fill_master_data_safe.py | 9135 bytes
+scripts\final_login_fix.py | 1005 bytes
+scripts\final_operational_seed.py | 5542 bytes
+scripts\final_safe_pos_search.py | 5605 bytes
+scripts\final_security_audit.py | 3719 bytes
+scripts\final_ui_check.py | 1818 bytes
+scripts\fix_accounts.py | 1819 bytes
+scripts\fix_database_ui.py | 3854 bytes
+scripts\fix_login_imports.py | 1028 bytes
+scripts\fix_pos_search_complete.py | 6922 bytes
+scripts\fix_real_pos_search.py | 7742 bytes
+scripts\fix_ui_stage1.py | 981 bytes
+scripts\full_database_audit.py | 3528 bytes
+scripts\full_database_seed.py | 24254 bytes
+scripts\full_erp_schema_audit.py | 4557 bytes
+scripts\guaranteed_login_fix.py | 1291 bytes
+scripts\inspect_erp_signatures.py | 456 bytes
+scripts\inspect_pos_ui.py | 1789 bytes
+scripts\integrate_operations_center.py | 2569 bytes
+scripts\integrated_store_scenario.py | 6821 bytes
+scripts\link_pos_engine_final.py | 2502 bytes
+scripts\link_real_pos.py | 3434 bytes
+scripts\master_erp_check.py | 2988 bytes
+scripts\MASTER_ERP_FINAL.py | 8067 bytes
+scripts\master_repair.py | 31941 bytes
+scripts\patch_live_dashboard.py | 3061 bytes
+scripts\patch_purchase_context.py | 1114 bytes
+scripts\patch_purchase_item.py | 910 bytes
+scripts\patch_receive_test.py | 591 bytes
+scripts\patch_safe_seed.py | 350 bytes
+scripts\populate_complete_operational_data.py | 21526 bytes
+scripts\pos_engine_final.py | 1741 bytes
+scripts\pos_safe_test.py | 1255 bytes
+scripts\pre_run_check.py | 1072 bytes
+scripts\prepare_pos.py | 4870 bytes
+scripts\print_reports_repair.py | 2409 bytes
+scripts\production_readiness.py | 3921 bytes
+scripts\real_erp_test.py | 2646 bytes
+scripts\real_login_integration.py | 3511 bytes
+scripts\real_transactions_seed.py | 9790 bytes
+scripts\repair_and_seed_data.py | 8046 bytes
+scripts\repair_inventory_sales_stage.py | 13399 bytes
+scripts\repair_qt_imports.py | 1936 bytes
+scripts\repair_run_function.py | 599 bytes
+scripts\replace_demo_data_arabic.py | 31552 bytes
+scripts\restore_safe_ui.py | 1795 bytes
+scripts\robust_pos_ui_patch.py | 7317 bytes
+scripts\safe_complete_arabic_data.py | 17473 bytes
+scripts\safe_connect_pos_ui.py | 4431 bytes
+scripts\safe_operational_seed.py | 10179 bytes
+scripts\safe_security_repair.py | 4601 bytes
+scripts\safe_users_security_repair.py | 5353 bytes
+scripts\schema_repair.py | 1515 bytes
+scripts\seed_operational.py | 2117 bytes
+scripts\stage_01.py | 11133 bytes
+scripts\stage_01_dependency_check.py | 570 bytes
+scripts\stage_02.py | 6546 bytes
+scripts\stage_03.py | 5063 bytes
+scripts\stage_04.py | 5380 bytes
+scripts\stage_05.py | 5573 bytes
+scripts\stage_06.py | 4390 bytes
+scripts\stage_07.py | 4076 bytes
+scripts\stage_08.py | 7783 bytes
+scripts\stage_09.py | 3276 bytes
+scripts\stage_10.py | 7268 bytes
+scripts\stage_11.py | 2419 bytes
+scripts\stage_12.py | 1910 bytes
+scripts\stage_13.py | 2095 bytes
+scripts\stage_14.py | 1523 bytes
+scripts\stage_15.py | 2029 bytes
+scripts\stage_16.py | 1889 bytes
+scripts\stage_17.py | 1893 bytes
+scripts\stage_18.py | 1635 bytes
+scripts\stage_19.py | 2169 bytes
+scripts\stage_20.py | 2365 bytes
+scripts\stage_21.py | 2091 bytes
+scripts\stage_22.py | 1769 bytes
+scripts\stage_23.py | 2183 bytes
+scripts\stage_24.py | 1652 bytes
+scripts\stage_25.py | 2138 bytes
+scripts\stage_26.py | 1604 bytes
+scripts\stage_27.py | 1758 bytes
+scripts\stage_28.py | 1920 bytes
+scripts\stage_29.py | 1433 bytes
+scripts\stage_30.py | 1473 bytes
+scripts\stage_31.py | 2663 bytes
+scripts\stage_32.py | 1501 bytes
+scripts\stage_33.py | 2253 bytes
+scripts\stage_34.py | 1444 bytes
+scripts\stage_accounting_reports.py | 4145 bytes
+scripts\stage_customer_accounts.py | 3631 bytes
+scripts\stage_print_reports.py | 3351 bytes
+scripts\stage_treasury.py | 5349 bytes
+scripts\stage_treasury_repair.py | 4702 bytes
+scripts\stage_zatca.py | 3916 bytes
+scripts\users_security_setup.py | 5006 bytes
+seed_database.py | 18053 bytes
+seed_transactions.py | 3532 bytes
+tests\__init__.py | 0 bytes
+tests\database_test.py | 716 bytes
+tests\manual_pos_rollback_test.py | 4427 bytes
+tests\test_pos_accounting.py | 1988 bytes
+tests\test_pos_core.py | 438 bytes
+tests\test_sales_parties.py | 735 bytes
+tests\test_system.py | 680 bytes
+update_party_balances.py | 2984 bytes
+verify_accounting_v2.py | 1302 bytes
+verify_inventory_accounting.py | 1669 bytes
+verify_stock_cost_layers.py | 1452 bytes
+
+==========================================================================================
+2. DATABASE
+==========================================================================================
+DATABASE: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah\database\nizam_alqirtasiyah.db
+DATABASE SIZE: 1429504 bytes
+INTEGRITY: ok
+FOREIGN_KEYS: []
+ACCOUNTING_DEBIT: 1229.8
+ACCOUNTING_CREDIT: 1229.8
+ACCOUNTING_DIFFERENCE: 0.0
+TABLES: 179
+
+TABLE: account_balances
+ROWS: 10
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  account_id | type=INTEGER | notnull=1 | default=None | pk=0
+  fiscal_period_id | type=INTEGER | notnull=0 | default=None | pk=0
+  debit | type=NUMERIC | notnull=0 | default=0 | pk=0
+  credit | type=NUMERIC | notnull=0 | default=0 | pk=0
+  balance | type=NUMERIC | notnull=0 | default=0 | pk=0
+FOREIGN_KEYS:
+  fiscal_period_id -> fiscal_periods.id | on_update=NO ACTION | on_delete=NO ACTION
+  account_id -> accounts.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: account_types
+ROWS: 6
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  normal_balance | type=VARCHAR(20) | notnull=1 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_account_types_1', 1, 'u', 0)
+
+TABLE: accounting_event_rules
+ROWS: 8
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  event_code | type=TEXT | notnull=1 | default=None | pk=0
+  event_name | type=TEXT | notnull=1 | default=None | pk=0
+  debit_account | type=TEXT | notnull=0 | default=None | pk=0
+  credit_account | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_accounting_event_rules_1', 1, 'u', 0)
+
+TABLE: accounting_links
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  event_code | type=TEXT | notnull=1 | default=None | pk=0
+  source_type | type=TEXT | notnull=1 | default=None | pk=0
+  source_id | type=INTEGER | notnull=0 | default=None | pk=0
+  debit_account | type=TEXT | notnull=0 | default=None | pk=0
+  credit_account | type=TEXT | notnull=0 | default=None | pk=0
+  amount | type=REAL | notnull=0 | default=0 | pk=0
+  status | type=TEXT | notnull=0 | default='pending' | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'idx_accounting_links_event', 0, 'c', 0)
+
+TABLE: accounting_periods
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  fiscal_year_id | type=INTEGER | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  start_date | type=TEXT | notnull=1 | default=None | pk=0
+  end_date | type=TEXT | notnull=1 | default=None | pk=0
+  status | type=VARCHAR(30) | notnull=1 | default='open' | pk=0
+FOREIGN_KEYS:
+  fiscal_year_id -> fiscal_years.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_accounting_periods_1', 1, 'u', 0)
+
+TABLE: accounts
+ROWS: 21
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  account_code | type=TEXT | notnull=1 | default=None | pk=0
+  account_name | type=TEXT | notnull=1 | default=None | pk=0
+  account_type | type=TEXT | notnull=1 | default=None | pk=0
+  parent_id | type=INTEGER | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+  allow_posting | type=INTEGER | notnull=0 | default=1 | pk=0
+  opening_balance | type=REAL | notnull=0 | default=0 | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'idx_accounts_type', 0, 'c', 0)
+  (1, 'idx_accounts_parent', 0, 'c', 0)
+  (2, 'sqlite_autoindex_accounts_1', 1, 'u', 0)
+
+TABLE: analytics_alerts
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  alert_type | type=TEXT | notnull=1 | default=None | pk=0
+  title | type=TEXT | notnull=1 | default=None | pk=0
+  message | type=TEXT | notnull=0 | default=None | pk=0
+  severity | type=TEXT | notnull=0 | default='info' | pk=0
+  status | type=TEXT | notnull=0 | default='new' | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: analytics_metrics
+ROWS: 8
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=1 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  category | type=TEXT | notnull=0 | default=None | pk=0
+  calculation | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_analytics_metrics_1', 1, 'u', 0)
+
+TABLE: analytics_snapshots
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  metric_id | type=INTEGER | notnull=1 | default=None | pk=0
+  metric_date | type=TEXT | notnull=1 | default=None | pk=0
+  value | type=REAL | notnull=0 | default=0 | pk=0
+  dimension | type=TEXT | notnull=0 | default=None | pk=0
+  dimension_value | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: application_versions
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  version | type=TEXT | notnull=1 | default=None | pk=0
+  release_name | type=TEXT | notnull=0 | default=None | pk=0
+  release_date | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='installed' | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_application_versions_1', 1, 'u', 0)
+
+TABLE: approval_actions
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  request_id | type=INTEGER | notnull=1 | default=None | pk=0
+  step_id | type=INTEGER | notnull=0 | default=None | pk=0
+  user_id | type=INTEGER | notnull=0 | default=None | pk=0
+  action | type=TEXT | notnull=1 | default=None | pk=0
+  comment | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: approval_requests
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  request_no | type=TEXT | notnull=1 | default=None | pk=0
+  workflow_id | type=INTEGER | notnull=1 | default=None | pk=0
+  entity_type | type=TEXT | notnull=0 | default=None | pk=0
+  entity_id | type=INTEGER | notnull=0 | default=None | pk=0
+  requested_by | type=INTEGER | notnull=0 | default=None | pk=0
+  current_step | type=INTEGER | notnull=0 | default=1 | pk=0
+  status | type=TEXT | notnull=0 | default='pending' | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+  completed_at | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_approval_requests_1', 1, 'u', 0)
+
+TABLE: asset_categories
+ROWS: 5
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=TEXT | notnull=1 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_asset_categories_1', 1, 'u', 0)
+
+TABLE: asset_depreciation
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  asset_id | type=INTEGER | notnull=1 | default=None | pk=0
+  period | type=TEXT | notnull=1 | default=None | pk=0
+  amount | type=REAL | notnull=0 | default=0 | pk=0
+  book_value | type=REAL | notnull=0 | default=0 | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_asset_depreciation_1', 1, 'u', 0)
+
+TABLE: assets
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  asset_no | type=TEXT | notnull=1 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  category_id | type=INTEGER | notnull=0 | default=None | pk=0
+  purchase_date | type=TEXT | notnull=0 | default=None | pk=0
+  cost | type=REAL | notnull=0 | default=0 | pk=0
+  salvage_value | type=REAL | notnull=0 | default=0 | pk=0
+  useful_life_months | type=INTEGER | notnull=0 | default=0 | pk=0
+  status | type=TEXT | notnull=0 | default='active' | pk=0
+  location | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_assets_1', 1, 'u', 0)
+
+TABLE: audit_log
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  user_id | type=INTEGER | notnull=0 | default=None | pk=0
+  action | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  table_name | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  record_id | type=INTEGER | notnull=0 | default=None | pk=0
+  description | type=TEXT | notnull=0 | default=None | pk=0
+  old_values | type=TEXT | notnull=0 | default=None | pk=0
+  new_values | type=TEXT | notnull=0 | default=None | pk=0
+  ip_address | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  created_at | type=DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: audit_logs
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  user_id | type=INTEGER | notnull=0 | default=None | pk=0
+  action | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  module | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  entity_type | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  entity_id | type=INTEGER | notnull=0 | default=None | pk=0
+  old_data | type=TEXT | notnull=0 | default=None | pk=0
+  new_data | type=TEXT | notnull=0 | default=None | pk=0
+  details | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  user_id -> users.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_audit_created', 0, 'c', 0)
+  (1, 'idx_audit_user', 0, 'c', 0)
+
+TABLE: backup_history
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  backup_path | type=VARCHAR(1000) | notnull=1 | default=None | pk=0
+  backup_type | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  status | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  created_at | type=DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: backup_jobs
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  backup_type | type=TEXT | notnull=1 | default=None | pk=0
+  destination | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='completed' | pk=0
+  started_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+  completed_at | type=TEXT | notnull=0 | default=None | pk=0
+  file_size | type=INTEGER | notnull=0 | default=None | pk=0
+  checksum | type=TEXT | notnull=0 | default=None | pk=0
+
+TABLE: backup_settings
+ROWS: 4
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  setting_key | type=TEXT | notnull=1 | default=None | pk=0
+  setting_value | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_backup_settings_1', 1, 'u', 0)
+
+TABLE: bank_accounts
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  bank_id | type=INTEGER | notnull=1 | default=None | pk=0
+  branch_id | type=INTEGER | notnull=0 | default=None | pk=0
+  account_name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  account_number | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  iban | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  currency_code | type=VARCHAR(10) | notnull=0 | default='SAR' | pk=0
+  opening_balance | type=NUMERIC | notnull=1 | default=0 | pk=0
+  current_balance | type=NUMERIC | notnull=1 | default=0 | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+FOREIGN_KEYS:
+  branch_id -> branches.id | on_update=NO ACTION | on_delete=NO ACTION
+  bank_id -> banks.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: bank_reconciliations
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  bank_account_id | type=INTEGER | notnull=1 | default=None | pk=0
+  statement_date | type=TEXT | notnull=1 | default=None | pk=0
+  statement_balance | type=NUMERIC | notnull=1 | default=None | pk=0
+  system_balance | type=NUMERIC | notnull=1 | default=None | pk=0
+  difference | type=NUMERIC | notnull=1 | default=None | pk=0
+  status | type=VARCHAR(50) | notnull=1 | default='draft' | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  bank_account_id -> bank_accounts.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: bank_transactions
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  bank_account_id | type=INTEGER | notnull=1 | default=None | pk=0
+  transaction_type | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  amount | type=NUMERIC | notnull=1 | default=None | pk=0
+  reference_type | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  reference_id | type=INTEGER | notnull=0 | default=None | pk=0
+  description | type=TEXT | notnull=0 | default=None | pk=0
+  transaction_date | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  bank_account_id -> bank_accounts.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_bank_transactions_date', 0, 'c', 0)
+  (1, 'idx_bank_transactions_account', 0, 'c', 0)
+
+TABLE: banks
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  code | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_banks_1', 1, 'u', 0)
+
+TABLE: branch_sequences
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  branch_id | type=INTEGER | notnull=1 | default=None | pk=0
+  sequence_type | type=TEXT | notnull=1 | default=None | pk=0
+  prefix | type=TEXT | notnull=0 | default='' | pk=0
+  current_number | type=INTEGER | notnull=0 | default=0 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_branch_sequences_1', 1, 'u', 0)
+
+TABLE: branch_settings
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  branch_id | type=INTEGER | notnull=1 | default=None | pk=0
+  setting_key | type=TEXT | notnull=1 | default=None | pk=0
+  setting_value | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_branch_settings_1', 1, 'u', 0)
+
+TABLE: branch_users
+ROWS: 1
+COLUMNS:
+  branch_id | type=INTEGER | notnull=1 | default=None | pk=1
+  user_id | type=INTEGER | notnull=1 | default=None | pk=2
+INDEXES:
+  (0, 'sqlite_autoindex_branch_users_1', 1, 'pk', 0)
+
+TABLE: branches
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  company_id | type=INTEGER | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  code | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  phone | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+  address | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+  updated_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  company_id -> companies.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_branches_1', 1, 'u', 0)
+
+TABLE: brands
+ROWS: 14
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  description | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_brands_1', 1, 'u', 0)
+
+TABLE: cash_payments
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  payment_number | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  supplier_id | type=INTEGER | notnull=0 | default=None | pk=0
+  amount | type=NUMERIC | notnull=1 | default=None | pk=0
+  payment_method | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  reference_number | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  notes | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+  payment_date | type=DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  supplier_id -> suppliers.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_cash_payments_1', 1, 'u', 0)
+
+TABLE: cash_receipts
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  receipt_number | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  customer_id | type=INTEGER | notnull=0 | default=None | pk=0
+  amount | type=NUMERIC | notnull=1 | default=None | pk=0
+  payment_method | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  reference_number | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  notes | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+  receipt_date | type=DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  customer_id -> customers.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_cash_receipts_1', 1, 'u', 0)
+
+TABLE: cash_registers
+ROWS: 2
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  branch_id | type=INTEGER | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  code | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+FOREIGN_KEYS:
+  branch_id -> branches.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_cash_registers_1', 1, 'u', 0)
+
+TABLE: cash_sessions
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  register_id | type=INTEGER | notnull=1 | default=None | pk=0
+  user_id | type=INTEGER | notnull=1 | default=None | pk=0
+  opening_balance | type=NUMERIC | notnull=1 | default=0 | pk=0
+  expected_balance | type=NUMERIC | notnull=1 | default=0 | pk=0
+  actual_balance | type=NUMERIC | notnull=0 | default=None | pk=0
+  difference | type=NUMERIC | notnull=0 | default=None | pk=0
+  opened_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+  closed_at | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=VARCHAR(30) | notnull=1 | default='open' | pk=0
+FOREIGN_KEYS:
+  user_id -> users.id | on_update=NO ACTION | on_delete=NO ACTION
+  register_id -> cash_registers.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: cash_transactions
+ROWS: 4
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  cash_session_id | type=INTEGER | notnull=0 | default=None | pk=0
+  transaction_type | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  amount | type=NUMERIC | notnull=1 | default=None | pk=0
+  reference_type | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  reference_id | type=INTEGER | notnull=0 | default=None | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  cash_session_id -> cash_sessions.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: chart_of_accounts
+ROWS: 18
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(250) | notnull=1 | default=None | pk=0
+  account_type_id | type=INTEGER | notnull=1 | default=None | pk=0
+  parent_id | type=INTEGER | notnull=0 | default=None | pk=0
+  level | type=INTEGER | notnull=1 | default=1 | pk=0
+  is_group | type=INTEGER | notnull=1 | default=0 | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+FOREIGN_KEYS:
+  parent_id -> chart_of_accounts.id | on_update=NO ACTION | on_delete=NO ACTION
+  account_type_id -> account_types.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_accounts_code', 0, 'c', 0)
+  (1, 'sqlite_autoindex_chart_of_accounts_1', 1, 'u', 0)
+
+TABLE: companies
+ROWS: 2
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  tax_number | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  phone | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+  email | type=VARCHAR(200) | notnull=0 | default=None | pk=0
+  address | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+  country | type=VARCHAR(100) | notnull=0 | default='المملكة العربية السعودية' | pk=0
+  city | type=VARCHAR(100) | notnull=0 | default='جدة' | pk=0
+  currency_code | type=VARCHAR(10) | notnull=0 | default='SAR' | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+  updated_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: contract_documents
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  contract_id | type=INTEGER | notnull=1 | default=None | pk=0
+  document_id | type=INTEGER | notnull=1 | default=None | pk=0
+
+TABLE: contract_payments
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  contract_id | type=INTEGER | notnull=1 | default=None | pk=0
+  due_date | type=TEXT | notnull=0 | default=None | pk=0
+  amount | type=REAL | notnull=0 | default=0 | pk=0
+  status | type=TEXT | notnull=0 | default='pending' | pk=0
+  paid_at | type=TEXT | notnull=0 | default=None | pk=0
+
+TABLE: contract_types
+ROWS: 5
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=TEXT | notnull=1 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_contract_types_1', 1, 'u', 0)
+
+TABLE: contracts
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  contract_no | type=TEXT | notnull=1 | default=None | pk=0
+  title | type=TEXT | notnull=1 | default=None | pk=0
+  contract_type_id | type=INTEGER | notnull=0 | default=None | pk=0
+  party_type | type=TEXT | notnull=0 | default=None | pk=0
+  party_id | type=INTEGER | notnull=0 | default=None | pk=0
+  start_date | type=TEXT | notnull=0 | default=None | pk=0
+  end_date | type=TEXT | notnull=0 | default=None | pk=0
+  value | type=REAL | notnull=0 | default=0 | pk=0
+  status | type=TEXT | notnull=0 | default='draft' | pk=0
+  terms | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_contracts_1', 1, 'u', 0)
+
+TABLE: cost_centers
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  parent_id | type=INTEGER | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+FOREIGN_KEYS:
+  parent_id -> cost_centers.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_cost_centers_1', 1, 'u', 0)
+
+TABLE: coupon_redemptions
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  coupon_id | type=INTEGER | notnull=1 | default=None | pk=0
+  customer_id | type=INTEGER | notnull=0 | default=None | pk=0
+  sale_id | type=INTEGER | notnull=0 | default=None | pk=0
+  discount_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  redeemed_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  sale_id -> sales.id | on_update=NO ACTION | on_delete=NO ACTION
+  customer_id -> customers.id | on_update=NO ACTION | on_delete=NO ACTION
+  coupon_id -> coupons.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: coupons
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  promotion_id | type=INTEGER | notnull=0 | default=None | pk=0
+  usage_limit | type=INTEGER | notnull=0 | default=None | pk=0
+  used_count | type=INTEGER | notnull=1 | default=0 | pk=0
+  start_date | type=TEXT | notnull=0 | default=None | pk=0
+  end_date | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+FOREIGN_KEYS:
+  promotion_id -> promotions.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_coupon_code', 0, 'c', 0)
+  (1, 'sqlite_autoindex_coupons_1', 1, 'u', 0)
+
+TABLE: currencies
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=VARCHAR(10) | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  symbol | type=VARCHAR(20) | notnull=0 | default=None | pk=0
+  decimal_places | type=INTEGER | notnull=1 | default=2 | pk=0
+  is_base | type=INTEGER | notnull=1 | default=0 | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_currencies_1', 1, 'u', 0)
+
+TABLE: customer_account_transactions
+ROWS: 2
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  customer_id | type=INTEGER | notnull=1 | default=None | pk=0
+  transaction_type | type=VARCHAR(40) | notnull=1 | default=None | pk=0
+  reference_type | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+  reference_id | type=INTEGER | notnull=0 | default=None | pk=0
+  debit | type=NUMERIC | notnull=0 | default=0 | pk=0
+  credit | type=NUMERIC | notnull=0 | default=0 | pk=0
+  balance | type=NUMERIC | notnull=0 | default=0 | pk=0
+  description | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+  transaction_date | type=DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  customer_id -> customers.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: customer_addresses
+ROWS: 28
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  customer_id | type=INTEGER | notnull=1 | default=None | pk=0
+  address_type | type=VARCHAR(50) | notnull=0 | default='main' | pk=0
+  address | type=TEXT | notnull=1 | default=None | pk=0
+  city | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  district | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  postal_code | type=VARCHAR(30) | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  customer_id -> customers.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: customer_collections
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  collection_number | type=VARCHAR(60) | notnull=1 | default=None | pk=0
+  customer_id | type=INTEGER | notnull=1 | default=None | pk=0
+  amount | type=NUMERIC | notnull=1 | default=None | pk=0
+  payment_method | type=VARCHAR(40) | notnull=1 | default=None | pk=0
+  reference_number | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  notes | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+  collection_date | type=DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  customer_id -> customers.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_customer_collections_1', 1, 'u', 0)
+
+TABLE: customer_credit_limits
+ROWS: 28
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  customer_id | type=INTEGER | notnull=1 | default=None | pk=0
+  old_limit | type=NUMERIC | notnull=1 | default=0 | pk=0
+  new_limit | type=NUMERIC | notnull=1 | default=0 | pk=0
+  reason | type=TEXT | notnull=0 | default=None | pk=0
+  approved_by | type=INTEGER | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  approved_by -> users.id | on_update=NO ACTION | on_delete=NO ACTION
+  customer_id -> customers.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: customer_groups
+ROWS: 4
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=VARCHAR(150) | notnull=1 | default=None | pk=0
+  discount_percent | type=NUMERIC | notnull=1 | default=0 | pk=0
+  price_type | type=VARCHAR(50) | notnull=0 | default='retail' | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_customer_groups_1', 1, 'u', 0)
+
+TABLE: customer_notes
+ROWS: 28
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  customer_id | type=INTEGER | notnull=1 | default=None | pk=0
+  user_id | type=INTEGER | notnull=0 | default=None | pk=0
+  note | type=TEXT | notnull=1 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  user_id -> users.id | on_update=NO ACTION | on_delete=NO ACTION
+  customer_id -> customers.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: customer_payments
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  customer_id | type=INTEGER | notnull=1 | default=None | pk=0
+  amount | type=NUMERIC | notnull=1 | default=None | pk=0
+  payment_method | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  reference_number | type=VARCHAR(200) | notnull=0 | default=None | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  customer_id -> customers.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: customer_transactions
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  customer_id | type=INTEGER | notnull=1 | default=None | pk=0
+  transaction_type | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  amount | type=NUMERIC | notnull=1 | default=None | pk=0
+  reference_type | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  reference_id | type=INTEGER | notnull=0 | default=None | pk=0
+  balance_after | type=NUMERIC | notnull=1 | default=0 | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  customer_id -> customers.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_customer_transactions_customer', 0, 'c', 0)
+
+TABLE: customers
+ROWS: 28
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  customer_code | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(250) | notnull=1 | default=None | pk=0
+  customer_type | type=VARCHAR(50) | notnull=1 | default='individual' | pk=0
+  group_id | type=INTEGER | notnull=0 | default=None | pk=0
+  phone | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+  email | type=VARCHAR(200) | notnull=0 | default=None | pk=0
+  tax_number | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  credit_limit | type=NUMERIC | notnull=1 | default=0 | pk=0
+  opening_balance | type=NUMERIC | notnull=1 | default=0 | pk=0
+  current_balance | type=NUMERIC | notnull=1 | default=0 | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+  updated_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  group_id -> customer_groups.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_customers_phone', 0, 'c', 0)
+  (1, 'idx_customers_name', 0, 'c', 0)
+  (2, 'sqlite_autoindex_customers_1', 1, 'u', 0)
+
+TABLE: dashboard_widgets
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=1 | default=None | pk=0
+  title | type=TEXT | notnull=1 | default=None | pk=0
+  widget_type | type=TEXT | notnull=0 | default=None | pk=0
+  configuration | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_dashboard_widgets_1', 1, 'u', 0)
+
+TABLE: departments
+ROWS: 11
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_departments_1', 1, 'u', 0)
+
+TABLE: document_links
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  document_id | type=INTEGER | notnull=1 | default=None | pk=0
+  entity_type | type=TEXT | notnull=1 | default=None | pk=0
+  entity_id | type=INTEGER | notnull=1 | default=None | pk=0
+
+TABLE: document_sequences
+ROWS: 11
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  branch_id | type=INTEGER | notnull=0 | default=None | pk=0
+  document_type | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  prefix | type=VARCHAR(50) | notnull=0 | default='' | pk=0
+  current_number | type=INTEGER | notnull=1 | default=0 | pk=0
+  padding | type=INTEGER | notnull=1 | default=6 | pk=0
+FOREIGN_KEYS:
+  branch_id -> branches.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_document_sequences_1', 1, 'u', 0)
+
+TABLE: document_versions
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  document_id | type=INTEGER | notnull=1 | default=None | pk=0
+  version_no | type=INTEGER | notnull=1 | default=None | pk=0
+  file_path | type=TEXT | notnull=0 | default=None | pk=0
+  file_hash | type=TEXT | notnull=0 | default=None | pk=0
+  created_by | type=INTEGER | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_document_versions_1', 1, 'u', 0)
+
+TABLE: documents
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  document_no | type=TEXT | notnull=1 | default=None | pk=0
+  title | type=TEXT | notnull=1 | default=None | pk=0
+  document_type | type=TEXT | notnull=0 | default=None | pk=0
+  entity_type | type=TEXT | notnull=0 | default=None | pk=0
+  entity_id | type=INTEGER | notnull=0 | default=None | pk=0
+  file_name | type=TEXT | notnull=0 | default=None | pk=0
+  file_path | type=TEXT | notnull=0 | default=None | pk=0
+  mime_type | type=TEXT | notnull=0 | default=None | pk=0
+  file_size | type=INTEGER | notnull=0 | default=None | pk=0
+  description | type=TEXT | notnull=0 | default=None | pk=0
+  created_by | type=INTEGER | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_documents_1', 1, 'u', 0)
+
+TABLE: e_invoice_lines
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  e_invoice_id | type=INTEGER | notnull=1 | default=None | pk=0
+  product_id | type=INTEGER | notnull=0 | default=None | pk=0
+  description | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+  quantity | type=NUMERIC | notnull=0 | default=0 | pk=0
+  unit_price | type=NUMERIC | notnull=0 | default=0 | pk=0
+  tax_rate | type=NUMERIC | notnull=0 | default=15 | pk=0
+  tax_amount | type=NUMERIC | notnull=0 | default=0 | pk=0
+  line_total | type=NUMERIC | notnull=0 | default=0 | pk=0
+FOREIGN_KEYS:
+  e_invoice_id -> e_invoices.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: e_invoices
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  invoice_number | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  invoice_type | type=VARCHAR(30) | notnull=0 | default='STANDARD' | pk=0
+  sale_id | type=INTEGER | notnull=0 | default=None | pk=0
+  customer_id | type=INTEGER | notnull=0 | default=None | pk=0
+  uuid | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  issue_date | type=DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+  subtotal | type=NUMERIC | notnull=0 | default=0 | pk=0
+  tax_amount | type=NUMERIC | notnull=0 | default=0 | pk=0
+  total_amount | type=NUMERIC | notnull=0 | default=0 | pk=0
+  status | type=VARCHAR(30) | notnull=0 | default='DRAFT' | pk=0
+  qr_data | type=TEXT | notnull=0 | default=None | pk=0
+  xml_data | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_e_invoices_1', 1, 'u', 0)
+
+TABLE: ecommerce_orders
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  external_order_id | type=TEXT | notnull=0 | default=None | pk=0
+  platform | type=TEXT | notnull=0 | default=None | pk=0
+  customer_name | type=TEXT | notnull=0 | default=None | pk=0
+  order_status | type=TEXT | notnull=0 | default='new' | pk=0
+  subtotal | type=REAL | notnull=0 | default=0 | pk=0
+  tax | type=REAL | notnull=0 | default=0 | pk=0
+  total | type=REAL | notnull=0 | default=0 | pk=0
+  payload | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_ecommerce_orders_1', 1, 'u', 0)
+
+TABLE: employee_attendance
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  employee_id | type=INTEGER | notnull=1 | default=None | pk=0
+  attendance_date | type=TEXT | notnull=1 | default=None | pk=0
+  check_in | type=TEXT | notnull=0 | default=None | pk=0
+  check_out | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='present' | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_employee_attendance_1', 1, 'u', 0)
+
+TABLE: employee_leaves
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  employee_id | type=INTEGER | notnull=1 | default=None | pk=0
+  leave_type | type=TEXT | notnull=0 | default=None | pk=0
+  start_date | type=TEXT | notnull=0 | default=None | pk=0
+  end_date | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='pending' | pk=0
+  reason | type=TEXT | notnull=0 | default=None | pk=0
+
+TABLE: employees
+ROWS: 7
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  employee_no | type=TEXT | notnull=1 | default=None | pk=0
+  full_name | type=TEXT | notnull=1 | default=None | pk=0
+  phone | type=TEXT | notnull=0 | default=None | pk=0
+  email | type=TEXT | notnull=0 | default=None | pk=0
+  department_id | type=INTEGER | notnull=0 | default=None | pk=0
+  position_id | type=INTEGER | notnull=0 | default=None | pk=0
+  hire_date | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='active' | pk=0
+  basic_salary | type=REAL | notnull=0 | default=0 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_employees_1', 1, 'u', 0)
+
+TABLE: erp_login_sessions
+ROWS: 6
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  user_id | type=INTEGER | notnull=0 | default=None | pk=0
+  login_at | type=DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+  logout_at | type=DATETIME | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='ACTIVE' | pk=0
+
+TABLE: erp_permissions
+ROWS: 13
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=1 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  module | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_erp_permissions_1', 1, 'u', 0)
+
+TABLE: erp_print_templates
+ROWS: 6
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=VARCHAR(60) | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  document_type | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+  is_default | type=INTEGER | notnull=0 | default=0 | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_erp_print_templates_1', 1, 'u', 0)
+
+TABLE: erp_report_catalog
+ROWS: 10
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  report_code | type=VARCHAR(60) | notnull=1 | default=None | pk=0
+  report_name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  report_type | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_erp_report_catalog_1', 1, 'u', 0)
+
+TABLE: erp_report_exports
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  report_code | type=VARCHAR(60) | notnull=0 | default=None | pk=0
+  file_format | type=VARCHAR(20) | notnull=0 | default=None | pk=0
+  file_path | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+  created_at | type=DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+  status | type=VARCHAR(30) | notnull=0 | default='READY' | pk=0
+
+TABLE: erp_role_permissions
+ROWS: 13
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  role_id | type=INTEGER | notnull=1 | default=None | pk=0
+  permission_id | type=INTEGER | notnull=1 | default=None | pk=0
+FOREIGN_KEYS:
+  permission_id -> erp_permissions.id | on_update=NO ACTION | on_delete=NO ACTION
+  role_id -> erp_roles.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_erp_role_permissions_1', 1, 'u', 0)
+
+TABLE: erp_roles
+ROWS: 5
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=1 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_erp_roles_1', 1, 'u', 0)
+
+TABLE: erp_user_roles
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  user_id | type=INTEGER | notnull=1 | default=None | pk=0
+  role_id | type=INTEGER | notnull=1 | default=None | pk=0
+FOREIGN_KEYS:
+  role_id -> erp_roles.id | on_update=NO ACTION | on_delete=NO ACTION
+  user_id -> users.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_erp_user_roles_1', 1, 'u', 0)
+
+TABLE: fiscal_periods
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  period_name | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+  start_date | type=DATE | notnull=0 | default=None | pk=0
+  end_date | type=DATE | notnull=0 | default=None | pk=0
+  status | type=VARCHAR(20) | notnull=0 | default='OPEN' | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_fiscal_periods_1', 1, 'u', 0)
+
+TABLE: fiscal_years
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  start_date | type=TEXT | notnull=1 | default=None | pk=0
+  end_date | type=TEXT | notnull=1 | default=None | pk=0
+  status | type=VARCHAR(30) | notnull=1 | default='open' | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_fiscal_years_1', 1, 'u', 0)
+
+TABLE: forecasts
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  metric_code | type=TEXT | notnull=1 | default=None | pk=0
+  period | type=TEXT | notnull=1 | default=None | pk=0
+  predicted_value | type=REAL | notnull=0 | default=None | pk=0
+  method | type=TEXT | notnull=0 | default=None | pk=0
+  confidence | type=REAL | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: goods_receipt_items
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  receipt_id | type=INTEGER | notnull=1 | default=None | pk=0
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  ordered_quantity | type=NUMERIC | notnull=1 | default=0 | pk=0
+  received_quantity | type=NUMERIC | notnull=1 | default=0 | pk=0
+  rejected_quantity | type=NUMERIC | notnull=1 | default=0 | pk=0
+  unit_cost | type=NUMERIC | notnull=1 | default=0 | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+  receipt_id -> goods_receipts.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: goods_receipts
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  receipt_number | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  purchase_order_id | type=INTEGER | notnull=0 | default=None | pk=0
+  warehouse_id | type=INTEGER | notnull=1 | default=None | pk=0
+  supplier_id | type=INTEGER | notnull=1 | default=None | pk=0
+  status | type=VARCHAR(50) | notnull=1 | default='received' | pk=0
+  received_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  supplier_id -> suppliers.id | on_update=NO ACTION | on_delete=NO ACTION
+  warehouse_id -> warehouses.id | on_update=NO ACTION | on_delete=NO ACTION
+  purchase_order_id -> purchase_orders.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_goods_receipts_1', 1, 'u', 0)
+
+TABLE: held_sales
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  hold_number | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  branch_id | type=INTEGER | notnull=1 | default=None | pk=0
+  cashier_id | type=INTEGER | notnull=0 | default=None | pk=0
+  customer_id | type=INTEGER | notnull=0 | default=None | pk=0
+  data_json | type=TEXT | notnull=1 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  cashier_id -> users.id | on_update=NO ACTION | on_delete=NO ACTION
+  branch_id -> branches.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_held_sales_1', 1, 'u', 0)
+
+TABLE: integration_logs
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  integration_id | type=INTEGER | notnull=0 | default=None | pk=0
+  direction | type=TEXT | notnull=0 | default=None | pk=0
+  endpoint | type=TEXT | notnull=0 | default=None | pk=0
+  request_data | type=TEXT | notnull=0 | default=None | pk=0
+  response_data | type=TEXT | notnull=0 | default=None | pk=0
+  status_code | type=INTEGER | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: integrations
+ROWS: 3
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=1 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  integration_type | type=TEXT | notnull=0 | default=None | pk=0
+  base_url | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='disabled' | pk=0
+  configuration | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_integrations_1', 1, 'u', 0)
+
+TABLE: interbranch_transfers
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  transfer_no | type=TEXT | notnull=1 | default=None | pk=0
+  from_branch_id | type=INTEGER | notnull=1 | default=None | pk=0
+  to_branch_id | type=INTEGER | notnull=1 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='draft' | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_interbranch_transfers_1', 1, 'u', 0)
+
+TABLE: job_positions
+ROWS: 8
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  department_id | type=INTEGER | notnull=0 | default=None | pk=0
+  base_salary | type=REAL | notnull=0 | default=0 | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_job_positions_1', 1, 'u', 0)
+
+TABLE: journal_entries
+ROWS: 8
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  entry_number | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  entry_date | type=TEXT | notnull=1 | default=None | pk=0
+  description | type=TEXT | notnull=0 | default=None | pk=0
+  source_type | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  source_id | type=INTEGER | notnull=0 | default=None | pk=0
+  status | type=VARCHAR(30) | notnull=1 | default='posted' | pk=0
+  fiscal_period_id | type=INTEGER | notnull=0 | default=None | pk=0
+  created_by | type=INTEGER | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  created_by -> users.id | on_update=NO ACTION | on_delete=NO ACTION
+  fiscal_period_id -> accounting_periods.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_journal_source', 0, 'c', 0)
+  (1, 'idx_journal_date', 0, 'c', 0)
+  (2, 'sqlite_autoindex_journal_entries_1', 1, 'u', 0)
+
+TABLE: journal_entry_lines
+ROWS: 31
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  journal_entry_id | type=INTEGER | notnull=1 | default=None | pk=0
+  account_id | type=INTEGER | notnull=1 | default=None | pk=0
+  cost_center_id | type=INTEGER | notnull=0 | default=None | pk=0
+  description | type=TEXT | notnull=0 | default=None | pk=0
+  debit | type=NUMERIC | notnull=1 | default=0 | pk=0
+  credit | type=NUMERIC | notnull=1 | default=0 | pk=0
+FOREIGN_KEYS:
+  cost_center_id -> cost_centers.id | on_update=NO ACTION | on_delete=NO ACTION
+  account_id -> chart_of_accounts.id | on_update=NO ACTION | on_delete=NO ACTION
+  journal_entry_id -> journal_entries.id | on_update=NO ACTION | on_delete=CASCADE
+INDEXES:
+  (0, 'idx_journal_lines_account', 0, 'c', 0)
+
+TABLE: login_attempts
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  username | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  success | type=INTEGER | notnull=1 | default=0 | pk=0
+  ip_address | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  attempted_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+  reason | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'idx_login_username', 0, 'c', 0)
+
+TABLE: login_sessions
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  user_id | type=INTEGER | notnull=0 | default=None | pk=0
+  login_at | type=DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+  logout_at | type=DATETIME | notnull=0 | default=None | pk=0
+  status | type=VARCHAR(30) | notnull=0 | default='ACTIVE' | pk=0
+
+TABLE: loyalty_accounts
+ROWS: 28
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  customer_id | type=INTEGER | notnull=1 | default=None | pk=0
+  points_balance | type=NUMERIC | notnull=1 | default=0 | pk=0
+  tier | type=VARCHAR(50) | notnull=1 | default='basic' | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  customer_id -> customers.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_loyalty_customer', 0, 'c', 0)
+  (1, 'sqlite_autoindex_loyalty_accounts_1', 1, 'u', 0)
+
+TABLE: loyalty_rules
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  points_per_currency | type=NUMERIC | notnull=1 | default=0 | pk=0
+  minimum_purchase | type=NUMERIC | notnull=1 | default=0 | pk=0
+  points_value | type=NUMERIC | notnull=1 | default=0 | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+  start_date | type=TEXT | notnull=0 | default=None | pk=0
+  end_date | type=TEXT | notnull=0 | default=None | pk=0
+
+TABLE: loyalty_transactions
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  loyalty_account_id | type=INTEGER | notnull=1 | default=None | pk=0
+  transaction_type | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  points | type=NUMERIC | notnull=1 | default=None | pk=0
+  reference_type | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  reference_id | type=INTEGER | notnull=0 | default=None | pk=0
+  balance_after | type=NUMERIC | notnull=1 | default=0 | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  loyalty_account_id -> loyalty_accounts.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: maintenance_orders
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  order_no | type=TEXT | notnull=1 | default=None | pk=0
+  asset_id | type=INTEGER | notnull=0 | default=None | pk=0
+  maintenance_type | type=TEXT | notnull=0 | default=None | pk=0
+  description | type=TEXT | notnull=0 | default=None | pk=0
+  cost | type=REAL | notnull=0 | default=0 | pk=0
+  status | type=TEXT | notnull=0 | default='open' | pk=0
+  opened_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+  closed_at | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_maintenance_orders_1', 1, 'u', 0)
+
+TABLE: notification_rules
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=1 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  condition_expression | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_notification_rules_1', 1, 'u', 0)
+
+TABLE: notification_types
+ROWS: 6
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=1 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  severity | type=TEXT | notnull=0 | default='info' | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_notification_types_1', 1, 'u', 0)
+
+TABLE: notifications
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  type_id | type=INTEGER | notnull=0 | default=None | pk=0
+  title | type=TEXT | notnull=1 | default=None | pk=0
+  message | type=TEXT | notnull=0 | default=None | pk=0
+  user_id | type=INTEGER | notnull=0 | default=None | pk=0
+  entity_type | type=TEXT | notnull=0 | default=None | pk=0
+  entity_id | type=INTEGER | notnull=0 | default=None | pk=0
+  is_read | type=INTEGER | notnull=0 | default=0 | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+  read_at | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'idx_notifications_status', 0, 'c', 0)
+  (1, 'idx_notifications_created', 0, 'c', 0)
+  (2, 'idx_notifications_user', 0, 'c', 0)
+
+TABLE: offline_operations
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  operation_code | type=TEXT | notnull=1 | default=None | pk=0
+  operation_type | type=TEXT | notnull=1 | default=None | pk=0
+  payload | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='pending' | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_offline_operations_1', 1, 'u', 0)
+
+TABLE: operation_center_tasks
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  task_type | type=TEXT | notnull=0 | default=None | pk=0
+  title | type=TEXT | notnull=1 | default=None | pk=0
+  entity_type | type=TEXT | notnull=0 | default=None | pk=0
+  entity_id | type=INTEGER | notnull=0 | default=None | pk=0
+  priority | type=TEXT | notnull=0 | default='normal' | pk=0
+  status | type=TEXT | notnull=0 | default='open' | pk=0
+  assigned_user_id | type=INTEGER | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: payroll_items
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  run_id | type=INTEGER | notnull=1 | default=None | pk=0
+  employee_id | type=INTEGER | notnull=1 | default=None | pk=0
+  basic_salary | type=REAL | notnull=0 | default=0 | pk=0
+  allowances | type=REAL | notnull=0 | default=0 | pk=0
+  overtime | type=REAL | notnull=0 | default=0 | pk=0
+  deductions | type=REAL | notnull=0 | default=0 | pk=0
+  tax | type=REAL | notnull=0 | default=0 | pk=0
+  net_salary | type=REAL | notnull=0 | default=0 | pk=0
+
+TABLE: payroll_periods
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  start_date | type=TEXT | notnull=0 | default=None | pk=0
+  end_date | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='open' | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_payroll_periods_1', 1, 'u', 0)
+
+TABLE: payroll_runs
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  period_id | type=INTEGER | notnull=1 | default=None | pk=0
+  run_no | type=TEXT | notnull=1 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='draft' | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_payroll_runs_1', 1, 'u', 0)
+
+TABLE: permissions
+ROWS: 15
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=VARCHAR(150) | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  module | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  action | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  description | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_permissions_1', 1, 'u', 0)
+
+TABLE: posting_batches
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  batch_no | type=TEXT | notnull=1 | default=None | pk=0
+  source_type | type=TEXT | notnull=0 | default=None | pk=0
+  source_id | type=INTEGER | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='posted' | pk=0
+  posted_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_posting_batches_1', 1, 'u', 0)
+
+TABLE: print_jobs
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  order_id | type=INTEGER | notnull=0 | default=None | pk=0
+  file_name | type=TEXT | notnull=0 | default=None | pk=0
+  file_path | type=TEXT | notnull=0 | default=None | pk=0
+  copies | type=INTEGER | notnull=0 | default=1 | pk=0
+  paper_size | type=TEXT | notnull=0 | default='A4' | pk=0
+  color_mode | type=TEXT | notnull=0 | default='black_white' | pk=0
+  status | type=TEXT | notnull=0 | default='pending' | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: print_templates
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  template_type | type=TEXT | notnull=0 | default=None | pk=0
+  content | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_print_templates_1', 1, 'u', 0)
+
+TABLE: printing_orders
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  order_no | type=TEXT | notnull=1 | default=None | pk=0
+  customer_id | type=INTEGER | notnull=0 | default=None | pk=0
+  service_id | type=INTEGER | notnull=0 | default=None | pk=0
+  quantity | type=REAL | notnull=0 | default=1 | pk=0
+  unit_price | type=REAL | notnull=0 | default=0 | pk=0
+  discount | type=REAL | notnull=0 | default=0 | pk=0
+  tax | type=REAL | notnull=0 | default=0 | pk=0
+  total | type=REAL | notnull=0 | default=0 | pk=0
+  status | type=TEXT | notnull=0 | default='new' | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_printing_orders_1', 1, 'u', 0)
+
+TABLE: printing_services
+ROWS: 5
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=0 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  service_type | type=TEXT | notnull=0 | default=None | pk=0
+  unit | type=TEXT | notnull=0 | default=None | pk=0
+  base_price | type=REAL | notnull=0 | default=0 | pk=0
+  tax_rate | type=REAL | notnull=0 | default=15 | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_printing_services_1', 1, 'u', 0)
+
+TABLE: product_barcodes
+ROWS: 32
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  barcode | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  is_primary | type=INTEGER | notnull=1 | default=0 | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=CASCADE
+INDEXES:
+  (0, 'idx_product_barcodes_barcode', 0, 'c', 0)
+  (1, 'idx_barcodes_barcode', 0, 'c', 0)
+  (2, 'sqlite_autoindex_product_barcodes_1', 1, 'u', 0)
+
+TABLE: product_categories
+ROWS: 32
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  parent_id | type=INTEGER | notnull=0 | default=None | pk=0
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  code | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  description | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+FOREIGN_KEYS:
+  parent_id -> product_categories.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_product_categories_1', 1, 'u', 0)
+
+TABLE: product_channel_links
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  platform | type=TEXT | notnull=1 | default=None | pk=0
+  external_product_id | type=TEXT | notnull=0 | default=None | pk=0
+  external_sku | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_product_channel_links_1', 1, 'u', 0)
+
+TABLE: product_images
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  file_path | type=TEXT | notnull=1 | default=None | pk=0
+  is_primary | type=INTEGER | notnull=1 | default=0 | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: product_locations
+ROWS: 32
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  warehouse_id | type=INTEGER | notnull=1 | default=None | pk=0
+  bin_id | type=INTEGER | notnull=0 | default=None | pk=0
+  quantity | type=NUMERIC | notnull=1 | default=0 | pk=0
+FOREIGN_KEYS:
+  bin_id -> warehouse_bins.id | on_update=NO ACTION | on_delete=NO ACTION
+  warehouse_id -> warehouses.id | on_update=NO ACTION | on_delete=NO ACTION
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_product_locations_1', 1, 'u', 0)
+
+TABLE: product_prices
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  price_type | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  price | type=NUMERIC | notnull=1 | default=0 | pk=0
+  min_quantity | type=NUMERIC | notnull=1 | default=1 | pk=0
+  start_date | type=TEXT | notnull=0 | default=None | pk=0
+  end_date | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=CASCADE
+INDEXES:
+  (0, 'sqlite_autoindex_product_prices_1', 1, 'u', 0)
+
+TABLE: product_supplier_links
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  supplier_id | type=INTEGER | notnull=0 | default=None | pk=0
+  supplier_sku | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  purchase_price | type=NUMERIC | notnull=1 | default=0 | pk=0
+  lead_time_days | type=INTEGER | notnull=0 | default=0 | pk=0
+  is_preferred | type=INTEGER | notnull=1 | default=0 | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=CASCADE
+INDEXES:
+  (0, 'sqlite_autoindex_product_supplier_links_1', 1, 'u', 0)
+
+TABLE: product_units
+ROWS: 62
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  unit_id | type=INTEGER | notnull=1 | default=None | pk=0
+  conversion_factor | type=NUMERIC | notnull=1 | default=1 | pk=0
+  is_base | type=INTEGER | notnull=1 | default=0 | pk=0
+FOREIGN_KEYS:
+  unit_id -> units.id | on_update=NO ACTION | on_delete=NO ACTION
+  product_id -> products.id | on_update=NO ACTION | on_delete=CASCADE
+INDEXES:
+  (0, 'sqlite_autoindex_product_units_1', 1, 'u', 0)
+
+TABLE: products
+ROWS: 62
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  sku | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  name_ar | type=VARCHAR(300) | notnull=1 | default=None | pk=0
+  name_en | type=VARCHAR(300) | notnull=0 | default=None | pk=0
+  category_id | type=INTEGER | notnull=0 | default=None | pk=0
+  brand_id | type=INTEGER | notnull=0 | default=None | pk=0
+  unit_id | type=INTEGER | notnull=0 | default=None | pk=0
+  product_type | type=VARCHAR(30) | notnull=1 | default='inventory' | pk=0
+  description | type=TEXT | notnull=0 | default=None | pk=0
+  cost_price | type=NUMERIC | notnull=1 | default=0 | pk=0
+  sale_price | type=NUMERIC | notnull=1 | default=0 | pk=0
+  wholesale_price | type=NUMERIC | notnull=1 | default=0 | pk=0
+  school_price | type=NUMERIC | notnull=1 | default=0 | pk=0
+  corporate_price | type=NUMERIC | notnull=1 | default=0 | pk=0
+  min_price | type=NUMERIC | notnull=1 | default=0 | pk=0
+  reorder_point | type=NUMERIC | notnull=1 | default=0 | pk=0
+  min_stock | type=NUMERIC | notnull=1 | default=0 | pk=0
+  max_stock | type=NUMERIC | notnull=1 | default=0 | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+  updated_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  unit_id -> units.id | on_update=NO ACTION | on_delete=NO ACTION
+  brand_id -> brands.id | on_update=NO ACTION | on_delete=NO ACTION
+  category_id -> product_categories.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_products_category', 0, 'c', 0)
+  (1, 'idx_products_sku', 0, 'c', 0)
+  (2, 'idx_products_name', 0, 'c', 0)
+  (3, 'sqlite_autoindex_products_1', 1, 'u', 0)
+
+TABLE: promotion_items
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  promotion_id | type=INTEGER | notnull=1 | default=None | pk=0
+  product_id | type=INTEGER | notnull=0 | default=None | pk=0
+  category_id | type=INTEGER | notnull=0 | default=None | pk=0
+  minimum_quantity | type=NUMERIC | notnull=1 | default=1 | pk=0
+FOREIGN_KEYS:
+  category_id -> product_categories.id | on_update=NO ACTION | on_delete=NO ACTION
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+  promotion_id -> promotions.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: promotions
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  promotion_type | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  value | type=NUMERIC | notnull=1 | default=0 | pk=0
+  minimum_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  maximum_discount | type=NUMERIC | notnull=0 | default=None | pk=0
+  start_date | type=TEXT | notnull=0 | default=None | pk=0
+  end_date | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+  description | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'idx_promotions_dates', 0, 'c', 0)
+
+TABLE: purchase_invoice_items
+ROWS: 3
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  invoice_id | type=INTEGER | notnull=1 | default=None | pk=0
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  quantity | type=NUMERIC | notnull=1 | default=None | pk=0
+  unit_cost | type=NUMERIC | notnull=1 | default=0 | pk=0
+  tax_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  line_total | type=NUMERIC | notnull=1 | default=0 | pk=0
+  purchase_invoice_id | type=INTEGER | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+  invoice_id -> purchase_invoices.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: purchase_invoices
+ROWS: 6
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  invoice_number | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  supplier_id | type=INTEGER | notnull=1 | default=None | pk=0
+  purchase_order_id | type=INTEGER | notnull=0 | default=None | pk=0
+  subtotal | type=NUMERIC | notnull=1 | default=0 | pk=0
+  tax_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  total_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  paid_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  due_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  status | type=VARCHAR(50) | notnull=1 | default='open' | pk=0
+  invoice_date | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+  due_date | type=TEXT | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  purchase_order_id -> purchase_orders.id | on_update=NO ACTION | on_delete=NO ACTION
+  supplier_id -> suppliers.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_purchase_invoices_supplier', 0, 'c', 0)
+  (1, 'sqlite_autoindex_purchase_invoices_1', 1, 'u', 0)
+
+TABLE: purchase_order_items
+ROWS: 6
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  order_id | type=INTEGER | notnull=1 | default=None | pk=0
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  quantity | type=NUMERIC | notnull=1 | default=None | pk=0
+  unit_cost | type=NUMERIC | notnull=1 | default=0 | pk=0
+  tax_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  line_total | type=NUMERIC | notnull=1 | default=0 | pk=0
+  purchase_order_id | type=INTEGER | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+  order_id -> purchase_orders.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: purchase_orders
+ROWS: 6
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  order_number | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  branch_id | type=INTEGER | notnull=1 | default=None | pk=0
+  supplier_id | type=INTEGER | notnull=1 | default=None | pk=0
+  status | type=VARCHAR(50) | notnull=1 | default='draft' | pk=0
+  subtotal | type=NUMERIC | notnull=1 | default=0 | pk=0
+  discount_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  tax_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  total_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  supplier_id -> suppliers.id | on_update=NO ACTION | on_delete=NO ACTION
+  branch_id -> branches.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_purchase_orders_supplier', 0, 'c', 0)
+  (1, 'sqlite_autoindex_purchase_orders_1', 1, 'u', 0)
+
+TABLE: purchase_request_items
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  request_id | type=INTEGER | notnull=1 | default=None | pk=0
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  quantity | type=NUMERIC | notnull=1 | default=None | pk=0
+  estimated_cost | type=NUMERIC | notnull=1 | default=0 | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+  request_id -> purchase_requests.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: purchase_requests
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  request_number | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  branch_id | type=INTEGER | notnull=1 | default=None | pk=0
+  requested_by | type=INTEGER | notnull=0 | default=None | pk=0
+  status | type=VARCHAR(50) | notnull=1 | default='draft' | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  requested_by -> users.id | on_update=NO ACTION | on_delete=NO ACTION
+  branch_id -> branches.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_purchase_requests_1', 1, 'u', 0)
+
+TABLE: purchase_returns
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  return_number | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  supplier_id | type=INTEGER | notnull=1 | default=None | pk=0
+  invoice_id | type=INTEGER | notnull=0 | default=None | pk=0
+  reason | type=TEXT | notnull=0 | default=None | pk=0
+  total_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  status | type=VARCHAR(50) | notnull=1 | default='completed' | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  invoice_id -> purchase_invoices.id | on_update=NO ACTION | on_delete=NO ACTION
+  supplier_id -> suppliers.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_purchase_returns_1', 1, 'u', 0)
+
+TABLE: quick_actions
+ROWS: 5
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=1 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  route | type=TEXT | notnull=0 | default=None | pk=0
+  required_permission | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_quick_actions_1', 1, 'u', 0)
+
+TABLE: report_definitions
+ROWS: 10
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=1 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  category | type=TEXT | notnull=0 | default=None | pk=0
+  query_sql | type=TEXT | notnull=0 | default=None | pk=0
+  format | type=TEXT | notnull=0 | default='pdf' | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_report_definitions_1', 1, 'u', 0)
+
+TABLE: report_exports
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  report_code | type=VARCHAR(60) | notnull=0 | default=None | pk=0
+  file_format | type=VARCHAR(20) | notnull=0 | default=None | pk=0
+  file_path | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+  created_at | type=DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+  status | type=VARCHAR(30) | notnull=0 | default='READY' | pk=0
+
+TABLE: report_runs
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  report_id | type=INTEGER | notnull=1 | default=None | pk=0
+  parameters | type=TEXT | notnull=0 | default=None | pk=0
+  output_path | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='completed' | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: restore_jobs
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  backup_file | type=TEXT | notnull=1 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='pending' | pk=0
+  started_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+  completed_at | type=TEXT | notnull=0 | default=None | pk=0
+  message | type=TEXT | notnull=0 | default=None | pk=0
+
+TABLE: role_permissions
+ROWS: 15
+COLUMNS:
+  role_id | type=INTEGER | notnull=1 | default=None | pk=1
+  permission_id | type=INTEGER | notnull=1 | default=None | pk=2
+FOREIGN_KEYS:
+  permission_id -> permissions.id | on_update=NO ACTION | on_delete=CASCADE
+  role_id -> roles.id | on_update=NO ACTION | on_delete=CASCADE
+INDEXES:
+  (0, 'sqlite_autoindex_role_permissions_1', 1, 'pk', 0)
+
+TABLE: roles
+ROWS: 16
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  description | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_roles_1', 1, 'u', 0)
+
+TABLE: rollback_points
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  version | type=TEXT | notnull=0 | default=None | pk=0
+  database_backup | type=TEXT | notnull=0 | default=None | pk=0
+  application_backup | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: salary_components
+ROWS: 4
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=1 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  component_type | type=TEXT | notnull=1 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_salary_components_1', 1, 'u', 0)
+
+TABLE: sale_items
+ROWS: 4
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  sale_id | type=INTEGER | notnull=1 | default=None | pk=0
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  quantity | type=NUMERIC | notnull=1 | default=None | pk=0
+  unit_price | type=NUMERIC | notnull=1 | default=None | pk=0
+  discount_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  tax_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  line_total | type=NUMERIC | notnull=1 | default=0 | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+  sale_id -> sales.id | on_update=NO ACTION | on_delete=CASCADE
+INDEXES:
+  (0, 'idx_sale_items_product', 0, 'c', 0)
+
+TABLE: sale_payments
+ROWS: 4
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  sale_id | type=INTEGER | notnull=1 | default=None | pk=0
+  payment_method | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  amount | type=NUMERIC | notnull=1 | default=None | pk=0
+  reference_number | type=VARCHAR(200) | notnull=0 | default=None | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  sale_id -> sales.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: sale_return_items
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  return_id | type=INTEGER | notnull=1 | default=None | pk=0
+  sale_item_id | type=INTEGER | notnull=0 | default=None | pk=0
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  quantity | type=NUMERIC | notnull=1 | default=None | pk=0
+  unit_price | type=NUMERIC | notnull=1 | default=None | pk=0
+  total_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+  sale_item_id -> sale_items.id | on_update=NO ACTION | on_delete=NO ACTION
+  return_id -> sale_returns.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: sale_returns
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  return_number | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  sale_id | type=INTEGER | notnull=1 | default=None | pk=0
+  customer_id | type=INTEGER | notnull=0 | default=None | pk=0
+  reason | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=VARCHAR(50) | notnull=1 | default='completed' | pk=0
+  total_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  created_by | type=INTEGER | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  created_by -> users.id | on_update=NO ACTION | on_delete=NO ACTION
+  customer_id -> customers.id | on_update=NO ACTION | on_delete=NO ACTION
+  sale_id -> sales.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_sale_returns_1', 1, 'u', 0)
+
+TABLE: sales
+ROWS: 4
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  invoice_number | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  branch_id | type=INTEGER | notnull=1 | default=None | pk=0
+  warehouse_id | type=INTEGER | notnull=0 | default=None | pk=0
+  customer_id | type=INTEGER | notnull=0 | default=None | pk=0
+  cashier_id | type=INTEGER | notnull=0 | default=None | pk=0
+  status | type=VARCHAR(50) | notnull=1 | default='completed' | pk=0
+  subtotal | type=NUMERIC | notnull=1 | default=0 | pk=0
+  discount_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  tax_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  total_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  paid_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  due_amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  cashier_id -> users.id | on_update=NO ACTION | on_delete=NO ACTION
+  customer_id -> customers.id | on_update=NO ACTION | on_delete=NO ACTION
+  warehouse_id -> warehouses.id | on_update=NO ACTION | on_delete=NO ACTION
+  branch_id -> branches.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_sales_invoice', 0, 'c', 0)
+  (1, 'idx_sales_date', 0, 'c', 0)
+  (2, 'sqlite_autoindex_sales_1', 1, 'u', 0)
+
+TABLE: schema_versions
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  stage_number | type=INTEGER | notnull=1 | default=None | pk=0
+  version | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  applied_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_schema_versions_1', 1, 'u', 0)
+
+TABLE: search_index
+ROWS: 62
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  entity_type | type=TEXT | notnull=1 | default=None | pk=0
+  entity_id | type=INTEGER | notnull=1 | default=None | pk=0
+  search_text | type=TEXT | notnull=1 | default=None | pk=0
+  updated_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'idx_search_text', 0, 'c', 0)
+
+TABLE: security_audit
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  check_code | type=TEXT | notnull=1 | default=None | pk=0
+  check_name | type=TEXT | notnull=1 | default=None | pk=0
+  status | type=TEXT | notnull=1 | default=None | pk=0
+  checked_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_security_audit_1', 1, 'u', 0)
+
+TABLE: stock
+ROWS: 62
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  warehouse_id | type=INTEGER | notnull=1 | default=None | pk=0
+  quantity | type=NUMERIC | notnull=1 | default=0 | pk=0
+  reserved_quantity | type=NUMERIC | notnull=1 | default=0 | pk=0
+  available_quantity | type=NUMERIC | notnull=1 | default=0 | pk=0
+  average_cost | type=NUMERIC | notnull=1 | default=0 | pk=0
+  updated_at | type=TEXT | notnull=1 | default=None | pk=0
+FOREIGN_KEYS:
+  warehouse_id -> warehouses.id | on_update=NO ACTION | on_delete=NO ACTION
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_stock_1', 1, 'u', 0)
+
+TABLE: stock_adjustments
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  warehouse_id | type=INTEGER | notnull=1 | default=None | pk=0
+  status | type=VARCHAR(50) | notnull=1 | default='draft' | pk=0
+  reason | type=TEXT | notnull=0 | default=None | pk=0
+  created_by | type=INTEGER | notnull=0 | default=None | pk=0
+  approved_by | type=INTEGER | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  warehouse_id -> warehouses.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: stock_balances
+ROWS: 62
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  warehouse_id | type=INTEGER | notnull=1 | default=None | pk=0
+  quantity | type=NUMERIC | notnull=1 | default=0 | pk=0
+  reserved_quantity | type=NUMERIC | notnull=1 | default=0 | pk=0
+  average_cost | type=NUMERIC | notnull=1 | default=0 | pk=0
+  last_movement_at | type=TEXT | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  warehouse_id -> warehouses.id | on_update=NO ACTION | on_delete=NO ACTION
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_stock_product', 0, 'c', 0)
+  (1, 'sqlite_autoindex_stock_balances_1', 1, 'u', 0)
+
+TABLE: stock_movements
+ROWS: 8
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  warehouse_id | type=INTEGER | notnull=1 | default=None | pk=0
+  movement_type | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  quantity | type=NUMERIC | notnull=1 | default=None | pk=0
+  unit_cost | type=NUMERIC | notnull=1 | default=0 | pk=0
+  reference_type | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  reference_id | type=INTEGER | notnull=0 | default=None | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  warehouse_id -> warehouses.id | on_update=NO ACTION | on_delete=NO ACTION
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_movements_date', 0, 'c', 0)
+  (1, 'idx_movements_product', 0, 'c', 0)
+
+TABLE: stocktake_items
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  stocktake_id | type=INTEGER | notnull=1 | default=None | pk=0
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  system_quantity | type=NUMERIC | notnull=1 | default=0 | pk=0
+  counted_quantity | type=NUMERIC | notnull=1 | default=0 | pk=0
+  difference | type=NUMERIC | notnull=1 | default=0 | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+  stocktake_id -> stocktakes.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: stocktakes
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  warehouse_id | type=INTEGER | notnull=1 | default=None | pk=0
+  status | type=VARCHAR(50) | notnull=1 | default='draft' | pk=0
+  started_at | type=TEXT | notnull=0 | default=None | pk=0
+  completed_at | type=TEXT | notnull=0 | default=None | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  warehouse_id -> warehouses.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: supplier_evaluations
+ROWS: 18
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  supplier_id | type=INTEGER | notnull=1 | default=None | pk=0
+  quality_score | type=NUMERIC | notnull=0 | default=None | pk=0
+  price_score | type=NUMERIC | notnull=0 | default=None | pk=0
+  delivery_score | type=NUMERIC | notnull=0 | default=None | pk=0
+  shortage_score | type=NUMERIC | notnull=0 | default=None | pk=0
+  notes | type=TEXT | notnull=0 | default=None | pk=0
+  evaluated_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  supplier_id -> suppliers.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: supplier_groups
+ROWS: 2
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=VARCHAR(150) | notnull=1 | default=None | pk=0
+  description | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_supplier_groups_1', 1, 'u', 0)
+
+TABLE: supplier_prices
+ROWS: 62
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  supplier_id | type=INTEGER | notnull=1 | default=None | pk=0
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  price | type=NUMERIC | notnull=1 | default=0 | pk=0
+  minimum_quantity | type=NUMERIC | notnull=1 | default=1 | pk=0
+  valid_from | type=TEXT | notnull=0 | default=None | pk=0
+  valid_to | type=TEXT | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+  supplier_id -> suppliers.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: supplier_products
+ROWS: 62
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  supplier_id | type=INTEGER | notnull=1 | default=None | pk=0
+  product_id | type=INTEGER | notnull=1 | default=None | pk=0
+  supplier_sku | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  preferred | type=INTEGER | notnull=1 | default=0 | pk=0
+FOREIGN_KEYS:
+  product_id -> products.id | on_update=NO ACTION | on_delete=NO ACTION
+  supplier_id -> suppliers.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_supplier_products_1', 1, 'u', 0)
+
+TABLE: supplier_transactions
+ROWS: 6
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  supplier_id | type=INTEGER | notnull=1 | default=None | pk=0
+  transaction_type | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  amount | type=NUMERIC | notnull=1 | default=0 | pk=0
+  reference_type | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+  reference_id | type=INTEGER | notnull=0 | default=None | pk=0
+  balance_after | type=NUMERIC | notnull=1 | default=0 | pk=0
+  created_at | type=TEXT | notnull=1 | default=None | pk=0
+FOREIGN_KEYS:
+  supplier_id -> suppliers.id | on_update=NO ACTION | on_delete=NO ACTION
+
+TABLE: suppliers
+ROWS: 18
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  supplier_code | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(250) | notnull=1 | default=None | pk=0
+  supplier_type | type=VARCHAR(50) | notnull=1 | default='local' | pk=0
+  phone | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+  email | type=VARCHAR(200) | notnull=0 | default=None | pk=0
+  tax_number | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  address | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+  credit_limit | type=NUMERIC | notnull=1 | default=0 | pk=0
+  current_balance | type=NUMERIC | notnull=1 | default=0 | pk=0
+  group_id | type=INTEGER | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+FOREIGN_KEYS:
+  group_id -> supplier_groups.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'idx_suppliers_phone', 0, 'c', 0)
+  (1, 'idx_suppliers_name', 0, 'c', 0)
+  (2, 'sqlite_autoindex_suppliers_1', 1, 'u', 0)
+
+TABLE: sync_conflicts
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  entity_type | type=TEXT | notnull=0 | default=None | pk=0
+  entity_id | type=INTEGER | notnull=0 | default=None | pk=0
+  local_data | type=TEXT | notnull=0 | default=None | pk=0
+  remote_data | type=TEXT | notnull=0 | default=None | pk=0
+  resolution | type=TEXT | notnull=0 | default='pending' | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: sync_devices
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  device_id | type=TEXT | notnull=1 | default=None | pk=0
+  device_name | type=TEXT | notnull=0 | default=None | pk=0
+  last_sync_at | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='active' | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_sync_devices_1', 1, 'u', 0)
+
+TABLE: sync_queue
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  entity_type | type=TEXT | notnull=1 | default=None | pk=0
+  entity_id | type=INTEGER | notnull=0 | default=None | pk=0
+  operation | type=TEXT | notnull=1 | default=None | pk=0
+  payload | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='pending' | pk=0
+  retry_count | type=INTEGER | notnull=0 | default=0 | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+  processed_at | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'idx_sync_queue_status', 0, 'c', 0)
+
+TABLE: system_audit_log
+ROWS: 2
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  action | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  entity_type | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  entity_id | type=INTEGER | notnull=0 | default=None | pk=0
+  description | type=VARCHAR(1000) | notnull=0 | default=None | pk=0
+  created_at | type=DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: system_info
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  system_name | type=TEXT | notnull=1 | default=None | pk=0
+  version | type=TEXT | notnull=1 | default=None | pk=0
+
+TABLE: system_settings
+ROWS: 25
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  setting_key | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  setting_value | type=TEXT | notnull=0 | default=None | pk=0
+  value_type | type=VARCHAR(30) | notnull=1 | default='text' | pk=0
+  description | type=VARCHAR(500) | notnull=0 | default=None | pk=0
+  updated_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_system_settings_1', 1, 'u', 0)
+
+TABLE: system_test_runs
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  test_code | type=TEXT | notnull=1 | default=None | pk=0
+  test_name | type=TEXT | notnull=1 | default=None | pk=0
+  status | type=TEXT | notnull=1 | default=None | pk=0
+  executed_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+  details | type=TEXT | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_system_test_runs_1', 1, 'u', 0)
+
+TABLE: tax_config
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  tax_number | type=VARCHAR(100) | notnull=0 | default=None | pk=0
+  vat_rate | type=NUMERIC | notnull=0 | default=15 | pk=0
+  currency | type=VARCHAR(10) | notnull=0 | default='SAR' | pk=0
+  country_code | type=VARCHAR(5) | notnull=0 | default='SA' | pk=0
+  invoice_prefix | type=VARCHAR(20) | notnull=0 | default='INV' | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+
+TABLE: tax_invoices
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  invoice_no | type=TEXT | notnull=1 | default=None | pk=0
+  source_type | type=TEXT | notnull=0 | default=None | pk=0
+  source_id | type=INTEGER | notnull=0 | default=None | pk=0
+  subtotal | type=REAL | notnull=0 | default=0 | pk=0
+  tax_amount | type=REAL | notnull=0 | default=0 | pk=0
+  total_amount | type=REAL | notnull=0 | default=0 | pk=0
+  tax_number | type=TEXT | notnull=0 | default=None | pk=0
+  uuid | type=TEXT | notnull=0 | default=None | pk=0
+  qr_code | type=TEXT | notnull=0 | default=None | pk=0
+  xml_path | type=TEXT | notnull=0 | default=None | pk=0
+  clearance_status | type=TEXT | notnull=0 | default='not_submitted' | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_tax_invoices_1', 1, 'u', 0)
+
+TABLE: tax_rates
+ROWS: 6
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=0 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  rate | type=REAL | notnull=1 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_tax_rates_1', 1, 'u', 0)
+
+TABLE: tax_transactions
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  invoice_id | type=INTEGER | notnull=0 | default=None | pk=0
+  tax_code | type=TEXT | notnull=0 | default=None | pk=0
+  tax_rate | type=REAL | notnull=0 | default=None | pk=0
+  taxable_amount | type=REAL | notnull=0 | default=None | pk=0
+  tax_amount | type=REAL | notnull=0 | default=None | pk=0
+
+TABLE: treasury_sequences
+ROWS: 3
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  sequence_type | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  last_number | type=INTEGER | notnull=0 | default=0 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_treasury_sequences_1', 1, 'u', 0)
+
+TABLE: units
+ROWS: 18
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  name | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  symbol | type=VARCHAR(30) | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_units_1', 1, 'u', 0)
+
+TABLE: update_history
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  from_version | type=TEXT | notnull=0 | default=None | pk=0
+  to_version | type=TEXT | notnull=0 | default=None | pk=0
+  action | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default=None | pk=0
+  message | type=TEXT | notnull=0 | default=None | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: update_packages
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  version | type=TEXT | notnull=1 | default=None | pk=0
+  package_path | type=TEXT | notnull=0 | default=None | pk=0
+  checksum | type=TEXT | notnull=0 | default=None | pk=0
+  status | type=TEXT | notnull=0 | default='available' | pk=0
+  created_at | type=TEXT | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+TABLE: user_roles
+ROWS: 1
+COLUMNS:
+  user_id | type=INTEGER | notnull=1 | default=None | pk=1
+  role_id | type=INTEGER | notnull=1 | default=None | pk=2
+FOREIGN_KEYS:
+  role_id -> roles.id | on_update=NO ACTION | on_delete=CASCADE
+  user_id -> users.id | on_update=NO ACTION | on_delete=CASCADE
+INDEXES:
+  (0, 'sqlite_autoindex_user_roles_1', 1, 'pk', 0)
+
+TABLE: user_sessions
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  user_id | type=INTEGER | notnull=1 | default=None | pk=0
+  session_token | type=VARCHAR(255) | notnull=1 | default=None | pk=0
+  login_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+  last_activity_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+  expires_at | type=TEXT | notnull=0 | default=None | pk=0
+  logout_at | type=TEXT | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+FOREIGN_KEYS:
+  user_id -> users.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_user_sessions_1', 1, 'u', 0)
+
+TABLE: users
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  username | type=VARCHAR(100) | notnull=1 | default=None | pk=0
+  password_hash | type=TEXT | notnull=1 | default=None | pk=0
+  full_name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  phone | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+  email | type=VARCHAR(200) | notnull=0 | default=None | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+  is_locked | type=INTEGER | notnull=1 | default=0 | pk=0
+  failed_login_attempts | type=INTEGER | notnull=1 | default=0 | pk=0
+  last_login_at | type=TEXT | notnull=0 | default=None | pk=0
+  password_changed_at | type=TEXT | notnull=0 | default=None | pk=0
+  auto_lock_minutes | type=INTEGER | notnull=1 | default=15 | pk=0
+  created_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+  updated_at | type=TEXT | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+INDEXES:
+  (0, 'idx_users_username', 0, 'c', 0)
+  (1, 'sqlite_autoindex_users_1', 1, 'u', 0)
+
+TABLE: warehouse_aisles
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  zone_id | type=INTEGER | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  code | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  zone_id -> warehouse_zones.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: warehouse_bins
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  shelf_id | type=INTEGER | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  code | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  shelf_id -> warehouse_shelves.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: warehouse_shelves
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  aisle_id | type=INTEGER | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  code | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  aisle_id -> warehouse_aisles.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: warehouse_zones
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  warehouse_id | type=INTEGER | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  code | type=VARCHAR(50) | notnull=0 | default=None | pk=0
+FOREIGN_KEYS:
+  warehouse_id -> warehouses.id | on_update=NO ACTION | on_delete=CASCADE
+
+TABLE: warehouses
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  branch_id | type=INTEGER | notnull=1 | default=None | pk=0
+  name | type=VARCHAR(200) | notnull=1 | default=None | pk=0
+  code | type=VARCHAR(50) | notnull=1 | default=None | pk=0
+  warehouse_type | type=VARCHAR(50) | notnull=0 | default='main' | pk=0
+  is_active | type=INTEGER | notnull=1 | default=1 | pk=0
+FOREIGN_KEYS:
+  branch_id -> branches.id | on_update=NO ACTION | on_delete=NO ACTION
+INDEXES:
+  (0, 'sqlite_autoindex_warehouses_1', 1, 'u', 0)
+
+TABLE: workflow_steps
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  workflow_id | type=INTEGER | notnull=1 | default=None | pk=0
+  step_no | type=INTEGER | notnull=1 | default=None | pk=0
+  step_name | type=TEXT | notnull=1 | default=None | pk=0
+  required_role_id | type=INTEGER | notnull=0 | default=None | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_workflow_steps_1', 1, 'u', 0)
+
+TABLE: workflows
+ROWS: 4
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  code | type=TEXT | notnull=1 | default=None | pk=0
+  name | type=TEXT | notnull=1 | default=None | pk=0
+  entity_type | type=TEXT | notnull=1 | default=None | pk=0
+  is_active | type=INTEGER | notnull=0 | default=1 | pk=0
+INDEXES:
+  (0, 'sqlite_autoindex_workflows_1', 1, 'u', 0)
+
+TABLE: zatca_documents
+ROWS: 0
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  invoice_id | type=INTEGER | notnull=1 | default=None | pk=0
+  document_type | type=TEXT | notnull=0 | default=None | pk=0
+  hash | type=TEXT | notnull=0 | default=None | pk=0
+  previous_hash | type=TEXT | notnull=0 | default=None | pk=0
+  xml_content | type=TEXT | notnull=0 | default=None | pk=0
+  submission_status | type=TEXT | notnull=0 | default='pending' | pk=0
+  response_code | type=TEXT | notnull=0 | default=None | pk=0
+  response_message | type=TEXT | notnull=0 | default=None | pk=0
+  submitted_at | type=TEXT | notnull=0 | default=None | pk=0
+
+TABLE: zatca_settings
+ROWS: 1
+COLUMNS:
+  id | type=INTEGER | notnull=0 | default=None | pk=1
+  environment | type=VARCHAR(30) | notnull=0 | default='SANDBOX' | pk=0
+  compliance_status | type=VARCHAR(30) | notnull=0 | default='NOT_CONFIGURED' | pk=0
+  csr_status | type=VARCHAR(30) | notnull=0 | default='NOT_CONFIGURED' | pk=0
+  reporting_status | type=VARCHAR(30) | notnull=0 | default='NOT_CONFIGURED' | pk=0
+  clearance_status | type=VARCHAR(30) | notnull=0 | default='NOT_CONFIGURED' | pk=0
+
+==========================================================================================
+3. DATABASE SPECIAL OBJECTS
+==========================================================================================
+INDEX: 142
+  idx_accounting_links_event | table=accounting_links
+    SQL: CREATE INDEX idx_accounting_links_event ON accounting_links(event_code)
+  idx_accounts_code | table=chart_of_accounts
+    SQL: CREATE INDEX idx_accounts_code ON chart_of_accounts(code)
+  idx_accounts_parent | table=accounts
+    SQL: CREATE INDEX idx_accounts_parent ON accounts(parent_id)
+  idx_accounts_type | table=accounts
+    SQL: CREATE INDEX idx_accounts_type ON accounts(account_type)
+  idx_audit_created | table=audit_logs
+    SQL: CREATE INDEX idx_audit_created ON audit_logs(created_at)
+  idx_audit_user | table=audit_logs
+    SQL: CREATE INDEX idx_audit_user ON audit_logs(user_id)
+  idx_bank_transactions_account | table=bank_transactions
+    SQL: CREATE INDEX idx_bank_transactions_account ON bank_transactions(bank_account_id)
+  idx_bank_transactions_date | table=bank_transactions
+    SQL: CREATE INDEX idx_bank_transactions_date ON bank_transactions(transaction_date)
+  idx_barcodes_barcode | table=product_barcodes
+    SQL: CREATE INDEX idx_barcodes_barcode ON product_barcodes(barcode)
+  idx_coupon_code | table=coupons
+    SQL: CREATE INDEX idx_coupon_code ON coupons(code)
+  idx_customer_transactions_customer | table=customer_transactions
+    SQL: CREATE INDEX idx_customer_transactions_customer ON customer_transactions(customer_id)
+  idx_customers_name | table=customers
+    SQL: CREATE INDEX idx_customers_name ON customers(name)
+  idx_customers_phone | table=customers
+    SQL: CREATE INDEX idx_customers_phone ON customers(phone)
+  idx_journal_date | table=journal_entries
+    SQL: CREATE INDEX idx_journal_date ON journal_entries(entry_date)
+  idx_journal_lines_account | table=journal_entry_lines
+    SQL: CREATE INDEX idx_journal_lines_account ON journal_entry_lines(account_id)
+  idx_journal_source | table=journal_entries
+    SQL: CREATE INDEX idx_journal_source ON journal_entries(source_type,source_id)
+  idx_login_username | table=login_attempts
+    SQL: CREATE INDEX idx_login_username ON login_attempts(username)
+  idx_loyalty_customer | table=loyalty_accounts
+    SQL: CREATE INDEX idx_loyalty_customer ON loyalty_accounts(customer_id)
+  idx_movements_date | table=stock_movements
+    SQL: CREATE INDEX idx_movements_date ON stock_movements(created_at)
+  idx_movements_product | table=stock_movements
+    SQL: CREATE INDEX idx_movements_product ON stock_movements(product_id)
+  idx_notifications_created | table=notifications
+    SQL: CREATE INDEX idx_notifications_created ON notifications(created_at)
+  idx_notifications_status | table=notifications
+    SQL: CREATE INDEX idx_notifications_status ON notifications(is_read)
+  idx_notifications_user | table=notifications
+    SQL: CREATE INDEX idx_notifications_user ON notifications(user_id,is_read)
+  idx_product_barcodes_barcode | table=product_barcodes
+    SQL: CREATE INDEX idx_product_barcodes_barcode ON product_barcodes(barcode)
+  idx_products_category | table=products
+    SQL: CREATE INDEX idx_products_category ON products(category_id)
+  idx_products_name | table=products
+    SQL: CREATE INDEX idx_products_name ON products(name_ar)
+  idx_products_sku | table=products
+    SQL: CREATE INDEX idx_products_sku ON products(sku)
+  idx_promotions_dates | table=promotions
+    SQL: CREATE INDEX idx_promotions_dates ON promotions(start_date,end_date)
+  idx_purchase_invoices_supplier | table=purchase_invoices
+    SQL: CREATE INDEX idx_purchase_invoices_supplier ON purchase_invoices(supplier_id)
+  idx_purchase_orders_supplier | table=purchase_orders
+    SQL: CREATE INDEX idx_purchase_orders_supplier ON purchase_orders(supplier_id)
+  idx_sale_items_product | table=sale_items
+    SQL: CREATE INDEX idx_sale_items_product ON sale_items(product_id)
+  idx_sales_date | table=sales
+    SQL: CREATE INDEX idx_sales_date ON sales(created_at)
+  idx_sales_invoice | table=sales
+    SQL: CREATE INDEX idx_sales_invoice ON sales(invoice_number)
+  idx_search_text | table=search_index
+    SQL: CREATE INDEX idx_search_text ON search_index(search_text)
+  idx_stock_product | table=stock_balances
+    SQL: CREATE INDEX idx_stock_product ON stock_balances(product_id)
+  idx_suppliers_name | table=suppliers
+    SQL: CREATE INDEX idx_suppliers_name ON suppliers(name)
+  idx_suppliers_phone | table=suppliers
+    SQL: CREATE INDEX idx_suppliers_phone ON suppliers(phone)
+  idx_sync_queue_status | table=sync_queue
+    SQL: CREATE INDEX idx_sync_queue_status ON sync_queue(status)
+  idx_users_username | table=users
+    SQL: CREATE INDEX idx_users_username ON users(username)
+  sqlite_autoindex_account_types_1 | table=account_types
+  sqlite_autoindex_accounting_event_rules_1 | table=accounting_event_rules
+  sqlite_autoindex_accounting_periods_1 | table=accounting_periods
+  sqlite_autoindex_accounts_1 | table=accounts
+  sqlite_autoindex_analytics_metrics_1 | table=analytics_metrics
+  sqlite_autoindex_application_versions_1 | table=application_versions
+  sqlite_autoindex_approval_requests_1 | table=approval_requests
+  sqlite_autoindex_asset_categories_1 | table=asset_categories
+  sqlite_autoindex_asset_depreciation_1 | table=asset_depreciation
+  sqlite_autoindex_assets_1 | table=assets
+  sqlite_autoindex_backup_settings_1 | table=backup_settings
+  sqlite_autoindex_banks_1 | table=banks
+  sqlite_autoindex_branch_sequences_1 | table=branch_sequences
+  sqlite_autoindex_branch_settings_1 | table=branch_settings
+  sqlite_autoindex_branch_users_1 | table=branch_users
+  sqlite_autoindex_branches_1 | table=branches
+  sqlite_autoindex_brands_1 | table=brands
+  sqlite_autoindex_cash_payments_1 | table=cash_payments
+  sqlite_autoindex_cash_receipts_1 | table=cash_receipts
+  sqlite_autoindex_cash_registers_1 | table=cash_registers
+  sqlite_autoindex_chart_of_accounts_1 | table=chart_of_accounts
+  sqlite_autoindex_contract_types_1 | table=contract_types
+  sqlite_autoindex_contracts_1 | table=contracts
+  sqlite_autoindex_cost_centers_1 | table=cost_centers
+  sqlite_autoindex_coupons_1 | table=coupons
+  sqlite_autoindex_currencies_1 | table=currencies
+  sqlite_autoindex_customer_collections_1 | table=customer_collections
+  sqlite_autoindex_customer_groups_1 | table=customer_groups
+  sqlite_autoindex_customers_1 | table=customers
+  sqlite_autoindex_dashboard_widgets_1 | table=dashboard_widgets
+  sqlite_autoindex_departments_1 | table=departments
+  sqlite_autoindex_document_sequences_1 | table=document_sequences
+  sqlite_autoindex_document_versions_1 | table=document_versions
+  sqlite_autoindex_documents_1 | table=documents
+  sqlite_autoindex_e_invoices_1 | table=e_invoices
+  sqlite_autoindex_ecommerce_orders_1 | table=ecommerce_orders
+  sqlite_autoindex_employee_attendance_1 | table=employee_attendance
+  sqlite_autoindex_employees_1 | table=employees
+  sqlite_autoindex_erp_permissions_1 | table=erp_permissions
+  sqlite_autoindex_erp_print_templates_1 | table=erp_print_templates
+  sqlite_autoindex_erp_report_catalog_1 | table=erp_report_catalog
+  sqlite_autoindex_erp_role_permissions_1 | table=erp_role_permissions
+  sqlite_autoindex_erp_roles_1 | table=erp_roles
+  sqlite_autoindex_erp_user_roles_1 | table=erp_user_roles
+  sqlite_autoindex_fiscal_periods_1 | table=fiscal_periods
+  sqlite_autoindex_fiscal_years_1 | table=fiscal_years
+  sqlite_autoindex_goods_receipts_1 | table=goods_receipts
+  sqlite_autoindex_held_sales_1 | table=held_sales
+  sqlite_autoindex_integrations_1 | table=integrations
+  sqlite_autoindex_interbranch_transfers_1 | table=interbranch_transfers
+  sqlite_autoindex_job_positions_1 | table=job_positions
+  sqlite_autoindex_journal_entries_1 | table=journal_entries
+  sqlite_autoindex_loyalty_accounts_1 | table=loyalty_accounts
+  sqlite_autoindex_maintenance_orders_1 | table=maintenance_orders
+  sqlite_autoindex_notification_rules_1 | table=notification_rules
+  sqlite_autoindex_notification_types_1 | table=notification_types
+  sqlite_autoindex_offline_operations_1 | table=offline_operations
+  sqlite_autoindex_payroll_periods_1 | table=payroll_periods
+  sqlite_autoindex_payroll_runs_1 | table=payroll_runs
+  sqlite_autoindex_permissions_1 | table=permissions
+  sqlite_autoindex_posting_batches_1 | table=posting_batches
+  sqlite_autoindex_print_templates_1 | table=print_templates
+  sqlite_autoindex_printing_orders_1 | table=printing_orders
+  sqlite_autoindex_printing_services_1 | table=printing_services
+  sqlite_autoindex_product_barcodes_1 | table=product_barcodes
+  sqlite_autoindex_product_categories_1 | table=product_categories
+  sqlite_autoindex_product_channel_links_1 | table=product_channel_links
+  sqlite_autoindex_product_locations_1 | table=product_locations
+  sqlite_autoindex_product_prices_1 | table=product_prices
+  sqlite_autoindex_product_supplier_links_1 | table=product_supplier_links
+  sqlite_autoindex_product_units_1 | table=product_units
+  sqlite_autoindex_products_1 | table=products
+  sqlite_autoindex_purchase_invoices_1 | table=purchase_invoices
+  sqlite_autoindex_purchase_orders_1 | table=purchase_orders
+  sqlite_autoindex_purchase_requests_1 | table=purchase_requests
+  sqlite_autoindex_purchase_returns_1 | table=purchase_returns
+  sqlite_autoindex_quick_actions_1 | table=quick_actions
+  sqlite_autoindex_report_definitions_1 | table=report_definitions
+  sqlite_autoindex_role_permissions_1 | table=role_permissions
+  sqlite_autoindex_roles_1 | table=roles
+  sqlite_autoindex_salary_components_1 | table=salary_components
+  sqlite_autoindex_sale_returns_1 | table=sale_returns
+  sqlite_autoindex_sales_1 | table=sales
+  sqlite_autoindex_schema_versions_1 | table=schema_versions
+  sqlite_autoindex_security_audit_1 | table=security_audit
+  sqlite_autoindex_stock_1 | table=stock
+  sqlite_autoindex_stock_balances_1 | table=stock_balances
+  sqlite_autoindex_supplier_groups_1 | table=supplier_groups
+  sqlite_autoindex_supplier_products_1 | table=supplier_products
+  sqlite_autoindex_suppliers_1 | table=suppliers
+  sqlite_autoindex_sync_devices_1 | table=sync_devices
+  sqlite_autoindex_system_settings_1 | table=system_settings
+  sqlite_autoindex_system_test_runs_1 | table=system_test_runs
+  sqlite_autoindex_tax_invoices_1 | table=tax_invoices
+  sqlite_autoindex_tax_rates_1 | table=tax_rates
+  sqlite_autoindex_treasury_sequences_1 | table=treasury_sequences
+  sqlite_autoindex_units_1 | table=units
+  sqlite_autoindex_user_roles_1 | table=user_roles
+  sqlite_autoindex_user_sessions_1 | table=user_sessions
+  sqlite_autoindex_users_1 | table=users
+  sqlite_autoindex_warehouses_1 | table=warehouses
+  sqlite_autoindex_workflow_steps_1 | table=workflow_steps
+  sqlite_autoindex_workflows_1 | table=workflows
+TRIGGER: 0
+VIEW: 0
+
+==========================================================================================
+4. IMPORTANT DATA COUNTS
+==========================================================================================
+companies: 2
+branches: 1
+users: 1
+roles: 16
+permissions: 15
+products: 62
+product_barcodes: 32
+product_categories: 32
+brands: 14
+units: 18
+customers: 28
+suppliers: 18
+employees: 7
+departments: 11
+job_positions: 8
+sales: 4
+sale_items: 4
+sale_payments: 4
+sale_returns: 1
+sale_return_items: 0
+purchase_requests: 1
+purchase_orders: 6
+purchase_order_items: 6
+purchase_invoices: 6
+purchase_invoice_items: 3
+purchase_returns: 0
+goods_receipts: 0
+goods_receipt_items: 0
+stock: 62
+stock_balances: 62
+stock_adjustments: 1
+accounts: 21
+chart_of_accounts: 18
+journal_entries: 8
+journal_entry_lines: 31
+cash_registers: 2
+cash_sessions: 1
+cash_transactions: 4
+banks: 1
+bank_accounts: 1
+bank_transactions: 1
+bank_reconciliations: 0
+e_invoices: 1
+e_invoice_lines: 1
+payroll_periods: 1
+payroll_runs: 0
+payroll_items: 0
+assets: 1
+asset_depreciation: 0
+approval_requests: 0
+approval_actions: 0
+workflow_steps: 0
+loyalty_accounts: 28
+loyalty_transactions: 0
+interbranch_transfers: 0
+integrations: 3
+integration_logs: 1
+offline_operations: 1
+notifications: 1
+audit_log: 1
+audit_logs: 1
+
+==========================================================================================
+5. SYSTEM SETTINGS SNAPSHOT
+==========================================================================================
+id=1 | setting_key=system_name | setting_value=نظام القرطاسية | value_type=text | description=اسم النظام | updated_at=2026-09-23T17:35:49.270494
+id=3 | setting_key=direction | setting_value=RTL | value_type=text | description=اتجاه الواجهة | updated_at=2026-09-23T17:35:49.270494
+id=4 | setting_key=country | setting_value=SA | value_type=text | description= | updated_at=2026-09-22 20:37:05
+id=5 | setting_key=base_currency | setting_value=SAR | value_type=text | description= | updated_at=2026-09-22 20:37:05
+id=6 | setting_key=tax_enabled | setting_value=1 | value_type=boolean | description= | updated_at=2026-09-22 20:37:05
+id=7 | setting_key=default_tax_rate | setting_value=15 | value_type=number | description= | updated_at=2026-09-22 20:37:05
+id=9 | setting_key=company_name | setting_value=قرطاسية لؤلؤة الأربعين النموذجية | value_type=text | description=اسم المنشأة | updated_at=2026-09-23T17:35:49.270494
+id=10 | setting_key=default_currency | setting_value=SAR | value_type=text | description=إعداد نظام | updated_at=2026-09-23T00:51:19.943249
+id=11 | setting_key=vat_rate | setting_value=15 | value_type=number | description=نسبة ضريبة القيمة المضافة | updated_at=2026-09-23T17:35:49.270494
+id=12 | setting_key=language | setting_value=العربية | value_type=text | description=لغة النظام | updated_at=2026-09-23T17:35:49.270494
+id=13 | setting_key=rtl | setting_value=true | value_type=boolean | description=إعداد نظام | updated_at=2026-09-23T00:51:19.943249
+id=14 | setting_key=offline_first | setting_value=1 | value_type=boolean | description=التشغيل دون اتصال | updated_at=2026-09-23T17:35:49.270494
+id=15 | setting_key=invoice_prefix | setting_value=INV | value_type=text | description=إعداد نظام | updated_at=2026-09-23T00:51:19.943249
+id=16 | setting_key=purchase_prefix | setting_value=PINV | value_type=text | description=إعداد نظام | updated_at=2026-09-23T00:51:19.943249
+id=17 | setting_key=currency | setting_value=SAR | value_type=text | description=العملة | updated_at=2026-09-23T17:35:49.270494
+id=18 | setting_key=currency_name | setting_value=الريال السعودي | value_type=text | description=اسم العملة | updated_at=2026-09-23T17:35:49.270494
+id=23 | setting_key=currency_code | setting_value=YER | value_type=text | description= | updated_at=2026-09-23T18:42:35
+id=25 | setting_key=timezone | setting_value=Asia/Aden | value_type=text | description= | updated_at=2026-09-23T18:42:35
+id=26 | setting_key=inventory_enabled | setting_value=1 | value_type=text | description= | updated_at=2026-09-23T18:42:35
+id=27 | setting_key=accounting_enabled | setting_value=1 | value_type=text | description= | updated_at=2026-09-23T18:42:35
+id=28 | setting_key=pos_enabled | setting_value=1 | value_type=text | description= | updated_at=2026-09-23T18:42:35
+id=30 | setting_key=automatic_backup | setting_value=1 | value_type=text | description= | updated_at=2026-09-23T18:42:35
+id=31 | setting_key=audit_log_enabled | setting_value=1 | value_type=text | description= | updated_at=2026-09-23T18:42:35
+id=33 | setting_key=multi_branch | setting_value=1 | value_type=text | description= | updated_at=2026-09-23T18:42:35
+id=34 | setting_key=multi_warehouse | setting_value=1 | value_type=text | description= | updated_at=2026-09-23T18:42:35
+
+==========================================================================================
+6. PYTHON CODE INVENTORY
+==========================================================================================
+
+PY: _make_master_audit.py
+  LINES: 518
+  SIZE: 14658
+  HASH: 0d45bb9a53505b90
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+  !!! ENCODING/MOJI WARNING DETECTED !!!
+
+PY: app\__init__.py
+  LINES: 2
+  SIZE: 31
+  HASH: dd88d3187a1560f0
+  SYNTAX: OK
+
+PY: app\analytics\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\core\__init__.py
+  LINES: 2
+  SIZE: 31
+  HASH: dd88d3187a1560f0
+  SYNTAX: OK
+
+PY: app\core\config.py
+  LINES: 15
+  SIZE: 358
+  HASH: f4dd5c2aa52e2927
+  SYNTAX: OK
+  IMPORTS: pathlib:Path
+
+PY: app\core\logging_setup.py
+  LINES: 24
+  SIZE: 605
+  HASH: a1ab1b6397680d44
+  SYNTAX: OK
+  FUNCTIONS: setup_logging
+  IMPORTS: logging, pathlib:Path, app.core.config:LOGS_PATH
+
+PY: app\database\__init__.py
+  LINES: 2
+  SIZE: 31
+  HASH: dd88d3187a1560f0
+  SYNTAX: OK
+
+PY: app\database\connection.py
+  LINES: 48
+  SIZE: 1248
+  HASH: 0d7107e08db37988
+  SYNTAX: OK
+  FUNCTIONS: create_database_engine, get_session, get_session_factory, database_health
+  IMPORTS: sqlalchemy:create_engine,text, sqlalchemy.orm:sessionmaker, app.core.config:DATABASE_PATH
+
+PY: app\database\create_tables.py
+  LINES: 10
+  SIZE: 228
+  HASH: 3d778a661cf04324
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: app\database\inspect_schema.py
+  LINES: 72
+  SIZE: 1767
+  HASH: 536029a0b45f974e
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: app\integrations\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\models\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\models\core.py
+  LINES: 78
+  SIZE: 3047
+  HASH: 871cc66a212798f5
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: app\modules\accounting\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\approvals\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\assets\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\backup\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\banking\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\branches\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\contracts\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\customers\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\dashboard\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\documents\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\hr\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\inventory\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\notifications\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\operations\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\payroll\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\pos\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\purchases\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\reports\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\sales\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\search\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\settings\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\suppliers\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\tax\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\modules\treasury\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\notifications\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\reports\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\repositories\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\security\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\services\__init__.py
+  LINES: 2
+  SIZE: 31
+  HASH: dd88d3187a1560f0
+  SYNTAX: OK
+
+PY: app\services\accounting_service.py
+  LINES: 277
+  SIZE: 8482
+  HASH: f201d43b8dc2e175
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: app\services\dashboard\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\services\dashboard\dashboard_service.py
+  LINES: 51
+  SIZE: 1477
+  HASH: 7f27cd96597a2e7e
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: app\services\dashboard\test_dashboard_service.py
+  LINES: 28
+  SIZE: 555
+  HASH: e00f460604e2661d
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: app\services\erp_engine.py
+  LINES: 708
+  SIZE: 25865
+  HASH: bb61066068490fe9
+  SYNTAX: OK
+  CLASSES: ERPError, ERP
+  FUNCTIONS: __init__, connect, _columns, _exists, _q, _next_number, _insert_dynamic, _product, _stock, _change_stock, _account, _journal, create_product, create_purchase, receive_purchase, create_sale, dashboard, health_check
+  IMPORTS: __future__:annotations, pathlib:Path, datetime:datetime, decimal:Decimal,ROUND_HALF_UP, sqlite3, json, uuid
+
+PY: app\services\erp_service.py
+  LINES: 249
+  SIZE: 5686
+  HASH: 228246b33cc26eef
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: app\services\inventory_service.py
+  LINES: 66
+  SIZE: 2273
+  HASH: 96bfacb6e6d0ce83
+  SYNTAX: OK
+  CLASSES: InventoryService
+  FUNCTIONS: search_products, get_product, available_quantity
+  IMPORTS: sqlalchemy:text, app.database.connection:get_session
+
+PY: app\services\party_service.py
+  LINES: 41
+  SIZE: 1338
+  HASH: 8876b841655dc4e0
+  SYNTAX: OK
+  CLASSES: PartyService
+  FUNCTIONS: customers, suppliers, customer_balance
+  IMPORTS: sqlalchemy:text, app.database.connection:get_session
+
+PY: app\services\pos_search_service.py
+  LINES: 58
+  SIZE: 2111
+  HASH: d22e4c8c5dad3493
+  SYNTAX: OK
+  CLASSES: POSProductSearch
+  FUNCTIONS: __init__, search
+  IMPORTS: sqlite3
+
+PY: app\services\pos_service.py
+  LINES: 486
+  SIZE: 18328
+  HASH: 9670f743c6ed942f
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: app\services\sales_service.py
+  LINES: 144
+  SIZE: 4332
+  HASH: f02a2d0f5357af90
+  SYNTAX: OK
+  CLASSES: SalesService, PurchaseService
+  FUNCTIONS: list_sales, get_sale, list_purchases, get_purchase, supplier_balance
+  IMPORTS: sqlalchemy:text, app.database.connection:get_session
+
+PY: app\services\security_service.py
+  LINES: 69
+  SIZE: 2089
+  HASH: 8bf2394514ec1b31
+  SYNTAX: OK
+  CLASSES: SecurityService
+  FUNCTIONS: __init__, _hash, users, authenticate, has_permission
+  IMPORTS: sqlite3, hashlib, pathlib:Path
+
+PY: app\services\system_service.py
+  LINES: 54
+  SIZE: 1637
+  HASH: 86a6d21e6b7ff48b
+  SYNTAX: OK
+  FUNCTIONS: get_system_summary, get_financial_summary, get_health, count, balance
+  IMPORTS: sqlalchemy:text, app.database.connection:get_session,database_health
+
+PY: app\ui\__init__.py
+  LINES: 2
+  SIZE: 31
+  HASH: dd88d3187a1560f0
+  SYNTAX: OK
+
+PY: app\ui\dashboard\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: app\ui\main_window.py
+  LINES: 188
+  SIZE: 5366
+  HASH: 0d4fc11d4e62c43b
+  SYNTAX: OK
+  CLASSES: MainWindow
+  FUNCTIONS: run, __init__, build_ui
+  IMPORTS: app.ui.pos_window:POSWindow, app.ui.sales_window:SalesWindow, app.ui.purchases_window:PurchasesWindow, app.ui.parties_window:PartiesWindow, PySide6.QtWidgets:QMainWindow,QWidget,QVBoxLayout,QHBoxLayout,QLabel,QPushButton,QFrame,QMessageBox, PySide6.QtCore:Qt, app.core.config:APP_NAME,APP_VERSION, app.services.system_service:get_system_summary,get_financial_summary,get_health, PySide6.QtWidgets:QApplication, sys
+
+PY: app\ui\operations_center.py
+  LINES: 334
+  SIZE: 11325
+  HASH: a5bf1933292c5a69
+  SYNTAX: OK
+  CLASSES: OperationsCenter
+  FUNCTIONS: __init__, query, scalar, build_dashboard, build_products, build_customers, build_suppliers, build_sales, build_purchases, build_stock, build_cash, build_reports, refresh_dashboard, fill, refresh_products, refresh_customers, refresh_suppliers, refresh_sales, refresh_purchases, refresh_stock, refresh_cash, refresh_reports, refresh_all
+  IMPORTS: pathlib:Path, sqlite3, PySide6.QtCore:Qt, PySide6.QtWidgets:QWidget,QVBoxLayout,QHBoxLayout,QLabel,QPushButton,QTableWidget,QTableWidgetItem,QTabWidget,QLineEdit,QMessageBox,QHeaderView
+
+PY: app\ui\parties_window.py
+  LINES: 75
+  SIZE: 2274
+  HASH: 8c0604c9a4b3e9c7
+  SYNTAX: OK
+  CLASSES: PartiesWindow
+  FUNCTIONS: __init__, load
+  IMPORTS: PySide6.QtWidgets:QWidget,QVBoxLayout,QTabWidget,QTableWidget,QTableWidgetItem,QLabel, app.services.party_service:PartyService
+
+PY: app\ui\pos_window.py
+  LINES: 166
+  SIZE: 4549
+  HASH: 4b595cfb613cfb84
+  SYNTAX: OK
+  CLASSES: POSWindow
+  FUNCTIONS: __init__, add_search_result, refresh, complete_sale
+  IMPORTS: PySide6.QtWidgets:QWidget,QVBoxLayout,QHBoxLayout,QLineEdit,QPushButton,QTableWidget,QTableWidgetItem,QLabel,QMessageBox,QHeaderView, PySide6.QtCore:Qt, app.services.inventory_service:InventoryService, app.services.pos_service:POSService
+
+PY: app\ui\purchases_window.py
+  LINES: 93
+  SIZE: 2733
+  HASH: 3261d0831ed0c2c1
+  SYNTAX: OK
+  CLASSES: PurchasesWindow
+  FUNCTIONS: __init__, load, show_details
+  IMPORTS: PySide6.QtWidgets:QWidget,QVBoxLayout,QTableWidget,QTableWidgetItem,QPushButton,QHBoxLayout,QLabel,QMessageBox, app.services.sales_service:PurchaseService
+
+PY: app\ui\sales_window.py
+  LINES: 91
+  SIZE: 2680
+  HASH: 4ee4ac30d97c6ae1
+  SYNTAX: OK
+  CLASSES: SalesWindow
+  FUNCTIONS: __init__, load, show_details
+  IMPORTS: PySide6.QtWidgets:QWidget,QVBoxLayout,QTableWidget,QTableWidgetItem,QPushButton,QHBoxLayout,QLabel,QMessageBox, PySide6.QtCore:Qt, app.services.sales_service:SalesService
+
+PY: app\ui\widgets\__init__.py
+  LINES: 2
+  SIZE: 31
+  HASH: dd88d3187a1560f0
+  SYNTAX: OK
+
+PY: app\utils\__init__.py
+  LINES: 2
+  SIZE: 31
+  HASH: dd88d3187a1560f0
+  SYNTAX: OK
+
+PY: audit_financial_links.py
+  LINES: 49
+  SIZE: 1190
+  HASH: c5dc70d2a12a4ded
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: audit_purchase_seed.py
+  LINES: 36
+  SIZE: 927
+  HASH: 5551ec04c904376d
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: audit_stock_gl_difference.py
+  LINES: 67
+  SIZE: 1758
+  HASH: d9f28850d765001e
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: build_application_core.py
+  LINES: 484
+  SIZE: 13635
+  HASH: c5c0e06a6cf53f9b
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: build_pos_core.py
+  LINES: 479
+  SIZE: 15719
+  HASH: 36c92471a31cfc40
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: build_sales_purchases_core.py
+  LINES: 537
+  SIZE: 16732
+  HASH: bd15d6d71b90a475
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: build_stock_v2.py
+  LINES: 168
+  SIZE: 5642
+  HASH: d71a9d4f3455efbd
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: check_products.py
+  LINES: 7
+  SIZE: 207
+  HASH: d4adb4f08f0b8d11
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: config.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: create_supplier_transactions.py
+  LINES: 81
+  SIZE: 2558
+  HASH: c42919a9dc882359
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: database\database.py
+  LINES: 36
+  SIZE: 969
+  HASH: 9136331fea9b8ea3
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: deep_inventory_audit.py
+  LINES: 49
+  SIZE: 1353
+  HASH: a31ec6744c4930a7
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: enrich_database.py
+  LINES: 284
+  SIZE: 11160
+  HASH: 8c24eb01bb17f6f7
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: enrich_database_v2.py
+  LINES: 108
+  SIZE: 4977
+  HASH: bf55e43cdce27b12
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: fix_duplicate_stock_movements.py
+  LINES: 106
+  SIZE: 3338
+  HASH: ba51314c0cd3a803
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: fix_opening_stock_and_valuation.py
+  LINES: 175
+  SIZE: 5625
+  HASH: 141a96841089385d
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: fix_party_balances.py
+  LINES: 86
+  SIZE: 2447
+  HASH: e5a7b7626915bb27
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: fix_purchase_schema.py
+  LINES: 250
+  SIZE: 7397
+  HASH: 7b454e65388a412a
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: fix_purchase_seed.py
+  LINES: 75
+  SIZE: 2007
+  HASH: 4c4716b02e55829a
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: fix_test_environment.py
+  LINES: 80
+  SIZE: 2725
+  HASH: a8927b8bfc4a7791
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: full_system_audit.py
+  LINES: 378
+  SIZE: 10780
+  HASH: 21c5b94fd0d495ee
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: inspect_accounting_links.py
+  LINES: 39
+  SIZE: 1110
+  HASH: cc035084c542656a
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: inspect_accounting_schema.py
+  LINES: 85
+  SIZE: 1869
+  HASH: 639d6f3299d63698
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: inspect_links.py
+  LINES: 9
+  SIZE: 308
+  HASH: d83103d06a2966ed
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: inspect_opening_accounts.py
+  LINES: 35
+  SIZE: 884
+  HASH: 2e67f6556db7ea80
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: inspect_parties_accounts.py
+  LINES: 24
+  SIZE: 647
+  HASH: af97edf019b40a08
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: inspect_stock_links.py
+  LINES: 13
+  SIZE: 407
+  HASH: d2578761991ec6ad
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: link_customers_v2.py
+  LINES: 40
+  SIZE: 1859
+  HASH: 4a79b8bd3e05c4e1
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: link_suppliers_v2.py
+  LINES: 70
+  SIZE: 2765
+  HASH: 47be5ab7353a0f28
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: link_transactions.py
+  LINES: 76
+  SIZE: 3570
+  HASH: faccf49a45b97832
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: main.py
+  LINES: 11
+  SIZE: 221
+  HASH: 30ce8b59419e2bf3
+  SYNTAX: OK
+  IMPORTS: app.core.logging_setup:setup_logging, app.ui.main_window:run
+
+PY: reconcile_stock_valuation.py
+  LINES: 104
+  SIZE: 3217
+  HASH: 1eb00bdc9910eaae
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\accounting_repair.py
+  LINES: 63
+  SIZE: 2327
+  HASH: e97b696aa76f8736
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\activate_permissions.py
+  LINES: 57
+  SIZE: 1753
+  HASH: a54c21d8e3bd1c92
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\activate_security_layer.py
+  LINES: 136
+  SIZE: 3851
+  HASH: 3b5163175728ebf1
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\add_purchase_engine.py
+  LINES: 46
+  SIZE: 1672
+  HASH: 5781a167d5a80a7e
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\BUILD_COMPLETE_ERP_UI.py
+  LINES: 705
+  SIZE: 21864
+  HASH: 105bd6711df06253
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\build_inventory_sales_stage.py
+  LINES: 490
+  SIZE: 13958
+  HASH: a26780b15632aad0
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\build_operations_center.py
+  LINES: 388
+  SIZE: 12628
+  HASH: 8bdfab2a5704a20e
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\build_products_stage.py
+  LINES: 436
+  SIZE: 12638
+  HASH: dd99acb7ba7aa50d
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\build_purchases_stage.py
+  LINES: 559
+  SIZE: 15579
+  HASH: fe7dde1a84a4d212
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\build_real_pos.py
+  LINES: 314
+  SIZE: 8722
+  HASH: 5314f8e06f98b52f
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\check_database.py
+  LINES: 36
+  SIZE: 773
+  HASH: 84f371875a1b513e
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\comprehensive_auto_repair.py
+  LINES: 339
+  SIZE: 10369
+  HASH: e03457c1895e87e2
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\connect_pos_button.py
+  LINES: 83
+  SIZE: 2691
+  HASH: a6dded01cbdfdf9a
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\connect_pos_ui_search.py
+  LINES: 175
+  SIZE: 5631
+  HASH: 98db3c66ce299a62
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\core_erp_check.py
+  LINES: 31
+  SIZE: 757
+  HASH: 895f373d0fd0369c
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\current_status.py
+  LINES: 36
+  SIZE: 1278
+  HASH: b9831f684173c200
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\database_schema_report.py
+  LINES: 17
+  SIZE: 602
+  HASH: 79a0ebb5f62b0652
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\erp_balance_audit.py
+  LINES: 124
+  SIZE: 3256
+  HASH: 50e1ce04a912bf40
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\extract_tables.py
+  LINES: 119
+  SIZE: 3132
+  HASH: 2c2386c7675a73cd
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\fill_master_data.py
+  LINES: 325
+  SIZE: 11410
+  HASH: 563e98c06fabbdf3
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\fill_master_data_safe.py
+  LINES: 234
+  SIZE: 9135
+  HASH: 11a35ed155a1af72
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\final_login_fix.py
+  LINES: 38
+  SIZE: 1005
+  HASH: eff74913debe4aa7
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\final_operational_seed.py
+  LINES: 221
+  SIZE: 5542
+  HASH: eeaba49718fd4e53
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\final_safe_pos_search.py
+  LINES: 192
+  SIZE: 5605
+  HASH: 63ec7064fa55f923
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\final_security_audit.py
+  LINES: 148
+  SIZE: 3719
+  HASH: 77ae1421823d1159
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\final_ui_check.py
+  LINES: 72
+  SIZE: 1818
+  HASH: 33856e29e826b8bf
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\fix_accounts.py
+  LINES: 71
+  SIZE: 1819
+  HASH: 241d2813a102fc54
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\fix_database_ui.py
+  LINES: 117
+  SIZE: 3854
+  HASH: c2941a9484600387
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\fix_login_imports.py
+  LINES: 36
+  SIZE: 1028
+  HASH: 926630e5ba08176f
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\fix_pos_search_complete.py
+  LINES: 217
+  SIZE: 6922
+  HASH: 37a3ff70d32cb443
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\fix_real_pos_search.py
+  LINES: 261
+  SIZE: 7742
+  HASH: 9d58cba83947bcbf
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\fix_ui_stage1.py
+  LINES: 32
+  SIZE: 981
+  HASH: 3a3bc6db84160781
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\full_database_audit.py
+  LINES: 83
+  SIZE: 3528
+  HASH: e4a2e33e3b3d2cee
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\full_database_seed.py
+  LINES: 817
+  SIZE: 24254
+  HASH: 35dd9a53f93945f9
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\full_erp_schema_audit.py
+  LINES: 130
+  SIZE: 4557
+  HASH: 8aa58edd26db94f0
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\guaranteed_login_fix.py
+  LINES: 49
+  SIZE: 1291
+  HASH: b4dec5f33982c76d
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\inspect_erp_signatures.py
+  LINES: 23
+  SIZE: 456
+  HASH: 8e735e3ebabb28a5
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\inspect_pos_ui.py
+  LINES: 84
+  SIZE: 1789
+  HASH: 37f24749bc98036f
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\integrate_operations_center.py
+  LINES: 86
+  SIZE: 2569
+  HASH: 39af914e79890ef6
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\integrated_store_scenario.py
+  LINES: 281
+  SIZE: 6821
+  HASH: ecec2aef2930807c
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\link_pos_engine_final.py
+  LINES: 80
+  SIZE: 2502
+  HASH: f090903f7cc99c67
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\link_real_pos.py
+  LINES: 104
+  SIZE: 3434
+  HASH: 13f1547f731af5e9
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\master_erp_check.py
+  LINES: 107
+  SIZE: 2988
+  HASH: f4dd63c5237b7cb5
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\MASTER_ERP_FINAL.py
+  LINES: 289
+  SIZE: 8067
+  HASH: 4a8048fa98f8d136
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\master_repair.py
+  LINES: 967
+  SIZE: 31941
+  HASH: 429a8633ce1fd5e4
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\patch_live_dashboard.py
+  LINES: 76
+  SIZE: 3061
+  HASH: 8a6af1acdb2e220a
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\patch_purchase_context.py
+  LINES: 34
+  SIZE: 1114
+  HASH: d370a0a1fe2cbdee
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\patch_purchase_item.py
+  LINES: 25
+  SIZE: 910
+  HASH: 14fdb36ccd1631b5
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\patch_receive_test.py
+  LINES: 20
+  SIZE: 591
+  HASH: 615138ba6f83e1e8
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\patch_safe_seed.py
+  LINES: 7
+  SIZE: 350
+  HASH: 264ffb6ff539ba71
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\populate_complete_operational_data.py
+  LINES: 518
+  SIZE: 21526
+  HASH: 853b3b524d52163b
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\pos_engine_final.py
+  LINES: 62
+  SIZE: 1741
+  HASH: fb518ed6b7d54f7d
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\pos_safe_test.py
+  LINES: 45
+  SIZE: 1255
+  HASH: e146f32e4bfac30c
+  SYNTAX: OK
+
+PY: scripts\pre_run_check.py
+  LINES: 53
+  SIZE: 1072
+  HASH: 403ef012306f3915
+  SYNTAX: OK
+  IMPORTS: pathlib:Path, sqlite3, sys
+
+PY: scripts\prepare_pos.py
+  LINES: 147
+  SIZE: 4870
+  HASH: 9e3b2bb6ada665c3
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\print_reports_repair.py
+  LINES: 72
+  SIZE: 2409
+  HASH: bf1d8c2c0ffd8d92
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\production_readiness.py
+  LINES: 139
+  SIZE: 3921
+  HASH: e7470b277e0b3528
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\real_erp_test.py
+  LINES: 99
+  SIZE: 2646
+  HASH: 2628e30a5cfbb109
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\real_login_integration.py
+  LINES: 118
+  SIZE: 3511
+  HASH: e593079391839424
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\real_transactions_seed.py
+  LINES: 328
+  SIZE: 9790
+  HASH: 607be8173783dd58
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\repair_and_seed_data.py
+  LINES: 296
+  SIZE: 8046
+  HASH: 39e064fe7d83d320
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\repair_inventory_sales_stage.py
+  LINES: 431
+  SIZE: 13399
+  HASH: 6660fe858915b3bb
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\repair_qt_imports.py
+  LINES: 69
+  SIZE: 1936
+  HASH: 4fa044e5185a052c
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\repair_run_function.py
+  LINES: 33
+  SIZE: 599
+  HASH: 7b8aa34fbbc5b077
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\replace_demo_data_arabic.py
+  LINES: 859
+  SIZE: 31552
+  HASH: 5c82fe334f1c734c
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\restore_safe_ui.py
+  LINES: 83
+  SIZE: 1795
+  HASH: d5f78d7c02a097cb
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\robust_pos_ui_patch.py
+  LINES: 241
+  SIZE: 7317
+  HASH: 3c669bb28962a6c7
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\safe_complete_arabic_data.py
+  LINES: 359
+  SIZE: 17473
+  HASH: 570289af1178cb26
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\safe_connect_pos_ui.py
+  LINES: 153
+  SIZE: 4431
+  HASH: ab3eace8b63e06bd
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\safe_operational_seed.py
+  LINES: 257
+  SIZE: 10179
+  HASH: 05a1f4465b2a2c14
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\safe_security_repair.py
+  LINES: 168
+  SIZE: 4601
+  HASH: 8c3291507feb1ba6
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\safe_users_security_repair.py
+  LINES: 186
+  SIZE: 5353
+  HASH: f7753af968833538
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\schema_repair.py
+  LINES: 45
+  SIZE: 1515
+  HASH: ac0425486507019f
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\seed_operational.py
+  LINES: 63
+  SIZE: 2117
+  HASH: e7bda1237ade426c
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_01.py
+  LINES: 480
+  SIZE: 11133
+  HASH: d6b0f8877be8c9f3
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_01_dependency_check.py
+  LINES: 25
+  SIZE: 570
+  HASH: 04262142a8da2883
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_02.py
+  LINES: 208
+  SIZE: 6546
+  HASH: b7d5e10892a09e6d
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_03.py
+  LINES: 151
+  SIZE: 5063
+  HASH: 617124ba2b76222b
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_04.py
+  LINES: 163
+  SIZE: 5380
+  HASH: 7aa187671331e38b
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_05.py
+  LINES: 168
+  SIZE: 5573
+  HASH: 66cc62456d41540c
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_06.py
+  LINES: 135
+  SIZE: 4390
+  HASH: 11423f1df68236fd
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_07.py
+  LINES: 126
+  SIZE: 4076
+  HASH: 43eef84eb19e9166
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_08.py
+  LINES: 219
+  SIZE: 7783
+  HASH: 797524d691103a2e
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_09.py
+  LINES: 100
+  SIZE: 3276
+  HASH: c17a03b8aef5f338
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_10.py
+  LINES: 227
+  SIZE: 7268
+  HASH: 00bda06611c81460
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_11.py
+  LINES: 31
+  SIZE: 2419
+  HASH: ce461db3c0237750
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_12.py
+  LINES: 18
+  SIZE: 1910
+  HASH: f03167670f988c57
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_13.py
+  LINES: 18
+  SIZE: 2095
+  HASH: da1c7197554f9ed3
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_14.py
+  LINES: 15
+  SIZE: 1523
+  HASH: 176e893f6e93bc66
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_15.py
+  LINES: 18
+  SIZE: 2029
+  HASH: 394951cd621e46aa
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_16.py
+  LINES: 17
+  SIZE: 1889
+  HASH: b0edb3a40ded2a05
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_17.py
+  LINES: 17
+  SIZE: 1893
+  HASH: 8e77d10f00feca22
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_18.py
+  LINES: 17
+  SIZE: 1635
+  HASH: 528316d0fc914a17
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_19.py
+  LINES: 17
+  SIZE: 2169
+  HASH: 99c4df78c212ead6
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_20.py
+  LINES: 18
+  SIZE: 2365
+  HASH: d4e5a5186024cfb9
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_21.py
+  LINES: 57
+  SIZE: 2091
+  HASH: 6bf50deed690b257
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_22.py
+  LINES: 48
+  SIZE: 1769
+  HASH: 1d8b8e0fd86d1b75
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_23.py
+  LINES: 56
+  SIZE: 2183
+  HASH: 26c728f63b96f6e3
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_24.py
+  LINES: 41
+  SIZE: 1652
+  HASH: 29f22db5135a3ac3
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_25.py
+  LINES: 50
+  SIZE: 2138
+  HASH: bd3f96c5ec2bc72f
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_26.py
+  LINES: 37
+  SIZE: 1604
+  HASH: a63c9320da48f388
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_27.py
+  LINES: 44
+  SIZE: 1758
+  HASH: 6f67e0b6ca2904a3
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_28.py
+  LINES: 41
+  SIZE: 1920
+  HASH: 9e72e5e513289e46
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_29.py
+  LINES: 34
+  SIZE: 1433
+  HASH: b9ab8b367b60ff7f
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_30.py
+  LINES: 30
+  SIZE: 1473
+  HASH: c9d292e13f7e19a3
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_31.py
+  LINES: 92
+  SIZE: 2663
+  HASH: 6985f93dbeef6462
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_32.py
+  LINES: 55
+  SIZE: 1501
+  HASH: 47c7d741d24304a6
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_33.py
+  LINES: 83
+  SIZE: 2253
+  HASH: c93c798aadb3a3ad
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_34.py
+  LINES: 48
+  SIZE: 1444
+  HASH: bb2fd451b9da0d74
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_accounting_reports.py
+  LINES: 89
+  SIZE: 4145
+  HASH: 1de60bc54ea4d30b
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_customer_accounts.py
+  LINES: 120
+  SIZE: 3631
+  HASH: bbd9387556976b5c
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_print_reports.py
+  LINES: 100
+  SIZE: 3351
+  HASH: 6f0b74f22f1047cc
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_treasury.py
+  LINES: 161
+  SIZE: 5349
+  HASH: febff3b4d9cf7116
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_treasury_repair.py
+  LINES: 123
+  SIZE: 4702
+  HASH: d4cffa50f6312055
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\stage_zatca.py
+  LINES: 124
+  SIZE: 3916
+  HASH: 47fb2da08967f756
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: scripts\users_security_setup.py
+  LINES: 184
+  SIZE: 5006
+  HASH: 420d874128d00b4a
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: seed_database.py
+  LINES: 419
+  SIZE: 18053
+  HASH: e830e4dc9d9909b8
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: seed_transactions.py
+  LINES: 86
+  SIZE: 3532
+  HASH: 17ea030a345b89a4
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: tests\__init__.py
+  LINES: 1
+  SIZE: 0
+  HASH: e3b0c44298fc1c14
+  SYNTAX: OK
+
+PY: tests\database_test.py
+  LINES: 37
+  SIZE: 716
+  HASH: 44be9af75a487a5a
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: tests\manual_pos_rollback_test.py
+  LINES: 141
+  SIZE: 4427
+  HASH: 7f563049d372a639
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: tests\test_pos_accounting.py
+  LINES: 96
+  SIZE: 1988
+  HASH: a651f14a31504b05
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: tests\test_pos_core.py
+  LINES: 16
+  SIZE: 438
+  HASH: 4e287164a63afb5f
+  SYNTAX: OK
+  FUNCTIONS: test_product_search, test_product_exists, test_stock_available
+  IMPORTS: app.services.inventory_service:InventoryService
+
+PY: tests\test_sales_parties.py
+  LINES: 29
+  SIZE: 735
+  HASH: a1b81ae2091ad79a
+  SYNTAX: OK
+  FUNCTIONS: test_sales_list, test_purchase_list, test_customers, test_suppliers, test_existing_sale_details, test_existing_purchase_details
+  IMPORTS: app.services.sales_service:SalesService,PurchaseService, app.services.party_service:PartyService
+
+PY: tests\test_system.py
+  LINES: 25
+  SIZE: 680
+  HASH: 46622b4cb7e14329
+  SYNTAX: OK
+  FUNCTIONS: test_database_health, test_system_summary, test_financial_summary
+  IMPORTS: app.database.connection:database_health, app.services.system_service:get_system_summary,get_financial_summary
+
+PY: update_party_balances.py
+  LINES: 103
+  SIZE: 2984
+  HASH: 0c6762becc3bc6ee
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: verify_accounting_v2.py
+  LINES: 65
+  SIZE: 1302
+  HASH: ecea8542d6e83f86
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: verify_inventory_accounting.py
+  LINES: 80
+  SIZE: 1669
+  HASH: 0c01e3a0444fd5a8
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+PY: verify_stock_cost_layers.py
+  LINES: 62
+  SIZE: 1452
+  HASH: c7aee9b1c869ac50
+  SYNTAX: ERROR line 1: invalid non-printable character U+FEFF
+
+==========================================================================================
+7. INSTALLED PYTHON DEPENDENCIES
+==========================================================================================
+PySide6: 6.11.2
+SQLAlchemy: 2.0.54
+alembic: 1.20.0
+reportlab: 5.0.1
+openpyxl: 3.1.5
+matplotlib: 3.11.2
+bcrypt: 5.0.0
+pydantic: 2.13.5
+pydantic-settings: NOT INSTALLED
+pytest: 9.1.1
+
+==========================================================================================
+8. TEST INVENTORY
+==========================================================================================
+TEST-LIKE FILES: 16
+app\services\dashboard\test_dashboard_service.py | 555 bytes | lines=1
+database\_erp_integration_test.db | 1232896 bytes | lines=1
+database\_erp_test_copy.db | 1425408 bytes | lines=1
+database\pos_test.db | 1425408 bytes | lines=1
+fix_test_environment.py | 2725 bytes | lines=6
+pos_tests_dump.txt | 451 bytes | lines=1
+pytest.ini | 70 bytes | lines=1
+scripts\patch_receive_test.py | 591 bytes | lines=1
+scripts\pos_safe_test.py | 1255 bytes | lines=1
+scripts\real_erp_test.py | 2646 bytes | lines=1
+tests\database_test.py | 716 bytes | lines=1
+tests\manual_pos_rollback_test.py | 4427 bytes | lines=1
+tests\test_pos_accounting.py | 1988 bytes | lines=1
+tests\test_pos_core.py | 438 bytes | lines=1
+tests\test_sales_parties.py | 735 bytes | lines=1
+tests\test_system.py | 680 bytes | lines=1
+
+==========================================================================================
+9. ENTRY POINT / RUN FILES
+==========================================================================================
+FOUND: app\ui\main_window.py
+  HAS __main__ BLOCK: NO
+  HAS run(): YES
+  HAS QApplication: YES
+FOUND: main.py
+  HAS __main__ BLOCK: YES
+  HAS run(): NO
+  HAS QApplication: NO
+
+==========================================================================================
+10. PYTHON SYNTAX CHECK
+==========================================================================================
+ERROR: _make_master_audit.py -> invalid non-printable character U+FEFF (_make_master_audit.py, line 1)
+ERROR: app\database\create_tables.py -> invalid non-printable character U+FEFF (create_tables.py, line 1)
+ERROR: app\database\inspect_schema.py -> invalid non-printable character U+FEFF (inspect_schema.py, line 1)
+ERROR: app\models\core.py -> invalid non-printable character U+FEFF (core.py, line 1)
+ERROR: app\services\accounting_service.py -> invalid non-printable character U+FEFF (accounting_service.py, line 1)
+ERROR: app\services\dashboard\dashboard_service.py -> invalid non-printable character U+FEFF (dashboard_service.py, line 1)
+ERROR: app\services\dashboard\test_dashboard_service.py -> invalid non-printable character U+FEFF (test_dashboard_service.py, line 1)
+ERROR: app\services\erp_service.py -> invalid non-printable character U+FEFF (erp_service.py, line 1)
+ERROR: app\services\pos_service.py -> invalid non-printable character U+FEFF (pos_service.py, line 1)
+ERROR: audit_financial_links.py -> invalid non-printable character U+FEFF (audit_financial_links.py, line 1)
+ERROR: audit_purchase_seed.py -> invalid non-printable character U+FEFF (audit_purchase_seed.py, line 1)
+ERROR: audit_stock_gl_difference.py -> invalid non-printable character U+FEFF (audit_stock_gl_difference.py, line 1)
+ERROR: build_application_core.py -> invalid non-printable character U+FEFF (build_application_core.py, line 1)
+ERROR: build_pos_core.py -> invalid non-printable character U+FEFF (build_pos_core.py, line 1)
+ERROR: build_sales_purchases_core.py -> invalid non-printable character U+FEFF (build_sales_purchases_core.py, line 1)
+ERROR: build_stock_v2.py -> invalid non-printable character U+FEFF (build_stock_v2.py, line 1)
+ERROR: check_products.py -> invalid non-printable character U+FEFF (check_products.py, line 1)
+ERROR: create_supplier_transactions.py -> invalid non-printable character U+FEFF (create_supplier_transactions.py, line 1)
+ERROR: database\database.py -> invalid non-printable character U+FEFF (database.py, line 1)
+ERROR: deep_inventory_audit.py -> invalid non-printable character U+FEFF (deep_inventory_audit.py, line 1)
+ERROR: enrich_database.py -> invalid non-printable character U+FEFF (enrich_database.py, line 1)
+ERROR: enrich_database_v2.py -> invalid non-printable character U+FEFF (enrich_database_v2.py, line 1)
+ERROR: fix_duplicate_stock_movements.py -> invalid non-printable character U+FEFF (fix_duplicate_stock_movements.py, line 1)
+ERROR: fix_opening_stock_and_valuation.py -> invalid non-printable character U+FEFF (fix_opening_stock_and_valuation.py, line 1)
+ERROR: fix_party_balances.py -> invalid non-printable character U+FEFF (fix_party_balances.py, line 1)
+ERROR: fix_purchase_schema.py -> invalid non-printable character U+FEFF (fix_purchase_schema.py, line 1)
+ERROR: fix_purchase_seed.py -> invalid non-printable character U+FEFF (fix_purchase_seed.py, line 1)
+ERROR: fix_test_environment.py -> invalid non-printable character U+FEFF (fix_test_environment.py, line 1)
+ERROR: full_system_audit.py -> invalid non-printable character U+FEFF (full_system_audit.py, line 1)
+ERROR: inspect_accounting_links.py -> invalid non-printable character U+FEFF (inspect_accounting_links.py, line 1)
+ERROR: inspect_accounting_schema.py -> invalid non-printable character U+FEFF (inspect_accounting_schema.py, line 1)
+ERROR: inspect_links.py -> invalid non-printable character U+FEFF (inspect_links.py, line 1)
+ERROR: inspect_opening_accounts.py -> invalid non-printable character U+FEFF (inspect_opening_accounts.py, line 1)
+ERROR: inspect_parties_accounts.py -> invalid non-printable character U+FEFF (inspect_parties_accounts.py, line 1)
+ERROR: inspect_stock_links.py -> invalid non-printable character U+FEFF (inspect_stock_links.py, line 1)
+ERROR: link_customers_v2.py -> invalid non-printable character U+FEFF (link_customers_v2.py, line 1)
+ERROR: link_suppliers_v2.py -> invalid non-printable character U+FEFF (link_suppliers_v2.py, line 1)
+ERROR: link_transactions.py -> invalid non-printable character U+FEFF (link_transactions.py, line 1)
+ERROR: reconcile_stock_valuation.py -> invalid non-printable character U+FEFF (reconcile_stock_valuation.py, line 1)
+ERROR: scripts\accounting_repair.py -> invalid non-printable character U+FEFF (accounting_repair.py, line 1)
+ERROR: scripts\activate_permissions.py -> invalid non-printable character U+FEFF (activate_permissions.py, line 1)
+ERROR: scripts\activate_security_layer.py -> invalid non-printable character U+FEFF (activate_security_layer.py, line 1)
+ERROR: scripts\add_purchase_engine.py -> invalid non-printable character U+FEFF (add_purchase_engine.py, line 1)
+ERROR: scripts\BUILD_COMPLETE_ERP_UI.py -> invalid non-printable character U+FEFF (BUILD_COMPLETE_ERP_UI.py, line 1)
+ERROR: scripts\build_inventory_sales_stage.py -> invalid non-printable character U+FEFF (build_inventory_sales_stage.py, line 1)
+ERROR: scripts\build_operations_center.py -> invalid non-printable character U+FEFF (build_operations_center.py, line 1)
+ERROR: scripts\build_products_stage.py -> invalid non-printable character U+FEFF (build_products_stage.py, line 1)
+ERROR: scripts\build_purchases_stage.py -> invalid non-printable character U+FEFF (build_purchases_stage.py, line 1)
+ERROR: scripts\build_real_pos.py -> invalid non-printable character U+FEFF (build_real_pos.py, line 1)
+ERROR: scripts\check_database.py -> invalid non-printable character U+FEFF (check_database.py, line 1)
+ERROR: scripts\comprehensive_auto_repair.py -> invalid non-printable character U+FEFF (comprehensive_auto_repair.py, line 1)
+ERROR: scripts\connect_pos_button.py -> invalid non-printable character U+FEFF (connect_pos_button.py, line 1)
+ERROR: scripts\connect_pos_ui_search.py -> invalid non-printable character U+FEFF (connect_pos_ui_search.py, line 1)
+ERROR: scripts\core_erp_check.py -> invalid non-printable character U+FEFF (core_erp_check.py, line 1)
+ERROR: scripts\current_status.py -> invalid non-printable character U+FEFF (current_status.py, line 1)
+ERROR: scripts\database_schema_report.py -> invalid non-printable character U+FEFF (database_schema_report.py, line 1)
+ERROR: scripts\erp_balance_audit.py -> invalid non-printable character U+FEFF (erp_balance_audit.py, line 1)
+ERROR: scripts\extract_tables.py -> invalid non-printable character U+FEFF (extract_tables.py, line 1)
+ERROR: scripts\fill_master_data.py -> invalid non-printable character U+FEFF (fill_master_data.py, line 1)
+ERROR: scripts\fill_master_data_safe.py -> invalid non-printable character U+FEFF (fill_master_data_safe.py, line 1)
+ERROR: scripts\final_login_fix.py -> invalid non-printable character U+FEFF (final_login_fix.py, line 1)
+ERROR: scripts\final_operational_seed.py -> invalid non-printable character U+FEFF (final_operational_seed.py, line 1)
+ERROR: scripts\final_safe_pos_search.py -> invalid non-printable character U+FEFF (final_safe_pos_search.py, line 1)
+ERROR: scripts\final_security_audit.py -> invalid non-printable character U+FEFF (final_security_audit.py, line 1)
+ERROR: scripts\final_ui_check.py -> invalid non-printable character U+FEFF (final_ui_check.py, line 1)
+ERROR: scripts\fix_accounts.py -> invalid non-printable character U+FEFF (fix_accounts.py, line 1)
+ERROR: scripts\fix_database_ui.py -> invalid non-printable character U+FEFF (fix_database_ui.py, line 1)
+ERROR: scripts\fix_login_imports.py -> invalid non-printable character U+FEFF (fix_login_imports.py, line 1)
+ERROR: scripts\fix_pos_search_complete.py -> invalid non-printable character U+FEFF (fix_pos_search_complete.py, line 1)
+ERROR: scripts\fix_real_pos_search.py -> invalid non-printable character U+FEFF (fix_real_pos_search.py, line 1)
+ERROR: scripts\fix_ui_stage1.py -> invalid non-printable character U+FEFF (fix_ui_stage1.py, line 1)
+ERROR: scripts\full_database_audit.py -> invalid non-printable character U+FEFF (full_database_audit.py, line 1)
+ERROR: scripts\full_database_seed.py -> invalid non-printable character U+FEFF (full_database_seed.py, line 1)
+ERROR: scripts\full_erp_schema_audit.py -> invalid non-printable character U+FEFF (full_erp_schema_audit.py, line 1)
+ERROR: scripts\guaranteed_login_fix.py -> invalid non-printable character U+FEFF (guaranteed_login_fix.py, line 1)
+ERROR: scripts\inspect_erp_signatures.py -> invalid non-printable character U+FEFF (inspect_erp_signatures.py, line 1)
+ERROR: scripts\inspect_pos_ui.py -> invalid non-printable character U+FEFF (inspect_pos_ui.py, line 1)
+ERROR: scripts\integrate_operations_center.py -> invalid non-printable character U+FEFF (integrate_operations_center.py, line 1)
+ERROR: scripts\integrated_store_scenario.py -> invalid non-printable character U+FEFF (integrated_store_scenario.py, line 1)
+ERROR: scripts\link_pos_engine_final.py -> invalid non-printable character U+FEFF (link_pos_engine_final.py, line 1)
+ERROR: scripts\link_real_pos.py -> invalid non-printable character U+FEFF (link_real_pos.py, line 1)
+ERROR: scripts\master_erp_check.py -> invalid non-printable character U+FEFF (master_erp_check.py, line 1)
+ERROR: scripts\MASTER_ERP_FINAL.py -> invalid non-printable character U+FEFF (MASTER_ERP_FINAL.py, line 1)
+ERROR: scripts\master_repair.py -> invalid non-printable character U+FEFF (master_repair.py, line 1)
+ERROR: scripts\patch_live_dashboard.py -> invalid non-printable character U+FEFF (patch_live_dashboard.py, line 1)
+ERROR: scripts\patch_purchase_context.py -> invalid non-printable character U+FEFF (patch_purchase_context.py, line 1)
+ERROR: scripts\patch_purchase_item.py -> invalid non-printable character U+FEFF (patch_purchase_item.py, line 1)
+ERROR: scripts\patch_receive_test.py -> invalid non-printable character U+FEFF (patch_receive_test.py, line 1)
+ERROR: scripts\patch_safe_seed.py -> invalid non-printable character U+FEFF (patch_safe_seed.py, line 1)
+ERROR: scripts\populate_complete_operational_data.py -> invalid non-printable character U+FEFF (populate_complete_operational_data.py, line 1)
+ERROR: scripts\pos_engine_final.py -> invalid non-printable character U+FEFF (pos_engine_final.py, line 1)
+ERROR: scripts\prepare_pos.py -> invalid non-printable character U+FEFF (prepare_pos.py, line 1)
+ERROR: scripts\print_reports_repair.py -> invalid non-printable character U+FEFF (print_reports_repair.py, line 1)
+ERROR: scripts\production_readiness.py -> invalid non-printable character U+FEFF (production_readiness.py, line 1)
+ERROR: scripts\real_erp_test.py -> invalid non-printable character U+FEFF (real_erp_test.py, line 1)
+ERROR: scripts\real_login_integration.py -> invalid non-printable character U+FEFF (real_login_integration.py, line 1)
+ERROR: scripts\real_transactions_seed.py -> invalid non-printable character U+FEFF (real_transactions_seed.py, line 1)
+ERROR: scripts\repair_and_seed_data.py -> invalid non-printable character U+FEFF (repair_and_seed_data.py, line 1)
+ERROR: scripts\repair_inventory_sales_stage.py -> invalid non-printable character U+FEFF (repair_inventory_sales_stage.py, line 1)
+ERROR: scripts\repair_qt_imports.py -> invalid non-printable character U+FEFF (repair_qt_imports.py, line 1)
+ERROR: scripts\repair_run_function.py -> invalid non-printable character U+FEFF (repair_run_function.py, line 1)
+ERROR: scripts\replace_demo_data_arabic.py -> invalid non-printable character U+FEFF (replace_demo_data_arabic.py, line 1)
+ERROR: scripts\restore_safe_ui.py -> invalid non-printable character U+FEFF (restore_safe_ui.py, line 1)
+ERROR: scripts\robust_pos_ui_patch.py -> invalid non-printable character U+FEFF (robust_pos_ui_patch.py, line 1)
+ERROR: scripts\safe_complete_arabic_data.py -> invalid non-printable character U+FEFF (safe_complete_arabic_data.py, line 1)
+ERROR: scripts\safe_connect_pos_ui.py -> invalid non-printable character U+FEFF (safe_connect_pos_ui.py, line 1)
+ERROR: scripts\safe_operational_seed.py -> invalid non-printable character U+FEFF (safe_operational_seed.py, line 1)
+ERROR: scripts\safe_security_repair.py -> invalid non-printable character U+FEFF (safe_security_repair.py, line 1)
+ERROR: scripts\safe_users_security_repair.py -> invalid non-printable character U+FEFF (safe_users_security_repair.py, line 1)
+ERROR: scripts\schema_repair.py -> invalid non-printable character U+FEFF (schema_repair.py, line 1)
+ERROR: scripts\seed_operational.py -> invalid non-printable character U+FEFF (seed_operational.py, line 1)
+ERROR: scripts\stage_01.py -> invalid non-printable character U+FEFF (stage_01.py, line 1)
+ERROR: scripts\stage_01_dependency_check.py -> invalid non-printable character U+FEFF (stage_01_dependency_check.py, line 1)
+ERROR: scripts\stage_02.py -> invalid non-printable character U+FEFF (stage_02.py, line 1)
+ERROR: scripts\stage_03.py -> invalid non-printable character U+FEFF (stage_03.py, line 1)
+ERROR: scripts\stage_04.py -> invalid non-printable character U+FEFF (stage_04.py, line 1)
+ERROR: scripts\stage_05.py -> invalid non-printable character U+FEFF (stage_05.py, line 1)
+ERROR: scripts\stage_06.py -> invalid non-printable character U+FEFF (stage_06.py, line 1)
+ERROR: scripts\stage_07.py -> invalid non-printable character U+FEFF (stage_07.py, line 1)
+ERROR: scripts\stage_08.py -> invalid non-printable character U+FEFF (stage_08.py, line 1)
+ERROR: scripts\stage_09.py -> invalid non-printable character U+FEFF (stage_09.py, line 1)
+ERROR: scripts\stage_10.py -> invalid non-printable character U+FEFF (stage_10.py, line 1)
+ERROR: scripts\stage_11.py -> invalid non-printable character U+FEFF (stage_11.py, line 1)
+ERROR: scripts\stage_12.py -> invalid non-printable character U+FEFF (stage_12.py, line 1)
+ERROR: scripts\stage_13.py -> invalid non-printable character U+FEFF (stage_13.py, line 1)
+ERROR: scripts\stage_14.py -> invalid non-printable character U+FEFF (stage_14.py, line 1)
+ERROR: scripts\stage_15.py -> invalid non-printable character U+FEFF (stage_15.py, line 1)
+ERROR: scripts\stage_16.py -> invalid non-printable character U+FEFF (stage_16.py, line 1)
+ERROR: scripts\stage_17.py -> invalid non-printable character U+FEFF (stage_17.py, line 1)
+ERROR: scripts\stage_18.py -> invalid non-printable character U+FEFF (stage_18.py, line 1)
+ERROR: scripts\stage_19.py -> invalid non-printable character U+FEFF (stage_19.py, line 1)
+ERROR: scripts\stage_20.py -> invalid non-printable character U+FEFF (stage_20.py, line 1)
+ERROR: scripts\stage_21.py -> invalid non-printable character U+FEFF (stage_21.py, line 1)
+ERROR: scripts\stage_22.py -> invalid non-printable character U+FEFF (stage_22.py, line 1)
+ERROR: scripts\stage_23.py -> invalid non-printable character U+FEFF (stage_23.py, line 1)
+ERROR: scripts\stage_24.py -> invalid non-printable character U+FEFF (stage_24.py, line 1)
+ERROR: scripts\stage_25.py -> invalid non-printable character U+FEFF (stage_25.py, line 1)
+ERROR: scripts\stage_26.py -> invalid non-printable character U+FEFF (stage_26.py, line 1)
+ERROR: scripts\stage_27.py -> invalid non-printable character U+FEFF (stage_27.py, line 1)
+ERROR: scripts\stage_28.py -> invalid non-printable character U+FEFF (stage_28.py, line 1)
+ERROR: scripts\stage_29.py -> invalid non-printable character U+FEFF (stage_29.py, line 1)
+ERROR: scripts\stage_30.py -> invalid non-printable character U+FEFF (stage_30.py, line 1)
+ERROR: scripts\stage_31.py -> invalid non-printable character U+FEFF (stage_31.py, line 1)
+ERROR: scripts\stage_32.py -> invalid non-printable character U+FEFF (stage_32.py, line 1)
+ERROR: scripts\stage_33.py -> invalid non-printable character U+FEFF (stage_33.py, line 1)
+ERROR: scripts\stage_34.py -> invalid non-printable character U+FEFF (stage_34.py, line 1)
+ERROR: scripts\stage_accounting_reports.py -> invalid non-printable character U+FEFF (stage_accounting_reports.py, line 1)
+ERROR: scripts\stage_customer_accounts.py -> invalid non-printable character U+FEFF (stage_customer_accounts.py, line 1)
+ERROR: scripts\stage_print_reports.py -> invalid non-printable character U+FEFF (stage_print_reports.py, line 1)
+ERROR: scripts\stage_treasury.py -> invalid non-printable character U+FEFF (stage_treasury.py, line 1)
+ERROR: scripts\stage_treasury_repair.py -> invalid non-printable character U+FEFF (stage_treasury_repair.py, line 1)
+ERROR: scripts\stage_zatca.py -> invalid non-printable character U+FEFF (stage_zatca.py, line 1)
+ERROR: scripts\users_security_setup.py -> invalid non-printable character U+FEFF (users_security_setup.py, line 1)
+ERROR: seed_database.py -> invalid non-printable character U+FEFF (seed_database.py, line 1)
+ERROR: seed_transactions.py -> invalid non-printable character U+FEFF (seed_transactions.py, line 1)
+ERROR: tests\database_test.py -> invalid non-printable character U+FEFF (database_test.py, line 1)
+ERROR: tests\manual_pos_rollback_test.py -> invalid non-printable character U+FEFF (manual_pos_rollback_test.py, line 1)
+ERROR: tests\test_pos_accounting.py -> invalid non-printable character U+FEFF (test_pos_accounting.py, line 1)
+ERROR: update_party_balances.py -> invalid non-printable character U+FEFF (update_party_balances.py, line 1)
+ERROR: verify_accounting_v2.py -> invalid non-printable character U+FEFF (verify_accounting_v2.py, line 1)
+ERROR: verify_inventory_accounting.py -> invalid non-printable character U+FEFF (verify_inventory_accounting.py, line 1)
+ERROR: verify_stock_cost_layers.py -> invalid non-printable character U+FEFF (verify_stock_cost_layers.py, line 1)
+SYNTAX ERRORS: 162
+
+==========================================================================================
+11. PACKAGE STRUCTURE
+==========================================================================================
+app: EXISTS
+  FILES: 101
+app\ui: EXISTS
+  FILES: 16
+app\services: EXISTS
+  FILES: 29
+app\models: EXISTS
+  FILES: 4
+app\database: EXISTS
+  FILES: 7
+scripts: EXISTS
+  FILES: 179
+tests: EXISTS
+  FILES: 15
+reports: EXISTS
+  FILES: 5
+
+==========================================================================================
+12. AUDIT SUMMARY
+==========================================================================================
+This file is intended as the master technical snapshot.
+Do NOT perform broad repairs from assumptions.
+Review order:
+1. Runtime/entry point
+2. Encoding and Arabic UI
+3. Database architecture and duplicates
+4. Services/business logic
+5. Accounting integrity
+6. Inventory/POS
+7. Purchases/sales
+8. HR/payroll
+9. ZATCA/e-invoicing
+10. Reports
+11. Security/permissions
+12. Backup/restore/offline/sync
+13. Automated tests
+14. Final UI and packaging
+
+END OF MASTER AUDIT

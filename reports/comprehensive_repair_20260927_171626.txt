@@ -1,0 +1,38 @@
+======================================================================
+الإصلاح الشامل الآمن — نظام القرطاسية
+======================================================================
+TABLE OK/CREATED: workflow_steps
+TABLE OK/CREATED: payroll_periods
+TABLE OK/CREATED: payroll_runs
+TABLE OK/CREATED: bank_reconciliations
+TABLE OK/CREATED: loyalty_transactions
+TABLE OK/CREATED: asset_depreciation
+TABLE OK/CREATED: interbranch_transfers
+TABLE OK/CREATED: integration_logs
+COLUMN EXISTS: products.name_en
+COLUMN EXISTS: products.description
+COLUMN EXISTS: products.reorder_point
+COLUMN EXISTS: products.min_stock
+COLUMN EXISTS: products.max_stock
+COLUMN EXISTS: customers.credit_limit
+COLUMN EXISTS: customers.opening_balance
+COLUMN EXISTS: customers.current_balance
+COLUMN EXISTS: sales.paid_amount
+COLUMN EXISTS: sales.due_amount
+COLUMN EXISTS: sales.discount_amount
+COLUMN EXISTS: purchase_invoices.paid_amount
+COLUMN EXISTS: purchase_invoices.due_amount
+TABLE OK/CREATED: product_barcodes
+UNITS EXIST: 18
+CATEGORIES: 32
+PRODUCTS: 62 | PRODUCTS WITH BARCODE: 32
+BARCODE POLICY: no synthetic commercial barcodes generated
+STOCK: 62
+STOCK_BALANCES: 62
+ACCOUNTING DEBIT: 1229.8
+ACCOUNTING CREDIT: 1229.8
+ACCOUNTING: BALANCED
+INTEGRITY: ok
+FOREIGN_KEYS: []
+DATABASE STATUS: SAFE
+TABLE COUNT: 180

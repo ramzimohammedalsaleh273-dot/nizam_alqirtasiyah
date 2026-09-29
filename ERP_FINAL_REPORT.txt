@@ -1,0 +1,127 @@
+
+==========================================================================================
+1) DATABASE INTEGRITY
+==========================================================================================
+INTEGRITY: ok
+FOREIGN KEY ERRORS: 0
+
+==========================================================================================
+2) TABLE COUNTS
+==========================================================================================
+companies                        1
+branches                         1
+warehouses                       1
+product_categories               6
+brands                           5
+units                            5
+products                         11
+customers                        8
+suppliers                        6
+accounts                         10
+users                            1
+tax_rates                        1
+purchase_requests                1
+purchase_orders                  4
+purchase_order_items             4
+purchase_invoices                2
+purchase_invoice_items           2
+stock_movements                  6
+sales                            3
+sale_items                       3
+sale_payments                    3
+sale_returns                     1
+cash_registers                   1
+cash_sessions                    0
+cash_transactions                3
+banks                            1
+bank_accounts                    1
+bank_transactions                0
+journal_entries                  5
+journal_entry_lines              21
+tax_invoices                     1
+notifications                    1
+sync_devices                     0
+sync_queue                       1
+integrations                     3
+ecommerce_orders                 1
+branch_settings                  1
+branch_sequences                 1
+workflows                        4
+approval_requests                0
+backup_jobs                      1
+restore_jobs                     1
+application_versions             1
+update_packages                  1
+rollback_points                  1
+search_index                     0
+quick_actions                    5
+operation_center_tasks           1
+
+==========================================================================================
+3) ACCOUNTING
+==========================================================================================
+JOURNAL ENTRIES: 5
+JOURNAL LINES: 21
+TOTAL DEBIT: 755.7
+TOTAL CREDIT: 755.7
+UNBALANCED JOURNALS: 0
+
+==========================================================================================
+4) VAT
+==========================================================================================
+('1410', 'ضريبة القيمة المضافة - مدخلات')
+('2200', 'ضريبة القيمة المضافة - مخرجات')
+
+==========================================================================================
+5) STOCK
+==========================================================================================
+PRODUCTS: 11
+STOCK MOVEMENTS: 6
+NEGATIVE STOCK PRODUCTS: 0
+
+==========================================================================================
+6) BUSINESS FLOWS
+==========================================================================================
+PURCHASE ORDERS: 4
+PURCHASE INVOICES: 2
+SALES: 3
+SALE ITEMS: 3
+SALE PAYMENTS: 3
+CASH TRANSACTIONS: 3
+TAX INVOICES: 1
+
+==========================================================================================
+7) ERP ENGINE
+==========================================================================================
+HEALTH CHECK:
+{'database': 'OK', 'integrity': True, 'foreign_keys': True, 'dashboard': {'المنتجات': 11, 'العملاء': 8, 'الموردون': 6, 'المبيعات': 3, 'المشتريات': 4, 'حركات المخزون': 6, 'القيود المحاسبية': 5}}
+DASHBOARD:
+{'المنتجات': 11, 'العملاء': 8, 'الموردون': 6, 'المبيعات': 3, 'المشتريات': 4, 'حركات المخزون': 6, 'القيود المحاسبية': 5}
+
+==========================================================================================
+8) CORE SYSTEM CHECK
+==========================================================================================
+======================================================================
+CORE ERP REPAIR CHECK
+======================================================================
+DATABASE: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah\database\nizam_alqirtasiyah.db
+STATUS: OK
+MISSING TABLES: []
+TABLES: 154
+DATABASE CONNECTION: PASSED
+ERP SERVICE: PASSED
+UI SERVICE IMPORT: PASSED
+STATUS: SUCCESS
+======================================================================
+
+
+==========================================================================================
+FINAL RESULT
+==========================================================================================
+DATABASE: HEALTHY
+ACCOUNTING: BALANCED
+STOCK: VALID
+FOREIGN KEYS: VALID
+ERP ENGINE: AVAILABLE
+STATUS: SUCCESS
+BACKUP: C:\Users\Ramzi Al Saleh\Desktop\Nizam_AlQirtasiyah\backups\FINAL_MASTER_BACKUP_20260923_010803.db

@@ -1,0 +1,15 @@
+
+from app.services.inventory_service import InventoryService
+
+def test_product_search():
+    products=InventoryService.search_products("دفتر")
+    assert isinstance(products,list)
+
+def test_product_exists():
+    product=InventoryService.get_product(1)
+    assert product is not None
+    assert product["id"]==1
+
+def test_stock_available():
+    quantity=InventoryService.available_quantity(1,1)
+    assert quantity >= 0
