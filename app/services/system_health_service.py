@@ -135,6 +135,85 @@ class SystemHealthService:
                         "أعمدة حالة القيد أو ربط سطور القيد غير مكتملة"
                     ))
 
+            # فحوصات اتساق المستندات التشغيلية.
+            for table, column, label in (
+                ("sales", "invoice_number", "أرقام فواتير المبيعات"),
+                ("purchase_invoices", "invoice_number", "أرقام فواتير المشتريات"),
+                ("journal_entries", "entry_number", "أرقام القيود"),
+            ):
+                if table in tables:
+                    cols = cls._columns(s, table)
+                    if column in cols:
+                        duplicates = s.execute(text(f"""
+                            SELECT COUNT(*) FROM (
+                                SELECT "{column}"
+                                FROM "{table}"
+                                WHERE "{column}" IS NOT NULL
+                                  AND TRIM(CAST("{column}" AS TEXT)) <> ''
+                                GROUP BY "{column}"
+                                HAVING COUNT(*) > 1
+                            )
+                        """)).scalar() or 0
+                        checks.append((
+                            f"عدم تكرار {label}",
+                            int(duplicates) == 0,
+                            f"مجموعات مكررة: {duplicates}"
+                        ))
+
+            # فحص عناصر المبيعات التي تشير إلى منتجات غير موجودة.
+            if "sale_items" in tables and "products" in tables:
+                item_cols = cls._columns(s, "sale_items")
+                if "product_id" in item_cols:
+                    orphan_sales = s.execute(text("""
+                        SELECT COUNT(*)
+                        FROM sale_items si
+                        LEFT JOIN products p ON p.id=si.product_id
+                        WHERE p.id IS NULL
+                    """)).scalar() or 0
+                    checks.append((
+                        "سلامة ربط أصناف المبيعات",
+                        int(orphan_sales) == 0,
+                        f"عناصر بلا منتج: {orphan_sales}"
+                    ))
+
+            if "stock" in tables and "products" in tables:
+                stock_cols = cls._columns(s, "stock")
+                if "product_id" in stock_cols:
+                    orphan_stock = s.execute(text("""
+                        SELECT COUNT(*)
+                        FROM stock st
+                        LEFT JOIN products p ON p.id=st.product_id
+                        WHERE p.id IS NULL
+                    """)).scalar() or 0
+                    checks.append((
+                        "سلامة ربط المخزون",
+                        int(orphan_stock) == 0,
+                        f"سجلات مخزون بلا منتج: {orphan_stock}"
+                    ))
+
+            # فحص اتساق إجماليات المبيعات عند توفر الأعمدة.
+            if "sales" in tables and "sale_items" in tables:
+                sales_cols = cls._columns(s, "sales")
+                item_cols = cls._columns(s, "sale_items")
+                if {"id", "subtotal"} <= sales_cols and {"sale_id", "line_total"} <= item_cols:
+                    mismatch = s.execute(text("""
+                        SELECT COUNT(*)
+                        FROM sales sa
+                        WHERE ABS(
+                            COALESCE(sa.subtotal,0) -
+                            COALESCE((
+                                SELECT SUM(COALESCE(si.line_total,0))
+                                FROM sale_items si
+                                WHERE si.sale_id=sa.id
+                            ),0)
+                        ) > 0.02
+                    """)).scalar() or 0
+                    checks.append((
+                        "اتساق إجماليات المبيعات",
+                        int(mismatch) == 0,
+                        f"فواتير مختلفة عن مجموع السطور: {mismatch}"
+                    ))
+
             # فحص أنظمة مكررة معروفة من مراحل البناء؛ لا يفشل النظام بسبب وجودها،
             # لكنه يجعلها مرئية حتى تُدمج تدريجيًا.
             duplicate_groups = (
