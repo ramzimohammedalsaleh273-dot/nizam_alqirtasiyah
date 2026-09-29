@@ -17,7 +17,7 @@ class BackupService:
         target_dir = Path(destination_dir) if destination_dir else PROJECT_ROOT / "backups"
         target_dir.mkdir(parents=True, exist_ok=True)
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         target = target_dir / f"nizam_alqirtasiyah_{timestamp}.db"
 
         source_con = sqlite3.connect(source)
