@@ -14,6 +14,7 @@ from app.ui.sales_window import SalesWindow
 from app.ui.purchases_window import PurchasesWindow
 from app.ui.parties_window import PartiesWindow
 from app.ui.inventory_window import InventoryWindow
+from app.ui.reports_window import ReportsWindow
 
 
 class MainWindow(QMainWindow):
@@ -76,7 +77,7 @@ class MainWindow(QMainWindow):
             ("العملاء والموردون", self.open_parties),
             ("الخزينة والبنوك", self.not_ready),
             ("المحاسبة", self.not_ready),
-            ("التقارير", self.not_ready),
+            ("التقارير", self.open_reports),
             ("الموظفون", self.not_ready),
             ("الإعدادات", self.not_ready),
         ]
@@ -203,6 +204,9 @@ class MainWindow(QMainWindow):
 
     def open_parties(self):
         self.open_window("parties", PartiesWindow)
+
+    def open_reports(self):
+        self.open_window("reports", ReportsWindow)
 
     def not_ready(self):
         button = self.sender()
