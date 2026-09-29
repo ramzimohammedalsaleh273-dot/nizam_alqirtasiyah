@@ -29,6 +29,32 @@ class PurchaseReturnService:
 
         with get_session() as s:
             try:
+                s.execute(text("""
+                    CREATE TABLE IF NOT EXISTS purchase_returns (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        purchase_id INTEGER NOT NULL,
+                        supplier_id INTEGER NULL,
+                        warehouse_id INTEGER NULL,
+                        return_number VARCHAR(100) NOT NULL UNIQUE,
+                        subtotal NUMERIC NOT NULL DEFAULT 0,
+                        tax_amount NUMERIC NOT NULL DEFAULT 0,
+                        total_amount NUMERIC NOT NULL DEFAULT 0,
+                        refund_method VARCHAR(30) NOT NULL DEFAULT 'credit',
+                        status VARCHAR(30) NOT NULL DEFAULT 'POSTED',
+                        reason TEXT NULL,
+                        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    )
+                """))
+                s.execute(text("""
+                    CREATE TABLE IF NOT EXISTS purchase_return_items (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        return_id INTEGER NOT NULL,
+                        product_id INTEGER NOT NULL,
+                        quantity NUMERIC NOT NULL,
+                        unit_cost NUMERIC NOT NULL DEFAULT 0,
+                        line_total NUMERIC NOT NULL DEFAULT 0
+                    )
+                """))
                 invoice = s.execute(text(
                     "SELECT * FROM purchase_invoices WHERE id=:id LIMIT 1"
                 ), {"id": purchase_id}).fetchone()
