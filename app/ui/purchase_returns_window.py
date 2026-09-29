@@ -34,16 +34,18 @@ class PurchaseReturnsWindow(QWidget):
 
     def load(self):
         with get_session() as s:
-            rows = s.execute(text("""
+            cols = {r[1] for r in s.execute(text("PRAGMA table_info(purchase_invoice_items)")).fetchall()}
+            fk = "invoice_id" if "invoice_id" in cols else ("purchase_invoice_id" if "purchase_invoice_id" in cols else None)
+            if not fk:
+                raise ValueError("جدول بنود المشتريات لا يحتوي مفتاح الفاتورة")
+            rows = s.execute(text(f"""
                 SELECT pi.id, COALESCE(pi.invoice_number, pi.id) AS invoice_number,
                        pi.supplier_id, pi.created_at, pii.product_id,
                        pii.quantity, pii.unit_cost
                 FROM purchase_invoices pi
-                JOIN purchase_invoice_items pii
-                  ON pii.invoice_id = pi.id
-                ORDER BY pi.id DESC, pii.id DESC
-                LIMIT 300
-            """)).fetchall()
+                JOIN purchase_invoice_items pii ON pii.{fk} = pi.id
+                ORDER BY pi.id DESC, pii.id DESC LIMIT 300
+            """ )).fetchall()
         self.table.setRowCount(0)
         for row in rows:
             i = self.table.rowCount()
