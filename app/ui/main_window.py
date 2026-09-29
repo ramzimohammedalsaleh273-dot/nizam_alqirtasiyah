@@ -18,6 +18,7 @@ from app.ui.reports_window import ReportsWindow
 from app.services.backup_service import BackupService
 from app.ui.administration_windows import accounting_window, treasury_window, employees_window, settings_window
 from app.ui.health_window import HealthWindow
+from app.ui.backup_window import BackupWindow
 
 
 class MainWindow(QMainWindow):
@@ -95,7 +96,7 @@ class MainWindow(QMainWindow):
         side_layout.addWidget(health_button)
 
         backup = QPushButton("إنشاء نسخة احتياطية")
-        backup.clicked.connect(self.create_backup)
+        backup.clicked.connect(self.open_backup)
         side_layout.addWidget(backup)
 
         side_layout.addStretch()
@@ -230,6 +231,9 @@ class MainWindow(QMainWindow):
 
     def open_settings(self):
         self.open_window("settings", settings_window)
+
+    def open_backup(self):
+        self.open_window("backup", BackupWindow)
 
     def open_health(self):
         self.open_window("health", HealthWindow)
