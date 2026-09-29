@@ -22,6 +22,7 @@ from app.ui.backup_window import BackupWindow
 from app.ui.enterprise_tools_window import EnterpriseToolsWindow
 from app.ui.purchase_workflow_window import PurchaseWorkflowWindow
 from app.ui.purchase_returns_window import PurchaseReturnsWindow
+from app.ui.sales_returns_window import SalesReturnsWindow
 
 
 class MainWindow(QMainWindow):
@@ -80,6 +81,7 @@ class MainWindow(QMainWindow):
             ("نقطة البيع", self.open_pos),
             ("المنتجات والمخزون", self.open_inventory),
             ("المبيعات", self.open_sales),
+            ("مرتجعات المبيعات", self.open_sales_returns),
             ("المشتريات", self.open_purchases),
             ("دورة المشتريات", self.open_purchase_workflow),
             ("مرتجعات المشتريات", self.open_purchase_returns),
@@ -217,6 +219,9 @@ class MainWindow(QMainWindow):
 
     def open_sales(self):
         self.open_window("sales", SalesWindow)
+
+    def open_sales_returns(self):
+        self.open_window("sales_returns", SalesReturnsWindow)
 
     def open_purchases(self):
         self.open_window("purchases", PurchasesWindow)
