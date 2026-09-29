@@ -4,6 +4,7 @@ from sqlalchemy import text
 from app.database.connection import get_session
 from app.services.accounting_service import AccountingService
 from app.services.audit_service import AuditService
+from app.services.document_number_service import DocumentNumberService
 
 
 class POSService:
@@ -216,18 +217,12 @@ class POSService:
                 # ====================================================
                 # رقم فاتورة آمن
                 # ====================================================
-                year = datetime.now().year
-                max_number = 0
-                existing_numbers = s.execute(
-                    text("SELECT invoice_number FROM sales WHERE invoice_number LIKE :prefix"),
-                    {"prefix": f"INV-{year}-%"}
-                ).fetchall()
-                for row in existing_numbers:
-                    value = str(row[0] or "")
-                    suffix = value.rsplit("-", 1)[-1]
-                    if suffix.isdigit():
-                        max_number = max(max_number, int(suffix))
-                invoice = f"INV-{year}-{max_number + 1:06d}"
+                invoice = DocumentNumberService.next_number(
+                    s,
+                    document_type="SALE",
+                    prefix="INV",
+                    width=6,
+                )
 
                 # ====================================================
                 # إنشاء الفاتورة
