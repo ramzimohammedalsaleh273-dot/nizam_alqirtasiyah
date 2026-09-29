@@ -9,7 +9,7 @@ class BackupService:
     """نسخ احتياطي آمن لقاعدة SQLite مع التحقق من سلامة النسخة."""
 
     @staticmethod
-    def create_backup(destination_dir="backups"):
+    def create_backup(destination_dir=None):
         source = Path(DATABASE_PATH)
         if not source.exists():
             raise FileNotFoundError(f"قاعدة البيانات غير موجودة: {source}")
