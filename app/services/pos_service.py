@@ -1,4 +1,5 @@
 ﻿from decimal import Decimal, ROUND_HALF_UP
+from datetime import datetime
 from sqlalchemy import text
 from app.database.connection import get_session
 from app.services.accounting_service import AccountingService
@@ -34,19 +35,16 @@ class POSService:
         cashier_id=None,
         reference_number=None,
         notes=None,
+        payments=None,
     ):
         if not items:
             raise ValueError("لا توجد أصناف في الفاتورة")
 
         if payment_method not in cls.PAYMENT_METHODS:
-            raise ValueError(
-                f"طريقة الدفع غير مدعومة: {payment_method}"
-            )
+            raise ValueError(f"طريقة الدفع غير مدعومة: {payment_method}")
 
-        if payment_method == "credit" and not customer_id:
-            raise ValueError(
-                "البيع الآجل يحتاج إلى عميل مسجل"
-            )
+        if payment_method == "credit" and not customer_id and not payments:
+            raise ValueError("البيع الآجل يحتاج إلى عميل مسجل")
 
         with get_session() as s:
             try:
@@ -166,21 +164,69 @@ class POSService:
                     subtotal + tax
                 )
 
-                if payment_method == "credit":
+                # الدفع الأحادي القديم ما زال مدعومًا، لكن يمكن الآن تمرير
+                # قائمة دفعات مختلطة من أكثر من طريقة.
+                normalized_payments = []
+                if payments is not None:
+                    if not isinstance(payments, (list, tuple)) or not payments:
+                        raise ValueError("قائمة الدفعات غير صحيحة")
+                    for payment in payments:
+                        method = str(payment.get("method", "")).strip()
+                        amount = cls.money(payment.get("amount", 0))
+                        if method not in cls.PAYMENT_METHODS:
+                            raise ValueError(f"طريقة الدفع غير مدعومة: {method}")
+                        if amount <= 0:
+                            raise ValueError("مبلغ الدفعة يجب أن يكون أكبر من صفر")
+                        if method == "credit" and not customer_id:
+                            raise ValueError("الجزء الآجل من البيع يحتاج إلى عميل مسجل")
+                        normalized_payments.append({
+                            "method": method,
+                            "amount": amount,
+                            "reference_number": payment.get("reference_number"),
+                            "notes": payment.get("notes"),
+                        })
+                    paid = cls.money(sum(
+                        (x["amount"] for x in normalized_payments if x["method"] != "credit"),
+                        Decimal("0")
+                    ))
+                    due = cls.money(sum(
+                        (x["amount"] for x in normalized_payments if x["method"] == "credit"),
+                        Decimal("0")
+                    ))
+                    if cls.money(paid + due) != total:
+                        raise ValueError(
+                            f"مجموع الدفعات يجب أن يساوي إجمالي الفاتورة: {total}"
+                        )
+                    if due > 0 and not customer_id:
+                        raise ValueError("البيع الآجل يحتاج إلى عميل مسجل")
+                elif payment_method == "credit":
                     paid = Decimal("0")
                     due = total
+                    normalized_payments = [{"method": "credit", "amount": total,
+                                            "reference_number": reference_number,
+                                            "notes": "بيع آجل"}]
                 else:
                     paid = total
                     due = Decimal("0")
+                    normalized_payments = [{"method": payment_method, "amount": total,
+                                            "reference_number": reference_number,
+                                            "notes": "دفع فاتورة نقطة بيع"}]
 
                 # ====================================================
                 # رقم فاتورة آمن
                 # ====================================================
-                max_id = s.execute(
-                    text("SELECT COALESCE(MAX(id),0) FROM sales")
-                ).scalar()
-
-                invoice = f"INV-2026-{int(max_id)+1:06d}"
+                year = datetime.now().year
+                max_number = 0
+                existing_numbers = s.execute(
+                    text("SELECT invoice_number FROM sales WHERE invoice_number LIKE :prefix"),
+                    {"prefix": f"INV-{year}-%"}
+                ).fetchall()
+                for row in existing_numbers:
+                    value = str(row[0] or "")
+                    suffix = value.rsplit("-", 1)[-1]
+                    if suffix.isdigit():
+                        max_number = max(max_number, int(suffix))
+                invoice = f"INV-{year}-{max_number + 1:06d}"
 
                 # ====================================================
                 # إنشاء الفاتورة
@@ -350,32 +396,21 @@ class POSService:
                 # ====================================================
                 # تسجيل الدفع
                 # ====================================================
-                if paid > 0:
+                for payment in normalized_payments:
+                    if payment["method"] == "credit":
+                        continue
                     s.execute(
                         text("""
                             INSERT INTO sale_payments
-                            (
-                                sale_id,
-                                payment_method,
-                                amount,
-                                reference_number,
-                                notes
-                            )
-                            VALUES
-                            (
-                                :sale,
-                                :method,
-                                :amount,
-                                :reference,
-                                :notes
-                            )
+                            (sale_id, payment_method, amount, reference_number, notes)
+                            VALUES (:sale, :method, :amount, :reference, :notes)
                         """),
                         {
                             "sale": sale_id,
-                            "method": payment_method,
-                            "amount": float(paid),
-                            "reference": reference_number,
-                            "notes": "دفع فاتورة نقطة بيع",
+                            "method": payment["method"],
+                            "amount": float(payment["amount"]),
+                            "reference": payment.get("reference_number"),
+                            "notes": payment.get("notes") or "دفع فاتورة نقطة بيع",
                         }
                     )
 
@@ -459,6 +494,7 @@ class POSService:
                     paid_amount=paid,
                     due_amount=due,
                     payment_method=payment_method,
+                    payments=normalized_payments,
                     cost_of_goods_sold=cost_of_goods_sold,
                     customer_id=customer_id,
                 )
@@ -476,6 +512,10 @@ class POSService:
                     "due": float(due),
                     "cost_of_goods_sold": float(cost_of_goods_sold),
                     "payment_method": payment_method,
+                    "payments": [
+                        {"method": x["method"], "amount": float(x["amount"])}
+                        for x in normalized_payments
+                    ],
                     "journal_entry_id": journal["journal_entry_id"],
                     "journal_entry_number": journal["entry_number"],
                 }
