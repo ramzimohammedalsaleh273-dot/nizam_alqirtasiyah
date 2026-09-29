@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
 from app.services.inventory_service import InventoryService
 from app.services.party_service import PartyService
 from app.services.pos_service import POSService
+from app.services.tax_service import TaxService
 
 
 class PaymentDialog(QDialog):
@@ -202,6 +203,8 @@ class POSWindow(QWidget):
         QShortcut(QKeySequence("F5"), self, activated=lambda: self.change_quantity(-1))
         QShortcut(QKeySequence("F6"), self, activated=self.remove_selected)
         QShortcut(QKeySequence("F7"), self, activated=self.discount_selected)
+        QShortcut(QKeySequence("F8"), self, activated=self.hold_sale)
+        QShortcut(QKeySequence("F9"), self, activated=self.resume_sale)
         QShortcut(QKeySequence("Delete"), self, activated=self.remove_selected)
         QShortcut(QKeySequence("Escape"), self, activated=self.search.setFocus)
 
@@ -293,12 +296,8 @@ class POSWindow(QWidget):
                 self.table.setItem(
                     row, column, QTableWidgetItem(str(value))
                 )
-        tax = (subtotal * Decimal("0.15")).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
-        grand = (subtotal + tax).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
+        tax_data = TaxService.calculate(subtotal)
+        grand = Decimal(str(tax_data["total"]))
         self.total.setText(f"الإجمالي مع الضريبة: {grand:.2f}")
 
     def current_total(self):
@@ -331,6 +330,25 @@ class POSWindow(QWidget):
             self.search.setFocus()
         except Exception as exc:
             QMessageBox.critical(self, "فشل البيع", str(exc))
+
+    def hold_sale(self):
+        if not self.cart:
+            QMessageBox.warning(self, "تعليق", "الفاتورة فارغة")
+            return
+        import copy
+        if not hasattr(self, "held_sales"):
+            self.held_sales = []
+        self.held_sales.append(copy.deepcopy(self.cart))
+        self.clear_cart()
+        QMessageBox.information(self, "تم التعليق", f"تم تعليق الفاتورة رقم {len(self.held_sales)}")
+
+    def resume_sale(self):
+        if not getattr(self, "held_sales", None):
+            QMessageBox.information(self, "الفواتير المعلقة", "لا توجد فاتورة معلقة")
+            return
+        self.cart = self.held_sales.pop()
+        self.refresh()
+        self.search.setFocus()
 
     def clear_cart(self):
         self.cart = []
