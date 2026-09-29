@@ -2,6 +2,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton,
     QTableWidget, QTableWidgetItem, QLabel, QMessageBox,
     QHeaderView, QDialog, QFormLayout, QDialogButtonBox, QDoubleSpinBox
+)
 from PySide6.QtCore import Qt
 from app.services.inventory_service import InventoryService
 from app.services.product_service import ProductService
