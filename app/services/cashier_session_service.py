@@ -2,24 +2,13 @@ from decimal import Decimal
 from sqlalchemy import text
 from app.database.connection import get_session
 from app.services.audit_service import AuditService
+from app.services.treasury_schema_service import TreasurySchemaService
 
 
 class CashierSessionService:
     @staticmethod
     def _ensure(s):
-        s.execute(text("""
-            CREATE TABLE IF NOT EXISTS cashier_sessions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                cashier_id INTEGER,
-                opening_amount NUMERIC(18,2) NOT NULL DEFAULT 0,
-                closing_amount NUMERIC(18,2),
-                expected_amount NUMERIC(18,2),
-                difference NUMERIC(18,2),
-                status VARCHAR(20) NOT NULL DEFAULT 'OPEN',
-                opened_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                closed_at DATETIME
-            )
-        """))
+        TreasurySchemaService.ensure(s)
 
     @staticmethod
     def _cols(s, table):
