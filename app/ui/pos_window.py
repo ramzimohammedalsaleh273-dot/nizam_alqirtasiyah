@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton,
     QTableWidget, QTableWidgetItem, QLabel, QMessageBox,
     QHeaderView, QDialog, QFormLayout, QDoubleSpinBox, QDialogButtonBox,
-    QComboBox, QSpinBox
+    QComboBox, QSpinBox, QInputDialog
 )
 from app.services.inventory_service import InventoryService
 from app.services.party_service import PartyService
@@ -166,12 +166,15 @@ class POSWindow(QWidget):
         plus = QPushButton("زيادة الكمية")
         minus = QPushButton("إنقاص الكمية")
         remove = QPushButton("حذف الصنف")
+        discount = QPushButton("خصم السطر")
         plus.clicked.connect(lambda: self.change_quantity(1))
         minus.clicked.connect(lambda: self.change_quantity(-1))
         remove.clicked.connect(self.remove_selected)
+        discount.clicked.connect(self.discount_selected)
         controls.addWidget(plus)
         controls.addWidget(minus)
         controls.addWidget(remove)
+        controls.addWidget(discount)
         controls.addStretch()
         layout.addLayout(controls)
 
@@ -192,8 +195,13 @@ class POSWindow(QWidget):
         self.search.setFocus()
 
     def _setup_shortcuts(self):
+        QShortcut(QKeySequence("F1"), self, activated=self.search.setFocus)
         QShortcut(QKeySequence("F2"), self, activated=self.complete_sale)
+        QShortcut(QKeySequence("F3"), self, activated=lambda: self.change_quantity(1))
         QShortcut(QKeySequence("F4"), self, activated=self.clear_cart)
+        QShortcut(QKeySequence("F5"), self, activated=lambda: self.change_quantity(-1))
+        QShortcut(QKeySequence("F6"), self, activated=self.remove_selected)
+        QShortcut(QKeySequence("F7"), self, activated=self.discount_selected)
         QShortcut(QKeySequence("Delete"), self, activated=self.remove_selected)
         QShortcut(QKeySequence("Escape"), self, activated=self.search.setFocus)
 
@@ -241,6 +249,26 @@ class POSWindow(QWidget):
         index = self.selected_index()
         if index is not None:
             self.cart.pop(index)
+            self.refresh()
+
+    def discount_selected(self):
+        index = self.selected_index()
+        if index is None:
+            QMessageBox.warning(self, "الخصم", "اختر صنفًا أولاً")
+            return
+        item = self.cart[index]
+        maximum = Decimal(str(item["quantity"])) * Decimal(str(item["unit_price"]))
+        value, ok = QInputDialog.getDouble(
+            self,
+            "خصم السطر",
+            f"الخصم للصنف: {item["name"]} (الحد الأقصى {maximum:.2f})",
+            float(item["discount"]),
+            0.0,
+            float(maximum),
+            2,
+        )
+        if ok:
+            item["discount"] = value
             self.refresh()
 
     def refresh(self):
