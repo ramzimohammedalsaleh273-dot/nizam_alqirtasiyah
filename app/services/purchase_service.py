@@ -22,10 +22,9 @@ class PurchaseService:
             if fk:items=[dict(r._mapping) for r in s.execute(text(f"SELECT pii.*,p.name_ar,p.sku FROM purchase_invoice_items pii JOIN products p ON p.id=pii.product_id WHERE pii.{fk}=:id ORDER BY pii.id"),{"id":invoice_id}).fetchall()]
             out=dict(inv._mapping);out["items"]=items;return out
     @classmethod
-    def create_invoice(cls,supplier_id,items,warehouse_id=1,branch_id=1,paid_amount=0,notes=None,payment_method="cash",tax_amount=0):
+    def _create_invoice_in_session(cls, s, supplier_id, items, warehouse_id=1, branch_id=1, paid_amount=0, notes=None, payment_method="cash", tax_amount=0):
         if not items:raise ValueError("لا توجد أصناف في فاتورة الشراء")
-        with get_session() as s:
-            try:
+        try:
                 total=Decimal("0.00");prepared=[]
                 for it in items:
                     q=Decimal(str(it["quantity"]));cost=Decimal(str(it["unit_cost"]))
@@ -83,7 +82,31 @@ class PurchaseService:
                 AuditService.log(s,"PURCHASE_POSTED","purchase_invoice",iid)
                 s.commit()
                 return {"id":iid,"invoice_number":invoice,"subtotal":float(total),"tax":float(tax),"total":float(grand_total),"paid":float(paid),"due":float(due),"journal":accounting}
-            except Exception:s.rollback();raise
+        except Exception:
+            raise
+
+    @classmethod
+    def create_invoice(cls, supplier_id, items, warehouse_id=1, branch_id=1,
+                       paid_amount=0, notes=None, payment_method="cash",
+                       tax_amount=0, session=None):
+        """إنشاء فاتورة شراء، مع دعم تنفيذها داخل معاملة خارجية."""
+        if session is not None:
+            return cls._create_invoice_in_session(
+                session, supplier_id, items, warehouse_id, branch_id,
+                paid_amount, notes, payment_method, tax_amount
+            )
+        with get_session() as s:
+            try:
+                result = cls._create_invoice_in_session(
+                    s, supplier_id, items, warehouse_id, branch_id,
+                    paid_amount, notes, payment_method, tax_amount
+                )
+                s.commit()
+                return result
+            except Exception:
+                s.rollback()
+                raise
+
     @staticmethod
     def supplier_balance(supplier_id):
         with get_session() as s:
