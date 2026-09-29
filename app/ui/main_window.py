@@ -19,6 +19,7 @@ from app.services.backup_service import BackupService
 from app.ui.administration_windows import accounting_window, treasury_window, employees_window, settings_window
 from app.ui.health_window import HealthWindow
 from app.ui.backup_window import BackupWindow
+from app.ui.enterprise_tools_window import EnterpriseToolsWindow
 
 
 class MainWindow(QMainWindow):
@@ -84,6 +85,7 @@ class MainWindow(QMainWindow):
             ("التقارير", self.open_reports),
             ("الموظفون", self.open_employees),
             ("الإعدادات", self.open_settings),
+            ("مركز التشغيل والفحص", self.open_enterprise_tools),
         ]
 
         for name, handler in navigation:
@@ -232,6 +234,9 @@ class MainWindow(QMainWindow):
 
     def open_settings(self):
         self.open_window("settings", settings_window)
+
+    def open_enterprise_tools(self):
+        self.open_window("enterprise_tools", EnterpriseToolsWindow)
 
     def open_backup(self):
         self.open_window("backup", BackupWindow)
