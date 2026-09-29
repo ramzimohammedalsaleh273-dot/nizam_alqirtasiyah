@@ -41,16 +41,21 @@ class CashierSessionService:
         with get_session() as s:
             cls._ensure(s)
             row=s.execute(text("""
-                SELECT opening_amount,
-                       COALESCE((SELECT SUM(amount) FROM sale_payments sp
-                                 JOIN sales sl ON sl.id=sp.sale_id
-                                 WHERE sp.payment_method='cash'
-                                 AND sl.created_at>=cs.opened_at
-                                 AND cs.status='OPEN'),0)
-                FROM cashier_sessions cs WHERE cs.id=:id
+                SELECT opening_amount, cashier_id, opened_at, status
+                FROM cashier_sessions WHERE id=:id
             """),{"id":session_id}).fetchone()
             if not row: raise ValueError("جلسة الكاشير غير موجودة")
-            return float(Decimal(str(row[0] or 0))+Decimal(str(row[1] or 0)))
+            if row.status!="OPEN": raise ValueError("الجلسة مغلقة")
+            sales_cash=Decimal(str(s.execute(text("""
+                SELECT COALESCE(SUM(sp.amount),0)
+                FROM sale_payments sp
+                JOIN sales sl ON sl.id=sp.sale_id
+                WHERE sp.payment_method='cash'
+                  AND sl.created_at>=:opened
+                  AND (sl.cashier_id=:cashier OR (:cashier IS NULL AND sl.cashier_id IS NULL))
+                  AND COALESCE(sl.status,'POSTED') NOT IN ('VOID','CANCELLED')
+            """),{"opened":row.opened_at,"cashier":row.cashier_id}).scalar() or 0))
+            return float(Decimal(str(row.opening_amount or 0))+sales_cash)
 
     @classmethod
     def close(cls,session_id,actual_amount):
