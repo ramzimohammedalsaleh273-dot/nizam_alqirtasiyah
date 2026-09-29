@@ -12,6 +12,7 @@ from app.services.inventory_service import InventoryService
 from app.services.party_service import PartyService
 from app.services.pos_service import POSService
 from app.services.tax_service import TaxService
+from app.services.pos_hold_service import POSHoldService
 
 
 class PaymentDialog(QDialog):
@@ -338,17 +339,39 @@ class POSWindow(QWidget):
         import copy
         if not hasattr(self, "held_sales"):
             self.held_sales = []
-        self.held_sales.append(copy.deepcopy(self.cart))
-        self.clear_cart()
-        QMessageBox.information(self, "تم التعليق", f"تم تعليق الفاتورة رقم {len(self.held_sales)}")
+        try:
+            result = POSHoldService.hold(
+                items=copy.deepcopy(self.cart),
+                payment_method="cash",
+                notes="تعليق من نقطة البيع",
+            )
+            self.clear_cart()
+            QMessageBox.information(
+                self, "تم التعليق",
+                f"تم حفظ الفاتورة المعلقة برقم {result['hold_number']}"
+            )
+        except Exception as exc:
+            QMessageBox.critical(self, "فشل التعليق", str(exc))
 
     def resume_sale(self):
-        if not getattr(self, "held_sales", None):
-            QMessageBox.information(self, "الفواتير المعلقة", "لا توجد فاتورة معلقة")
-            return
-        self.cart = self.held_sales.pop()
-        self.refresh()
-        self.search.setFocus()
+        try:
+            rows = POSHoldService.list_held()
+            if not rows:
+                QMessageBox.information(self, "الفواتير المعلقة", "لا توجد فاتورة معلقة محفوظة")
+                return
+            labels = [f"{r['hold_number']} | {r.get('notes') or 'بدون ملاحظات'}" for r in rows]
+            selected, ok = QInputDialog.getItem(
+                self, "استرجاع فاتورة معلقة", "اختر الفاتورة:", labels, 0, False
+            )
+            if not ok:
+                return
+            idx = labels.index(selected)
+            result = POSHoldService.resume(rows[idx]["id"])
+            self.cart = result["items"]
+            self.refresh()
+            self.search.setFocus()
+        except Exception as exc:
+            QMessageBox.critical(self, "فشل الاسترجاع", str(exc))
 
     def clear_cart(self):
         self.cart = []
