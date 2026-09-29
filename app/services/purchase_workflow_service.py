@@ -95,7 +95,7 @@ class PurchaseWorkflowService:
                 PermissionService.ensure_schema(s)
                 if approved_by is None:
                     raise PermissionError("يجب تحديد المستخدم المعتمد")
-                if not PermissionService.has(int(approved_by), "purchase.request.approve"):
+                if not PermissionService.has_in_session(s, int(approved_by), "purchase.request.approve"):
                     raise PermissionError("المستخدم لا يملك صلاحية اعتماد طلبات الشراء")
                 row=s.execute(text("SELECT * FROM purchase_requests WHERE id=:id"),{"id":request_id}).fetchone()
                 if not row: raise ValueError("طلب الشراء غير موجود")
