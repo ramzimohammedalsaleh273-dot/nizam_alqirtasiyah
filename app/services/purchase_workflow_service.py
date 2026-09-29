@@ -134,35 +134,50 @@ class PurchaseWorkflowService:
 
     @classmethod
     def receive_order(cls, order_id, paid_amount=0, tax_amount=0, payment_method="cash", notes=None):
-        # الاستلام يستدعي PurchaseService كعملية ترحيل مستقلة؛ لا نغيّر حالة الأمر
-        # إلا بعد نجاح الفاتورة، حتى لا يظهر أمر كمستلم قبل وجود فاتورة فعلية.
-        with get_session() as s:
-            cls.ensure_schema(s)
-            order=s.execute(text("SELECT * FROM purchase_orders WHERE id=:id"),{"id":order_id}).fetchone()
-            if not order: raise ValueError("أمر الشراء غير موجود")
-            if order.status=="RECEIVED": raise ValueError("أمر الشراء مستلم مسبقاً")
-            if order.status not in {"APPROVED","PARTIAL"}: raise ValueError("أمر الشراء غير جاهز للاستلام")
-            rows=s.execute(text("SELECT product_id,quantity,unit_cost FROM purchase_order_items WHERE order_id=:id"),{"id":order_id}).fetchall()
-            if not rows: raise ValueError("أمر الشراء لا يحتوي أصنافاً")
-            order_data={"supplier_id":int(order.supplier_id),"warehouse_id":int(order.warehouse_id),
-                        "branch_id":int(order.branch_id),"order_number":order.order_number,
-                        "request_id":order.request_id}
-        result=PurchaseService.create_invoice(
-            supplier_id=order_data["supplier_id"],
-            items=[{"product_id":int(r.product_id),"quantity":float(r.quantity),"unit_cost":float(r.unit_cost)} for r in rows],
-            warehouse_id=order_data["warehouse_id"], branch_id=order_data["branch_id"],
-            paid_amount=paid_amount, notes=notes or f"استلام أمر شراء {order_data['order_number']}",
-            payment_method=payment_method, tax_amount=tax_amount
-        )
+        """استلام أمر الشراء وفوترته داخل معاملة واحدة."""
         with get_session() as s:
             try:
                 cls.ensure_schema(s)
-                s.execute(text("UPDATE purchase_orders SET status='RECEIVED' WHERE id=:id AND status<>'RECEIVED'"),{"id":order_id})
-                if order_data["request_id"] is not None:
-                    s.execute(text("UPDATE purchase_requests SET status='RECEIVED' WHERE id=:id"),{"id":order_data["request_id"]})
+                order=s.execute(
+                    text("SELECT * FROM purchase_orders WHERE id=:id"),
+                    {"id":order_id},
+                ).fetchone()
+                if not order:
+                    raise ValueError("أمر الشراء غير موجود")
+                if order.status=="RECEIVED":
+                    raise ValueError("أمر الشراء مستلم مسبقاً")
+                if order.status not in {"APPROVED","PARTIAL"}:
+                    raise ValueError("أمر الشراء غير جاهز للاستلام")
+                rows=s.execute(
+                    text("SELECT product_id,quantity,unit_cost FROM purchase_order_items WHERE order_id=:id ORDER BY id"),
+                    {"id":order_id},
+                ).fetchall()
+                if not rows:
+                    raise ValueError("أمر الشراء لا يحتوي أصنافاً")
+
+                result=PurchaseService.create_invoice(
+                    supplier_id=int(order.supplier_id),
+                    items=[{"product_id":int(r.product_id),"quantity":float(r.quantity),"unit_cost":float(r.unit_cost)} for r in rows],
+                    warehouse_id=int(order.warehouse_id),
+                    branch_id=int(order.branch_id),
+                    paid_amount=paid_amount,
+                    notes=notes or f"استلام أمر شراء {order.order_number}",
+                    payment_method=payment_method,
+                    tax_amount=tax_amount,
+                    session=s,
+                )
+                s.execute(
+                    text("UPDATE purchase_orders SET status='RECEIVED' WHERE id=:id AND status<>'RECEIVED'"),
+                    {"id":order_id},
+                )
+                if order.request_id is not None:
+                    s.execute(
+                        text("UPDATE purchase_requests SET status='RECEIVED' WHERE id=:id"),
+                        {"id":int(order.request_id)},
+                    )
                 AuditService.log(s,"PURCHASE_ORDER_RECEIVED","purchase_order",order_id)
                 s.commit()
+                return {"order_id":order_id,"purchase_invoice":result}
             except Exception:
                 s.rollback()
                 raise
-        return {"order_id":order_id,"purchase_invoice":result}
