@@ -1,5 +1,4 @@
 from PySide6.QtWidgets import (
-    QFileDialog,
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox
 )
