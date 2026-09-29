@@ -17,6 +17,7 @@ from app.ui.inventory_window import InventoryWindow
 from app.ui.reports_window import ReportsWindow
 from app.services.backup_service import BackupService
 from app.ui.administration_windows import accounting_window, treasury_window, employees_window, settings_window
+from app.ui.health_window import HealthWindow
 
 
 class MainWindow(QMainWindow):
@@ -88,6 +89,10 @@ class MainWindow(QMainWindow):
             button = QPushButton(name)
             button.clicked.connect(handler)
             side_layout.addWidget(button)
+
+        health_button = QPushButton("فحص صحة النظام")
+        health_button.clicked.connect(self.open_health)
+        side_layout.addWidget(health_button)
 
         backup = QPushButton("إنشاء نسخة احتياطية")
         backup.clicked.connect(self.create_backup)
@@ -225,6 +230,9 @@ class MainWindow(QMainWindow):
 
     def open_settings(self):
         self.open_window("settings", settings_window)
+
+    def open_health(self):
+        self.open_window("health", HealthWindow)
 
     def create_backup(self):
         try:
