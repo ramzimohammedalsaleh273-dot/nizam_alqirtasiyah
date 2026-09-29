@@ -16,6 +16,7 @@ from app.ui.parties_window import PartiesWindow
 from app.ui.inventory_window import InventoryWindow
 from app.ui.reports_window import ReportsWindow
 from app.services.backup_service import BackupService
+from app.ui.administration_windows import accounting_window, treasury_window, employees_window, settings_window
 
 
 class MainWindow(QMainWindow):
@@ -76,11 +77,11 @@ class MainWindow(QMainWindow):
             ("المبيعات", self.open_sales),
             ("المشتريات", self.open_purchases),
             ("العملاء والموردون", self.open_parties),
-            ("الخزينة والبنوك", self.not_ready),
-            ("المحاسبة", self.not_ready),
+            ("الخزينة والبنوك", self.open_treasury),
+            ("المحاسبة", self.open_accounting),
             ("التقارير", self.open_reports),
-            ("الموظفون", self.not_ready),
-            ("الإعدادات", self.not_ready),
+            ("الموظفون", self.open_employees),
+            ("الإعدادات", self.open_settings),
         ]
 
         for name, handler in navigation:
@@ -212,6 +213,18 @@ class MainWindow(QMainWindow):
 
     def open_reports(self):
         self.open_window("reports", ReportsWindow)
+
+    def open_accounting(self):
+        self.open_window("accounting", accounting_window)
+
+    def open_treasury(self):
+        self.open_window("treasury", treasury_window)
+
+    def open_employees(self):
+        self.open_window("employees", employees_window)
+
+    def open_settings(self):
+        self.open_window("settings", settings_window)
 
     def create_backup(self):
         try:
