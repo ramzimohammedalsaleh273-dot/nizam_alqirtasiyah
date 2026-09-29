@@ -87,6 +87,7 @@ class AccountingService:
         due_amount,
         payment_method,
         cost_of_goods_sold,
+        payments=None,
         customer_id=None,
     ):
         subtotal = cls.money(subtotal)
@@ -104,25 +105,27 @@ class AccountingService:
 
         lines = []
 
-        # المدين: النقدية / البنك
-        if paid_amount > 0:
-            if payment_method in cls.PAYMENT_ACCOUNTS:
-                debit_account_code = cls.PAYMENT_ACCOUNTS[payment_method]
+        # المدين: توزيع التحصيل على جميع طرق الدفع.
+        # هذا يسمح مثلًا بـ 100 نقدًا + 200 بطاقة + 50 تحويل + 50 آجل.
+        if payments is None:
+            if paid_amount > 0:
+                payments = [{"method": payment_method, "amount": paid_amount}]
             else:
-                raise ValueError(
-                    f"طريقة الدفع غير مدعومة محاسبيًا: {payment_method}"
-                )
+                payments = []
 
-            debit_account = cls.get_account_id(
-                session,
-                debit_account_code
-            )
-
+        for payment in payments:
+            method = payment["method"]
+            amount = cls.money(payment["amount"])
+            if method == "credit" or amount <= 0:
+                continue
+            if method not in cls.PAYMENT_ACCOUNTS:
+                raise ValueError(f"طريقة الدفع غير مدعومة محاسبيًا: {method}")
+            debit_account = cls.get_account_id(session, cls.PAYMENT_ACCOUNTS[method])
             lines.append({
                 "account_id": debit_account,
-                "debit": paid_amount,
+                "debit": amount,
                 "credit": Decimal("0"),
-                "description": f"تحصيل فاتورة {invoice_number}",
+                "description": f"تحصيل {method} لفاتورة {invoice_number}",
             })
 
         # البيع الآجل
