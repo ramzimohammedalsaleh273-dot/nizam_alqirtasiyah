@@ -22,7 +22,7 @@ class PurchaseService:
             if fk:items=[dict(r._mapping) for r in s.execute(text(f"SELECT pii.*,p.name_ar,p.sku FROM purchase_invoice_items pii JOIN products p ON p.id=pii.product_id WHERE pii.{fk}=:id ORDER BY pii.id"),{"id":invoice_id}).fetchall()]
             out=dict(inv._mapping);out["items"]=items;return out
     @classmethod
-    def create_invoice(cls,supplier_id,items,warehouse_id=1,branch_id=1,paid_amount=0,notes=None):
+    def create_invoice(cls,supplier_id,items,warehouse_id=1,branch_id=1,paid_amount=0,notes=None,payment_method="cash",tax_amount=0):
         if not items:raise ValueError("لا توجد أصناف في فاتورة الشراء")
         with get_session() as s:
             try:
@@ -35,9 +35,13 @@ class PurchaseService:
                     line=(q*cost).quantize(Decimal("0.01"),ROUND_HALF_UP);total+=line;prepared.append((int(it["product_id"]),q,cost,line))
                 total=total.quantize(Decimal("0.01"),ROUND_HALF_UP);paid=Decimal(str(paid_amount)).quantize(Decimal("0.01"),ROUND_HALF_UP)
                 if paid<0 or paid>total:raise ValueError("المدفوع غير صالح")
-                due=total-paid;invoice=DocumentNumberService.next_number(s,"PURCHASE","PUR",6)
+                tax=Decimal(str(tax_amount)).quantize(Decimal("0.01"),ROUND_HALF_UP)
+                if tax<0: raise ValueError("الضريبة لا يمكن أن تكون سالبة")
+                grand_total=(total+tax).quantize(Decimal("0.01"),ROUND_HALF_UP)
+                if paid>grand_total: raise ValueError("المدفوع أكبر من الإجمالي")
+                due=grand_total-paid;invoice=DocumentNumberService.next_number(s,"PURCHASE","PUR",6)
                 cols=cls._columns(s,"purchase_invoices")
-                vals={"invoice_number":invoice,"supplier_id":supplier_id,"subtotal":float(total),"tax_amount":0.0,"total_amount":float(total),"paid_amount":float(paid),"due_amount":float(due),"status":"POSTED","notes":notes or "فاتورة شراء"}
+                vals={"invoice_number":invoice,"supplier_id":supplier_id,"subtotal":float(total),"tax_amount":float(tax),"total_amount":float(grand_total),"paid_amount":float(paid),"due_amount":float(due),"status":"POSTED","notes":notes or "فاتورة شراء"}
                 if "branch_id" in cols:vals["branch_id"]=branch_id
                 if "warehouse_id" in cols:vals["warehouse_id"]=warehouse_id
                 fields=[k for k in vals if k in cols];params={k:vals[k] for k in fields};ph=[":"+k for k in fields]
@@ -66,12 +70,19 @@ class PurchaseService:
                         if "created_at" in mc:f.append("created_at");v.append("CURRENT_TIMESTAMP")
                         s.execute(text(f"INSERT INTO stock_movements({','.join(f)}) VALUES({','.join(v)})"),d)
                 accounting = AccountingService.post_purchase(
-                    s, iid, invoice, total, paid, due, supplier_id,
-                    tax_amount=Decimal("0.00"), payment_method="cash"
+                    s, iid, invoice, grand_total, paid, due, supplier_id,
+                    tax_amount=tax, payment_method=payment_method
                 )
+                if "current_balance" in cls._columns(s,"suppliers") and due > 0:
+                    s.execute(text("""
+                        UPDATE suppliers
+                        SET current_balance=COALESCE(current_balance,0)+:amount,
+                            updated_at=CURRENT_TIMESTAMP
+                        WHERE id=:id
+                    """), {"amount":float(due),"id":supplier_id})
                 AuditService.log(s,"PURCHASE_POSTED","purchase_invoice",iid)
                 s.commit()
-                return {"id":iid,"invoice_number":invoice,"total":float(total),"paid":float(paid),"due":float(due),"journal":accounting}
+                return {"id":iid,"invoice_number":invoice,"subtotal":float(total),"tax":float(tax),"total":float(grand_total),"paid":float(paid),"due":float(due),"journal":accounting}
             except Exception:s.rollback();raise
     @staticmethod
     def supplier_balance(supplier_id):
