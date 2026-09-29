@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
     QWidget,QVBoxLayout,QTableWidget,QTableWidgetItem,
     QPushButton,QHBoxLayout,QLabel,QMessageBox
 )
-from app.services.sales_service import PurchaseService
+from app.services.purchase_service import PurchaseService
 
 class PurchasesWindow(QWidget):
 
