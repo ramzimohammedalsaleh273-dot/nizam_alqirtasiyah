@@ -261,7 +261,7 @@ class POSWindow(QWidget):
         value, ok = QInputDialog.getDouble(
             self,
             "خصم السطر",
-            f"الخصم للصنف: {item["name"]} (الحد الأقصى {maximum:.2f})",
+            f"الخصم للصنف: {item['name']} (الحد الأقصى {maximum:.2f})",
             float(item["discount"]),
             0.0,
             float(maximum),
