@@ -94,3 +94,19 @@ def test_existing_sales_unchanged_by_tests():
     assert sales == 5
     assert journals == 9
 
+
+
+def test_document_number_sequence_is_incremental():
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from app.services.document_number_service import DocumentNumberService
+
+    engine = create_engine("sqlite:///:memory:", future=True)
+    Session = sessionmaker(bind=engine, future=True)
+    with Session() as session:
+        first = DocumentNumberService.next_number(session, "TEST", "TST", 2099)
+        second = DocumentNumberService.next_number(session, "TEST", "TST", 2099)
+        session.commit()
+
+    assert first == "TST-2099-000001"
+    assert second == "TST-2099-000002"
