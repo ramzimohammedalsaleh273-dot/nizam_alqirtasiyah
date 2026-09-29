@@ -19,6 +19,7 @@ def get_system_summary():
             "purchase_invoices": count("purchase_invoices"),
             "stock": count("stock"),
             "journal_entries": count("journal_entries"),
+            "low_stock": session.execute(text("""SELECT COUNT(*) FROM products p LEFT JOIN stock st ON st.product_id=p.id WHERE p.is_active=1 AND COALESCE(st.available_quantity,0) <= COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)""")).scalar() or 0,
         }
 
         return summary
