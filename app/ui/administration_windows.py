@@ -55,12 +55,8 @@ def accounting_window(parent=None):
 
 
 def treasury_window(parent=None):
-    return DataWindow("الخزينة والبنوك",[
-        ("cash","حركات الخزينة","cash_transactions"),
-        ("banks","حركات البنوك","bank_transactions"),
-        ("customer_payments","تحصيلات العملاء","customer_payments"),
-        ("supplier_payments","مدفوعات الموردين","supplier_payments"),
-    ],parent)
+    from app.ui.treasury_operations_window import TreasuryOperationsWindow
+    return TreasuryOperationsWindow(parent)
 
 
 def employees_window(parent=None):
