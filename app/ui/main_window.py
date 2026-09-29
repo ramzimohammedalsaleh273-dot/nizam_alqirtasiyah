@@ -15,6 +15,7 @@ from app.ui.purchases_window import PurchasesWindow
 from app.ui.parties_window import PartiesWindow
 from app.ui.inventory_window import InventoryWindow
 from app.ui.reports_window import ReportsWindow
+from app.services.backup_service import BackupService
 
 
 class MainWindow(QMainWindow):
@@ -86,6 +87,10 @@ class MainWindow(QMainWindow):
             button = QPushButton(name)
             button.clicked.connect(handler)
             side_layout.addWidget(button)
+
+        backup = QPushButton("إنشاء نسخة احتياطية")
+        backup.clicked.connect(self.create_backup)
+        side_layout.addWidget(backup)
 
         side_layout.addStretch()
 
@@ -207,6 +212,17 @@ class MainWindow(QMainWindow):
 
     def open_reports(self):
         self.open_window("reports", ReportsWindow)
+
+    def create_backup(self):
+        try:
+            path = BackupService.create_backup()
+            QMessageBox.information(
+                self,
+                "النسخ الاحتياطي",
+                f"تم إنشاء نسخة احتياطية سليمة بنجاح:\\n{path}",
+            )
+        except Exception as exc:
+            QMessageBox.critical(self, "فشل النسخ الاحتياطي", str(exc))
 
     def not_ready(self):
         button = self.sender()
