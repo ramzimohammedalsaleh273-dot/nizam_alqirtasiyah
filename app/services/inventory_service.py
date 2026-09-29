@@ -63,3 +63,18 @@ class InventoryService:
                 FROM stock
                 WHERE product_id=:p AND warehouse_id=:w
             """),{"p":product_id,"w":warehouse_id}).scalar() or 0)
+
+    @staticmethod
+    def low_stock(limit=100):
+        with get_session() as s:
+            rows=s.execute(text("""
+                SELECT p.id,p.sku,p.name_ar,p.reorder_point,p.min_stock,
+                       COALESCE(st.available_quantity,0) AS available_quantity
+                FROM products p
+                LEFT JOIN stock st ON st.product_id=p.id
+                WHERE p.is_active=1
+                  AND COALESCE(st.available_quantity,0) <= COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)
+                ORDER BY available_quantity ASC,p.id
+                LIMIT :limit
+            """),{"limit":limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
