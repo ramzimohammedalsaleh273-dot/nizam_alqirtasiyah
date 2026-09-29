@@ -1,9 +1,11 @@
 from PySide6.QtWidgets import (
+    QFileDialog,
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTableWidget, QTableWidgetItem, QHeaderView
+    QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox
 )
 from sqlalchemy import text
 from app.database.connection import get_session
+from app.services.report_export_service import ReportExportService
 
 
 class ReportsWindow(QWidget):
@@ -23,7 +25,10 @@ class ReportsWindow(QWidget):
         bar = QHBoxLayout()
         refresh = QPushButton("تحديث التقارير")
         refresh.clicked.connect(self.load)
+        export_excel = QPushButton("تصدير Excel")
+        export_excel.clicked.connect(self.export_excel)
         bar.addWidget(refresh)
+        bar.addWidget(export_excel)
         bar.addStretch()
         layout.addLayout(bar)
 
@@ -42,6 +47,17 @@ class ReportsWindow(QWidget):
         layout.addWidget(self.table)
 
         self.load()
+
+    def export_excel(self):
+        headers = [self.table.horizontalHeaderItem(i).text() for i in range(self.table.columnCount())]
+        rows = []
+        for r in range(self.table.rowCount()):
+            rows.append([self.table.item(r, c).text() if self.table.item(r, c) else "" for c in range(self.table.columnCount())])
+        try:
+            path = ReportExportService.to_excel("تقرير_النظام", headers, rows)
+            QMessageBox.information(self, "التصدير", f"تم إنشاء ملف Excel:\n{path}")
+        except Exception as exc:
+            QMessageBox.critical(self, "فشل التصدير", str(exc))
 
     def load(self):
         with get_session() as s:
