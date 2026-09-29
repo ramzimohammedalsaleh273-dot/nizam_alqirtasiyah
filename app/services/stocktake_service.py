@@ -2,7 +2,6 @@ from decimal import Decimal
 from sqlalchemy import text
 from app.database.connection import get_session
 from app.services.audit_service import AuditService
-from app.services.inventory_operations_service import InventoryOperationsService
 
 class StocktakeService:
     @staticmethod
@@ -73,12 +72,24 @@ class StocktakeService:
             if not st: raise ValueError("الجرد غير موجود")
             if st.status!="DRAFT": raise ValueError("الجرد مغلق مسبقًا")
             items=s.execute(text("SELECT product_id,counted_quantity FROM stocktake_items WHERE stocktake_id=:id"),{"id":stocktake_id}).fetchall()
+            movement_cols={r[1] for r in s.connection().exec_driver_sql("PRAGMA table_info(stock_movements)").fetchall()}
             for item in items:
-                InventoryOperationsService.adjust(item.product_id,st.warehouse_id,item.counted_quantity,reason)
-            # adjust يفتح جلسة مستقلة؛ نعيد حالة الجرد بعد نجاح كل التسويات.
-            s.execute(text("""
-                UPDATE stocktakes SET status='COMPLETED',completed_at=CURRENT_TIMESTAMP WHERE id=:id
-            """),{"id":stocktake_id})
+                row=s.execute(text("SELECT quantity FROM stock WHERE product_id=:p AND warehouse_id=:w"),{"p":item.product_id,"w":st.warehouse_id}).fetchone()
+                old=Decimal(str((row[0] if row else 0) or 0))
+                counted=Decimal(str(item.counted_quantity))
+                delta=counted-old
+                if row:
+                    s.execute(text("UPDATE stock SET quantity=:q,available_quantity=:q,updated_at=CURRENT_TIMESTAMP WHERE product_id=:p AND warehouse_id=:w"),{"q":float(counted),"p":item.product_id,"w":st.warehouse_id})
+                else:
+                    s.execute(text("INSERT INTO stock(product_id,warehouse_id,quantity,available_quantity,average_cost) VALUES(:p,:w,:q,:q,0)"),{"p":item.product_id,"w":st.warehouse_id,"q":float(counted)})
+                fields=["product_id","warehouse_id","quantity"]; vals=[":p",":w",":q"]; params={"p":item.product_id,"w":st.warehouse_id,"q":float(delta)}
+                if "movement_type" in movement_cols: fields.append("movement_type"); vals.append("'ADJUSTMENT'")
+                if "notes" in movement_cols: fields.append("notes"); vals.append(":n"); params["n"]=reason
+                if "reference_type" in movement_cols: fields.append("reference_type"); vals.append("'STOCKTAKE'")
+                if "reference_id" in movement_cols: fields.append("reference_id"); vals.append(":sid"); params["sid"]=stocktake_id
+                if "created_at" in movement_cols: fields.append("created_at"); vals.append("CURRENT_TIMESTAMP")
+                s.execute(text(f"INSERT INTO stock_movements({','.join(fields)}) VALUES({','.join(vals)})"),params)
+            s.execute(text("UPDATE stocktakes SET status='COMPLETED',completed_at=CURRENT_TIMESTAMP WHERE id=:id"),{"id":stocktake_id})
             AuditService.log(s,"STOCKTAKE_COMPLETED","stocktake",stocktake_id)
             s.commit()
             return {"id":stocktake_id,"items":len(items),"status":"COMPLETED"}
