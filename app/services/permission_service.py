@@ -106,26 +106,35 @@ class PermissionService:
             s.commit()
             return int(row[0]) if row else None
 
+    @staticmethod
+    def has_in_session(s, user_id, permission_code):
+        if user_id is None:
+            return False
+        PermissionService.ensure_schema(s)
+        row = s.execute(text("""
+            SELECT 1
+            FROM erp_user_roles ur
+            JOIN erp_role_permissions rp ON rp.role_id=ur.role_id
+            JOIN erp_permissions p ON p.id=rp.permission_id
+            JOIN erp_roles r ON r.id=ur.role_id
+            WHERE ur.user_id=:user
+              AND p.code=:code
+              AND COALESCE(p.is_active,1)=1
+              AND COALESCE(r.is_active,1)=1
+            LIMIT 1
+        """), {"user": int(user_id), "code": permission_code}).fetchone()
+        return bool(row)
+
     @classmethod
     def has(cls, user_id, permission_code):
         if user_id is None:
             return False
         with get_session() as s:
-            cls.ensure_schema(s)
-            row = s.execute(text("""
-                SELECT 1
-                FROM erp_user_roles ur
-                JOIN erp_role_permissions rp ON rp.role_id=ur.role_id
-                JOIN erp_permissions p ON p.id=rp.permission_id
-                JOIN erp_roles r ON r.id=ur.role_id
-                WHERE ur.user_id=:user
-                  AND p.code=:code
-                  AND COALESCE(p.is_active,1)=1
-                  AND COALESCE(r.is_active,1)=1
-                LIMIT 1
-            """), {"user": int(user_id), "code": permission_code}).fetchone()
-            s.commit()
-            return bool(row)
+            try:
+                return cls.has_in_session(s, user_id, permission_code)
+            except Exception:
+                s.rollback()
+                raise
 
     @classmethod
     def require(cls, user_id, permission_code):
