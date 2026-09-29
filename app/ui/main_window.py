@@ -23,6 +23,8 @@ from app.ui.enterprise_tools_window import EnterpriseToolsWindow
 from app.ui.purchase_workflow_window import PurchaseWorkflowWindow
 from app.ui.purchase_returns_window import PurchaseReturnsWindow
 from app.ui.sales_returns_window import SalesReturnsWindow
+from app.database.connection import get_session
+from app.services.treasury_schema_service import TreasurySchemaService
 
 
 class MainWindow(QMainWindow):
@@ -33,7 +35,13 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(f"{APP_NAME} - {APP_VERSION}")
         self.setMinimumSize(1200, 720)
         self._child_windows = {}
+        self._bootstrap_operational_schema()
         self.build_ui()
+
+    def _bootstrap_operational_schema(self):
+        with get_session() as s:
+            TreasurySchemaService.ensure(s)
+            s.commit()
 
     def build_ui(self):
         self.setStyleSheet("""
