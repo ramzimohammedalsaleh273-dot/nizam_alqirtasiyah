@@ -1,6 +1,7 @@
 ﻿from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from sqlalchemy import text
+from app.services.document_number_service import DocumentNumberService
 
 
 class AccountingService:
@@ -42,37 +43,12 @@ class AccountingService:
 
     @staticmethod
     def next_entry_number(session):
-        year = datetime.now().year
-
-        # ????? ?? ???? ??? ???? ???? ?? ????? ?????? ??????
-        # ??? JE-2026-OPENING-STOCK
-        rows = session.execute(
-            text("""
-                SELECT entry_number
-                FROM journal_entries
-                WHERE entry_number LIKE :prefix
-                ORDER BY id DESC
-            """),
-            {"prefix": f"JE-{year}-%"}
-        ).fetchall()
-
-        max_number = 0
-
-        for row in rows:
-            value = str(row[0] or "")
-            parts = value.split("-")
-
-            if len(parts) != 3:
-                continue
-
-            suffix = parts[-1]
-
-            if suffix.isdigit():
-                number = int(suffix)
-                if number > max_number:
-                    max_number = number
-
-        return f"JE-{year}-{max_number + 1:06d}"
+        return DocumentNumberService.next_number(
+            session,
+            document_type="JOURNAL",
+            prefix="JE",
+            width=6,
+        )
 
     @classmethod
     def post_sale(
