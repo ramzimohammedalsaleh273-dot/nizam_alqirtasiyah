@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import text
 from app.database.connection import get_session
 from app.services.accounting_service import AccountingService
+from app.services.audit_service import AuditService
 
 
 class POSService:
@@ -497,6 +498,14 @@ class POSService:
                     payments=normalized_payments,
                     cost_of_goods_sold=cost_of_goods_sold,
                     customer_id=customer_id,
+                )
+
+                AuditService.log(
+                    s,
+                    action="CREATE",
+                    entity="sale",
+                    entity_id=sale_id,
+                    username=str(cashier_id) if cashier_id is not None else None,
                 )
 
                 s.commit()
