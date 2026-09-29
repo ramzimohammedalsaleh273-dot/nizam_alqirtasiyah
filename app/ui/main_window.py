@@ -21,6 +21,7 @@ from app.ui.health_window import HealthWindow
 from app.ui.backup_window import BackupWindow
 from app.ui.enterprise_tools_window import EnterpriseToolsWindow
 from app.ui.purchase_workflow_window import PurchaseWorkflowWindow
+from app.ui.purchase_returns_window import PurchaseReturnsWindow
 
 
 class MainWindow(QMainWindow):
@@ -81,6 +82,7 @@ class MainWindow(QMainWindow):
             ("المبيعات", self.open_sales),
             ("المشتريات", self.open_purchases),
             ("دورة المشتريات", self.open_purchase_workflow),
+            ("مرتجعات المشتريات", self.open_purchase_returns),
             ("العملاء والموردون", self.open_parties),
             ("الخزينة والبنوك", self.open_treasury),
             ("المحاسبة", self.open_accounting),
@@ -221,6 +223,9 @@ class MainWindow(QMainWindow):
 
     def open_purchase_workflow(self):
         self.open_window("purchase_workflow", PurchaseWorkflowWindow)
+
+    def open_purchase_returns(self):
+        self.open_window("purchase_returns", PurchaseReturnsWindow)
 
     def open_parties(self):
         self.open_window("parties", PartiesWindow)
