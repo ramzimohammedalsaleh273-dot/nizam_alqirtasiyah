@@ -34,7 +34,10 @@ class InventoryWindow(QWidget):
 
         add_button = QPushButton("إضافة صنف")
         add_button.clicked.connect(self.add_product)
+        edit_button = QPushButton("تعديل الصنف")
+        edit_button.clicked.connect(self.edit_product)
         bar.addWidget(add_button)
+        bar.addWidget(edit_button)
 
         refresh_button = QPushButton("تحديث")
         refresh_button.clicked.connect(lambda: self.load(""))
@@ -79,6 +82,25 @@ class InventoryWindow(QWidget):
             ProductService.create_product(sku.text(),name.text(),cost.value(),sale.value(),barcode.text() or None)
             QMessageBox.information(self,"تم","تم إنشاء الصنف بنجاح"); self.load("")
         except Exception as exc: QMessageBox.critical(self,"فشل إنشاء الصنف",str(exc))
+
+    def edit_product(self):
+        row=self.table.currentRow()
+        if row<0:
+            QMessageBox.warning(self,"تنبيه","اختر صنفًا أولاً"); return
+        product_id=int(self.table.item(row,0).text())
+        sku=QLineEdit(self.table.item(row,1).text())
+        name=QLineEdit(self.table.item(row,2).text())
+        cost=QDoubleSpinBox(); sale=QDoubleSpinBox()
+        cost.setMaximum(999999999); sale.setMaximum(999999999); cost.setDecimals(2); sale.setDecimals(2)
+        cost.setValue(float(self.table.item(row,3).text() or 0)); sale.setValue(float(self.table.item(row,4).text() or 0))
+        dialog=QDialog(self); dialog.setWindowTitle("تعديل الصنف"); form=QFormLayout(dialog)
+        form.addRow("رمز الصنف:",sku); form.addRow("اسم المنتج:",name); form.addRow("التكلفة:",cost); form.addRow("سعر البيع:",sale)
+        buttons=QDialogButtonBox(QDialogButtonBox.Ok|QDialogButtonBox.Cancel); buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject); form.addRow(buttons)
+        if dialog.exec()!=QDialog.Accepted: return
+        try:
+            ProductService.update_product(product_id,sku.text(),name.text(),cost.value(),sale.value())
+            self.load(self.search.text().strip()); QMessageBox.information(self,"تم","تم تحديث الصنف بنجاح")
+        except Exception as exc: QMessageBox.critical(self,"فشل التعديل",str(exc))
 
     def load(self, term=None):
         if term is None:
