@@ -1,6 +1,7 @@
 from app.services.system_validation_service import SystemValidationService
 from app.database.connection import get_session
 from sqlalchemy import text
+from app.services.treasury_schema_service import TreasurySchemaService
 
 
 def main():
@@ -12,6 +13,8 @@ def main():
 
     try:
         with get_session() as s:
+            TreasurySchemaService.ensure(s)
+            s.commit()
             tables = {
                 r[0] for r in s.execute(text(
                     "SELECT name FROM sqlite_master WHERE type='table'"
