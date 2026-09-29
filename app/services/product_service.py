@@ -45,3 +45,21 @@ class ProductService:
                 s.execute(text("INSERT INTO product_barcodes(product_id,barcode,is_primary) VALUES(:id,:barcode,1)"),{"id":product_id,"barcode":str(barcode).strip()})
             s.commit()
             return int(product_id)
+
+    @staticmethod
+    def update_product(product_id, sku, name_ar, cost_price, sale_price):
+        sku=str(sku).strip(); name_ar=str(name_ar).strip()
+        if not sku or not name_ar: raise ValueError("رمز الصنف واسم المنتج مطلوبان")
+        if float(cost_price)<0 or float(sale_price)<0: raise ValueError("الأسعار لا يمكن أن تكون سالبة")
+        with get_session() as s:
+            duplicate=s.execute(text("SELECT id FROM products WHERE sku=:sku AND id<>:id LIMIT 1"),{"sku":sku,"id":product_id}).scalar()
+            if duplicate: raise ValueError("رمز الصنف مستخدم لصنف آخر")
+            cols={r[1] for r in s.execute(text("PRAGMA table_info(products)")).fetchall()}
+            data={"sku":sku,"name_ar":name_ar,"cost_price":float(cost_price),"sale_price":float(sale_price),"updated_at":datetime.now().isoformat()}
+            data={k:v for k,v in data.items() if k in cols}
+            if not data: raise ValueError("لا توجد حقول قابلة للتحديث")
+            assignments=", ".join(f'"{k}"=:{k}' for k in data)
+            data["id"]=int(product_id)
+            result=s.execute(text(f"UPDATE products SET {assignments} WHERE id=:id AND is_active=1"),data)
+            if result.rowcount != 1: raise ValueError("الصنف غير موجود أو غير نشط")
+            s.commit()
