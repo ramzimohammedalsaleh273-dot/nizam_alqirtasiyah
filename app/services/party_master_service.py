@@ -246,3 +246,20 @@ class PartyMasterService:
             except Exception:
                 s.rollback()
                 raise
+
+
+    @classmethod
+    def deactivate_party(cls, table, party_id):
+        if table not in ("customers","suppliers"):
+            raise ValueError("نوع الطرف غير مسموح")
+        with get_session() as s:
+            row=s.execute(text(f"SELECT current_balance FROM {table} WHERE id=:id"),{"id":int(party_id)}).fetchone()
+            if not row:
+                raise ValueError("الطرف غير موجود")
+            balance=float(row[0] or 0)
+            if abs(balance) > 0.0001:
+                raise ValueError("لا يمكن حذف/تعطيل طرف عليه رصيد. يجب تسوية الرصيد أولًا.")
+            result=s.execute(text(f"UPDATE {table} SET is_active=0, updated_at=CURRENT_TIMESTAMP WHERE id=:id"),{"id":int(party_id)})
+            if result.rowcount != 1:
+                raise ValueError("تعذر تعطيل الطرف")
+            s.commit()
