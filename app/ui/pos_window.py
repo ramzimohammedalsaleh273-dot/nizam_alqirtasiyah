@@ -6,13 +6,14 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton,
     QTableWidget, QTableWidgetItem, QLabel, QMessageBox,
     QHeaderView, QDialog, QFormLayout, QDoubleSpinBox, QDialogButtonBox,
-    QComboBox, QSpinBox, QInputDialog
+    QComboBox, QInputDialog, QAbstractItemView
 )
 from app.services.inventory_service import InventoryService
 from app.services.party_service import PartyService
 from app.services.pos_service import POSService
 from app.services.tax_service import TaxService
 from app.services.pos_hold_service import POSHoldService
+from app.services.pos_search_service import POSProductSearch
 
 
 class PaymentDialog(QDialog):
@@ -20,12 +21,9 @@ class PaymentDialog(QDialog):
 
     def __init__(self, total, parent=None):
         super().__init__(parent)
-        self.total = Decimal(str(total)).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
+        self.total = Decimal(str(total)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         self.setWindowTitle("إتمام الدفع")
         self.setMinimumWidth(500)
-
         layout = QFormLayout(self)
 
         self.cash = self._money_box()
@@ -38,8 +36,7 @@ class PaymentDialog(QDialog):
         try:
             for row in PartyService.customers():
                 if row.get("is_active", 1):
-                    label = f'{row["id"]} - {row["name"]}'
-                    self.customer.addItem(label, row["id"])
+                    self.customer.addItem(f'{row["id"]} - {row["name"]}', row["id"])
         except Exception:
             pass
 
@@ -47,7 +44,6 @@ class PaymentDialog(QDialog):
         self.reference.setPlaceholderText("رقم العملية/المرجع - اختياري")
         self.total_label = QLabel(f"إجمالي الفاتورة: {self.total:.2f}")
         self.remaining_label = QLabel()
-
         layout.addRow("الإجمالي:", self.total_label)
         layout.addRow("نقدًا:", self.cash)
         layout.addRow("بطاقة:", self.card)
@@ -60,9 +56,7 @@ class PaymentDialog(QDialog):
         for widget in (self.cash, self.card, self.transfer, self.credit):
             widget.valueChanged.connect(self.update_remaining)
 
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        )
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttons.accepted.connect(self.accept_if_valid)
         buttons.rejected.connect(self.reject)
         layout.addRow(buttons)
@@ -85,26 +79,19 @@ class PaymentDialog(QDialog):
 
     def update_remaining(self):
         paid = sum(self.amounts().values(), Decimal("0"))
-        remaining = self.total - paid
-        self.remaining_label.setText(f"{remaining:.2f}")
+        self.remaining_label.setText(f"{self.total - paid:.2f}")
 
     def accept_if_valid(self):
         amounts = self.amounts()
-        total = sum(amounts.values(), Decimal("0")).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
+        total = sum(amounts.values(), Decimal("0")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         if total != self.total:
             QMessageBox.warning(
                 self, "مجموع الدفعات غير صحيح",
-                f"يجب أن يساوي مجموع الدفعات {self.total:.2f}.\n"
-                f"المجموع الحالي: {total:.2f}"
+                f"يجب أن يساوي مجموع الدفعات {self.total:.2f}.\nالمجموع الحالي: {total:.2f}"
             )
             return
         if amounts["credit"] > 0 and self.customer.currentData() is None:
-            QMessageBox.warning(
-                self, "العميل مطلوب",
-                "اختر العميل عند وجود جزء آجل من الفاتورة."
-            )
+            QMessageBox.warning(self, "العميل مطلوب", "اختر العميل عند وجود جزء آجل من الفاتورة.")
             return
         if total <= 0:
             QMessageBox.warning(self, "الدفع", "أدخل مبلغًا للدفع.")
@@ -126,14 +113,81 @@ class PaymentDialog(QDialog):
         return self.customer.currentData()
 
 
+class ProductSelectionDialog(QDialog):
+    """اختيار صنف متعدد النتائج بدل إضافة أول نتيجة بشكل صامت."""
+
+    def __init__(self, products, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("اختيار الصنف")
+        self.setMinimumSize(850, 420)
+        self.selected_product = None
+
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("اختر الصنف المطلوب ثم اضغط Enter أو انقر مرتين."))
+
+        self.table = QTableWidget(0, 6)
+        self.table.setHorizontalHeaderLabels(
+            ["المعرف", "الكود", "الصنف", "الباركود", "السعر", "المتاح"]
+        )
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        for product in products:
+            row = self.table.rowCount()
+            self.table.insertRow(row)
+            values = [
+                product.get("id"),
+                product.get("sku") or "",
+                product.get("name_ar") or product.get("name_en") or "",
+                product.get("barcode") or "",
+                f'{float(product.get("sale_price") or 0):.2f}',
+                f'{float(product.get("available_quantity", product.get("stock", 0)) or 0):.2f}',
+            ]
+            for col, value in enumerate(values):
+                self.table.setItem(row, col, QTableWidgetItem(str(value)))
+
+        layout.addWidget(self.table)
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self.accept_selection)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+        self.table.itemDoubleClicked.connect(lambda *_: self.accept_selection())
+        if self.table.rowCount():
+            self.table.selectRow(0)
+            self.table.setFocus()
+
+    def accept_selection(self):
+        row = self.table.currentRow()
+        if row < 0:
+            return
+        self.selected_product = self._products()[row]
+        self.accept()
+
+    def _products(self):
+        return [
+            {
+                "id": self.table.item(row, 0).text(),
+                "sku": self.table.item(row, 1).text(),
+                "name_ar": self.table.item(row, 2).text(),
+                "barcode": self.table.item(row, 3).text(),
+                "sale_price": self.table.item(row, 4).text(),
+                "available_quantity": self.table.item(row, 5).text(),
+            }
+            for row in range(self.table.rowCount())
+        ]
+
+
 class POSWindow(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.cart = []
+        self.search_engine = POSProductSearch()
         self.setWindowTitle("نقطة البيع")
         self.setMinimumSize(1100, 650)
-
         layout = QVBoxLayout(self)
 
         title = QLabel("نقطة البيع")
@@ -142,11 +196,8 @@ class POSWindow(QWidget):
 
         top = QHBoxLayout()
         self.search = QLineEdit()
-        self.search.setPlaceholderText(
-            "باركود / رمز الصنف / اسم المنتج ثم Enter"
-        )
+        self.search.setPlaceholderText("باركود / رمز الصنف / اسم المنتج ثم Enter")
         self.search.returnPressed.connect(self.add_search_result)
-
         add = QPushButton("إضافة")
         add.clicked.connect(self.add_search_result)
         top.addWidget(self.search)
@@ -154,42 +205,43 @@ class POSWindow(QWidget):
         layout.addLayout(top)
 
         self.table = QTableWidget(0, 5)
-        self.table.setHorizontalHeaderLabels(
-            ["الصنف", "الكمية", "السعر", "الخصم", "الإجمالي"]
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.Stretch
-        )
+        self.table.setHorizontalHeaderLabels(["الصنف", "الكمية", "السعر", "الخصم", "الإجمالي"])
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         layout.addWidget(self.table)
 
         controls = QHBoxLayout()
-        plus = QPushButton("زيادة الكمية")
-        minus = QPushButton("إنقاص الكمية")
-        remove = QPushButton("حذف الصنف")
-        discount = QPushButton("خصم السطر")
-        plus.clicked.connect(lambda: self.change_quantity(1))
-        minus.clicked.connect(lambda: self.change_quantity(-1))
-        remove.clicked.connect(self.remove_selected)
-        discount.clicked.connect(self.discount_selected)
-        controls.addWidget(plus)
-        controls.addWidget(minus)
-        controls.addWidget(remove)
-        controls.addWidget(discount)
+        for label, handler in (
+            ("زيادة الكمية", lambda: self.change_quantity(1)),
+            ("إنقاص الكمية", lambda: self.change_quantity(-1)),
+            ("حذف الصنف", self.remove_selected),
+            ("خصم السطر", self.discount_selected),
+        ):
+            button = QPushButton(label)
+            button.clicked.connect(handler)
+            controls.addWidget(button)
         controls.addStretch()
         layout.addLayout(controls)
 
-        bottom = QHBoxLayout()
-        self.total = QLabel("الإجمالي مع الضريبة: 0.00")
+        totals = QHBoxLayout()
+        self.subtotal_label = QLabel("قبل الضريبة: 0.00")
+        self.discount_label = QLabel("الخصم: 0.00")
+        self.taxable_label = QLabel("الخاضع للضريبة: 0.00")
+        self.tax_label = QLabel("ضريبة القيمة المضافة: 0.00")
+        self.total = QLabel("الإجمالي النهائي: 0.00")
         self.total.setStyleSheet("font-size:22px;font-weight:bold")
+        for label in (self.subtotal_label, self.discount_label, self.taxable_label, self.tax_label, self.total):
+            totals.addWidget(label)
+        layout.addLayout(totals)
+
+        bottom = QHBoxLayout()
         pay = QPushButton("الدفع وإتمام البيع")
         clear = QPushButton("تفريغ الفاتورة")
         pay.clicked.connect(self.complete_sale)
         clear.clicked.connect(self.clear_cart)
-        bottom.addWidget(self.total)
-        bottom.addStretch()
         bottom.addWidget(clear)
+        bottom.addStretch()
         bottom.addWidget(pay)
         layout.addLayout(bottom)
 
@@ -209,30 +261,52 @@ class POSWindow(QWidget):
         QShortcut(QKeySequence("Delete"), self, activated=self.remove_selected)
         QShortcut(QKeySequence("Escape"), self, activated=self.search.setFocus)
 
-    def add_search_result(self):
-        term = self.search.text().strip()
-        if not term:
-            return
-        products = InventoryService.search_products(term)
-        if not products:
-            QMessageBox.warning(self, "غير موجود", "لم يتم العثور على الصنف")
-            return
-        product = products[0]
+    def _add_product(self, product):
+        product_id = int(product["id"])
         for item in self.cart:
-            if item["product_id"] == product["id"]:
+            if item["product_id"] == product_id:
                 item["quantity"] += 1
                 self.refresh()
                 self.search.clear()
+                self.search.setFocus()
                 return
         self.cart.append({
-            "product_id": product["id"],
-            "name": product["name_ar"],
+            "product_id": product_id,
+            "name": product.get("name_ar") or product.get("name_en") or "",
             "quantity": 1,
-            "unit_price": float(product["sale_price"]),
+            "unit_price": float(product.get("sale_price") or 0),
             "discount": 0,
         })
         self.refresh()
         self.search.clear()
+        self.search.setFocus()
+
+    def add_search_result(self):
+        term = self.search.text().strip()
+        if not term:
+            return
+        products = self.search_engine.search(term)
+        if not products:
+            QMessageBox.warning(self, "غير موجود", "لم يتم العثور على الصنف")
+            return
+
+        exact = [
+            p for p in products
+            if term == str(p.get("barcode") or "")
+            or term == str(p.get("sku") or "")
+            or term == str(p.get("id") or "")
+        ]
+        if len(exact) == 1:
+            self._add_product(exact[0])
+            return
+
+        if len(products) == 1:
+            self._add_product(products[0])
+            return
+
+        dialog = ProductSelectionDialog(products, self)
+        if dialog.exec() == QDialog.Accepted and dialog.selected_product:
+            self._add_product(dialog.selected_product)
 
     def selected_index(self):
         row = self.table.currentRow()
@@ -265,7 +339,7 @@ class POSWindow(QWidget):
         value, ok = QInputDialog.getDouble(
             self,
             "خصم السطر",
-            f"الخصم للصنف: {item['name']} (الحد الأقصى {maximum:.2f})",
+            f'الخصم للصنف: {item["name"]} (الحد الأقصى {maximum:.2f})',
             float(item["discount"]),
             0.0,
             float(maximum),
@@ -278,31 +352,39 @@ class POSWindow(QWidget):
     def refresh(self):
         self.table.setRowCount(0)
         subtotal = Decimal("0")
+        discount_total = Decimal("0")
+        taxable = Decimal("0")
+
         for item in self.cart:
             row = self.table.rowCount()
             self.table.insertRow(row)
-            line = (
-                Decimal(str(item["quantity"])) *
-                Decimal(str(item["unit_price"])) -
-                Decimal(str(item["discount"]))
-            )
-            subtotal += line
+            gross = Decimal(str(item["quantity"])) * Decimal(str(item["unit_price"]))
+            discount = Decimal(str(item["discount"]))
+            line = gross - discount
+            subtotal += gross
+            discount_total += discount
+            taxable += line
             values = [
-                item["name"], item["quantity"],
-                f'{item["unit_price"]:.2f}',
-                f'{item["discount"]:.2f}',
-                f'{line:.2f}',
+                item["name"], item["quantity"], f'{item["unit_price"]:.2f}',
+                f'{item["discount"]:.2f}', f'{line:.2f}',
             ]
             for column, value in enumerate(values):
-                self.table.setItem(
-                    row, column, QTableWidgetItem(str(value))
-                )
-        tax_data = TaxService.calculate(subtotal)
+                self.table.setItem(row, column, QTableWidgetItem(str(value)))
+
+        subtotal = subtotal.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        discount_total = discount_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        taxable = taxable.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        tax_data = TaxService.calculate(taxable)
         grand = Decimal(str(tax_data["total"]))
-        self.total.setText(f"الإجمالي مع الضريبة: {grand:.2f}")
+
+        self.subtotal_label.setText(f"قبل الضريبة: {subtotal:.2f}")
+        self.discount_label.setText(f"الخصم: {discount_total:.2f}")
+        self.taxable_label.setText(f"الخاضع للضريبة: {taxable:.2f}")
+        self.tax_label.setText(f"ضريبة القيمة المضافة ({tax_data['rate'] * 100:.2f}%): {tax_data['tax']:.2f}")
+        self.total.setText(f"الإجمالي النهائي: {grand:.2f}")
 
     def current_total(self):
-        return Decimal(self.total.text().split(":")[-1].strip())
+        return Decimal(str(self.total.text().split(":")[-1].strip()))
 
     def complete_sale(self):
         if not self.cart:
@@ -321,9 +403,9 @@ class POSWindow(QWidget):
             )
             QMessageBox.information(
                 self, "تمت العملية",
-                f"تم إنشاء الفاتورة\\n{result['invoice_number']}\\n"
-                f"الإجمالي: {result['total']:.2f}\\n"
-                f"المدفوع: {result['paid']:.2f}\\n"
+                f"تم إنشاء الفاتورة\n{result['invoice_number']}\n"
+                f"الإجمالي: {result['total']:.2f}\n"
+                f"المدفوع: {result['paid']:.2f}\n"
                 f"الآجل: {result['due']:.2f}"
             )
             self.cart = []
@@ -337,8 +419,6 @@ class POSWindow(QWidget):
             QMessageBox.warning(self, "تعليق", "الفاتورة فارغة")
             return
         import copy
-        if not hasattr(self, "held_sales"):
-            self.held_sales = []
         try:
             result = POSHoldService.hold(
                 items=copy.deepcopy(self.cart),
@@ -346,10 +426,7 @@ class POSWindow(QWidget):
                 notes="تعليق من نقطة البيع",
             )
             self.clear_cart()
-            QMessageBox.information(
-                self, "تم التعليق",
-                f"تم حفظ الفاتورة المعلقة برقم {result['hold_number']}"
-            )
+            QMessageBox.information(self, "تم التعليق", f"تم حفظ الفاتورة المعلقة برقم {result['hold_number']}")
         except Exception as exc:
             QMessageBox.critical(self, "فشل التعليق", str(exc))
 
@@ -360,9 +437,7 @@ class POSWindow(QWidget):
                 QMessageBox.information(self, "الفواتير المعلقة", "لا توجد فاتورة معلقة محفوظة")
                 return
             labels = [f"{r['hold_number']} | {r.get('notes') or 'بدون ملاحظات'}" for r in rows]
-            selected, ok = QInputDialog.getItem(
-                self, "استرجاع فاتورة معلقة", "اختر الفاتورة:", labels, 0, False
-            )
+            selected, ok = QInputDialog.getItem(self, "استرجاع فاتورة معلقة", "اختر الفاتورة:", labels, 0, False)
             if not ok:
                 return
             idx = labels.index(selected)
