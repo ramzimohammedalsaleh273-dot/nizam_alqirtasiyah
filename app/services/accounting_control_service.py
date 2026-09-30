@@ -59,10 +59,14 @@ class AccountingControlService:
             "closed_at": "DATETIME",
             "closed_by": "INTEGER",
             "notes": "VARCHAR(500)",
-            "created_at": "DATETIME DEFAULT CURRENT_TIMESTAMP",
+            "created_at": "DATETIME",
         }
         for column, definition in fiscal_columns.items():
             cls._add_column(s, "fiscal_periods", column, definition)
+        # SQLite لا يسمح بإضافة عمود جديد مع DEFAULT CURRENT_TIMESTAMP عبر ALTER TABLE.
+        # بعد إضافة created_at بدون default نملأ السجلات القديمة فقط.
+        if "created_at" in cls._columns(s, "fiscal_periods"):
+            s.execute(text("UPDATE fiscal_periods SET created_at=CURRENT_TIMESTAMP WHERE created_at IS NULL"))
 
         s.execute(text("CREATE INDEX IF NOT EXISTS ix_accounts_parent ON accounts(parent_id)"))
         s.execute(text("CREATE INDEX IF NOT EXISTS ix_accounts_code ON accounts(account_code)"))
