@@ -49,6 +49,21 @@ class AccountingControlService:
                 UNIQUE(start_date,end_date)
             )
         """))
+        # ترقية آمنة لجدول الفترات المالية الموجود من إصدارات أقدم.
+        # لا نحذف أي صفوف؛ نضيف فقط الأعمدة الناقصة مع قيم افتراضية آمنة.
+        fiscal_columns = {
+            "name_ar": "VARCHAR(200) NOT NULL DEFAULT 'فترة مالية'",
+            "start_date": "DATE",
+            "end_date": "DATE",
+            "status": "VARCHAR(20) NOT NULL DEFAULT 'OPEN'",
+            "closed_at": "DATETIME",
+            "closed_by": "INTEGER",
+            "notes": "VARCHAR(500)",
+            "created_at": "DATETIME DEFAULT CURRENT_TIMESTAMP",
+        }
+        for column, definition in fiscal_columns.items():
+            cls._add_column(s, "fiscal_periods", column, definition)
+
         s.execute(text("CREATE INDEX IF NOT EXISTS ix_accounts_parent ON accounts(parent_id)"))
         s.execute(text("CREATE INDEX IF NOT EXISTS ix_accounts_code ON accounts(account_code)"))
         s.execute(text("CREATE INDEX IF NOT EXISTS ix_journal_entries_period ON journal_entries(fiscal_period_id)"))
