@@ -5,11 +5,10 @@ from app.database.connection import get_session
 from app.services.accounting_service import AccountingService
 from app.services.audit_service import AuditService
 from app.services.document_number_service import DocumentNumberService
+from app.services.tax_service import TaxService
 
 
 class POSService:
-
-    TAX_RATE = Decimal("0.15")
 
     PAYMENT_METHODS = {
         "cash",
@@ -158,9 +157,7 @@ class POSService:
                 total_discount = cls.money(total_discount)
                 cost_of_goods_sold = cls.money(cost_of_goods_sold)
 
-                tax = cls.money(
-                    subtotal * cls.TAX_RATE
-                )
+                tax = cls.money(TaxService.calculate(subtotal)["tax"])
 
                 total = cls.money(
                     subtotal + tax
@@ -291,9 +288,7 @@ class POSService:
                 # ====================================================
                 for item in prepared:
 
-                    line_tax = cls.money(
-                        item["line_total"] * cls.TAX_RATE
-                    )
+                    line_tax = cls.money(TaxService.calculate(item["line_total"])["tax"])
 
                     s.execute(
                         text("""
