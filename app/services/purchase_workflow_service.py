@@ -140,7 +140,7 @@ class PurchaseWorkflowService:
                 s.rollback(); raise
 
     @classmethod
-    def receive_order(cls, order_id, paid_amount=0, tax_amount=0, payment_method="cash", notes=None):
+    def receive_order(cls, order_id, paid_amount=0, tax_amount=None, payment_method="cash", notes=None):
         """استلام أمر الشراء وفوترته داخل معاملة واحدة."""
         with get_session() as s:
             try:
