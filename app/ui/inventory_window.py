@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton,
     QTableWidget, QTableWidgetItem, QLabel, QMessageBox,
-    QHeaderView, QDialog, QFormLayout, QDialogButtonBox, QDoubleSpinBox
+    QHeaderView, QDialog, QFormLayout, QDialogButtonBox, QDoubleSpinBox, QComboBox
 )
 from PySide6.QtCore import Qt
 from app.services.inventory_service import InventoryService
@@ -37,8 +37,11 @@ class InventoryWindow(QWidget):
         add_button.clicked.connect(self.add_product)
         edit_button = QPushButton("تعديل الصنف")
         edit_button.clicked.connect(self.edit_product)
+        delete_button = QPushButton("تعطيل/حذف الصنف")
+        delete_button.clicked.connect(self.delete_product)
         bar.addWidget(add_button)
         bar.addWidget(edit_button)
+        bar.addWidget(delete_button)
 
         refresh_button = QPushButton("تحديث")
         refresh_button.clicked.connect(lambda: self.load(""))
@@ -72,15 +75,24 @@ class InventoryWindow(QWidget):
         dialog=QDialog(self); dialog.setWindowTitle("إضافة صنف جديد")
         form=QFormLayout(dialog)
         sku=QLineEdit(); name=QLineEdit(); barcode=QLineEdit()
-        cost=QDoubleSpinBox(); sale=QDoubleSpinBox()
-        for x in (cost,sale): x.setMaximum(999999999); x.setDecimals(2)
+        cost=QDoubleSpinBox(); sale=QDoubleSpinBox(); opening=QDoubleSpinBox(); warehouse=QComboBox()
+        for x in (cost,sale,opening): x.setMaximum(999999999); x.setDecimals(2)
+        opening.setMinimum(0)
+        try:
+            from app.database.connection import get_session
+            from sqlalchemy import text
+            with get_session() as s:
+                for r in s.execute(text("SELECT id,name FROM warehouses WHERE COALESCE(is_active,1)=1 ORDER BY id")).mappings():
+                    warehouse.addItem(str(r["name"]), int(r["id"]))
+        except Exception:
+            warehouse.addItem("المستودع الافتراضي",1)
         form.addRow("رمز الصنف:",sku); form.addRow("اسم المنتج:",name); form.addRow("الباركود:",barcode)
-        form.addRow("التكلفة:",cost); form.addRow("سعر البيع:",sale)
+        form.addRow("التكلفة:",cost); form.addRow("سعر البيع:",sale); form.addRow("الكمية الافتتاحية:",opening); form.addRow("المستودع:",warehouse)
         buttons=QDialogButtonBox(QDialogButtonBox.Ok|QDialogButtonBox.Cancel)
         buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject); form.addRow(buttons)
         if dialog.exec()!=QDialog.Accepted: return
         try:
-            ProductService.create_product(sku.text(),name.text(),cost.value(),sale.value(),barcode.text() or None)
+            ProductService.create_product(sku.text(),name.text(),cost.value(),sale.value(),barcode.text() or None,opening.value(),warehouse.currentData() or 1)
             QMessageBox.information(self,"تم","تم إنشاء الصنف بنجاح"); self.load("")
         except Exception as exc: QMessageBox.critical(self,"فشل إنشاء الصنف",str(exc))
 
@@ -91,17 +103,30 @@ class InventoryWindow(QWidget):
         product_id=int(self.table.item(row,0).text())
         sku=QLineEdit(self.table.item(row,1).text())
         name=QLineEdit(self.table.item(row,2).text())
-        cost=QDoubleSpinBox(); sale=QDoubleSpinBox()
+        cost=QDoubleSpinBox(); sale=QDoubleSpinBox(); quantity=QDoubleSpinBox(); warehouse=QComboBox()
         cost.setMaximum(999999999); sale.setMaximum(999999999); cost.setDecimals(2); sale.setDecimals(2)
-        cost.setValue(float(self.table.item(row,3).text() or 0)); sale.setValue(float(self.table.item(row,4).text() or 0))
+        cost.setValue(float(self.table.item(row,3).text() or 0)); sale.setValue(float(self.table.item(row,4).text() or 0)); quantity.setValue(float(self.table.item(row,7).text() or 0))
         dialog=QDialog(self); dialog.setWindowTitle("تعديل الصنف"); form=QFormLayout(dialog)
-        form.addRow("رمز الصنف:",sku); form.addRow("اسم المنتج:",name); form.addRow("التكلفة:",cost); form.addRow("سعر البيع:",sale)
+        form.addRow("رمز الصنف:",sku); form.addRow("اسم المنتج:",name); form.addRow("التكلفة:",cost); form.addRow("سعر البيع:",sale); form.addRow("الكمية الحالية:",quantity); form.addRow("المستودع:",warehouse)
         buttons=QDialogButtonBox(QDialogButtonBox.Ok|QDialogButtonBox.Cancel); buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject); form.addRow(buttons)
         if dialog.exec()!=QDialog.Accepted: return
         try:
             ProductService.update_product(product_id,sku.text(),name.text(),cost.value(),sale.value())
+            ProductService.adjust_quantity(product_id, warehouse.currentData() or 1, quantity.value())
             self.load(self.search.text().strip()); QMessageBox.information(self,"تم","تم تحديث الصنف بنجاح")
         except Exception as exc: QMessageBox.critical(self,"فشل التعديل",str(exc))
+
+    def delete_product(self):
+        row=self.table.currentRow()
+        if row<0:
+            QMessageBox.warning(self,"تنبيه","اختر صنفًا أولًا"); return
+        product_id=int(self.table.item(row,0).text())
+        if QMessageBox.question(self,"تعطيل الصنف","سيتم إخفاؤه من التشغيل مع الاحتفاظ بتاريخه. هل تريد المتابعة؟",QMessageBox.Yes|QMessageBox.No)!=QMessageBox.Yes: return
+        try:
+            ProductService.deactivate_product(product_id)
+            self.load(self.search.text().strip())
+        except Exception as exc:
+            QMessageBox.critical(self,"فشل تعطيل الصنف",str(exc))
 
     def load(self, term=None):
         if term is None:
