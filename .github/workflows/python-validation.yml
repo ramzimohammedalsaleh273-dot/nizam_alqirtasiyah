@@ -8,6 +8,8 @@ on:
 
 jobs:
   compile:
+    env:
+      LULU_INITIAL_ADMIN_PASSWORD: "CI-Only-Validation-Password-2026!"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
