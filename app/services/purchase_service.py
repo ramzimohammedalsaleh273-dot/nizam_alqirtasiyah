@@ -4,6 +4,7 @@ from app.database.connection import get_session
 from app.services.document_number_service import DocumentNumberService
 from app.services.audit_service import AuditService
 from app.services.accounting_service import AccountingService
+from app.services.tax_service import TaxService
 
 class PurchaseService:
     @staticmethod
@@ -34,7 +35,7 @@ class PurchaseService:
                     line=(q*cost).quantize(Decimal("0.01"),ROUND_HALF_UP);total+=line;prepared.append((int(it["product_id"]),q,cost,line))
                 total=total.quantize(Decimal("0.01"),ROUND_HALF_UP);paid=Decimal(str(paid_amount)).quantize(Decimal("0.01"),ROUND_HALF_UP)
                 if paid<0 or paid>total:raise ValueError("المدفوع غير صالح")
-                tax=Decimal(str(tax_amount)).quantize(Decimal("0.01"),ROUND_HALF_UP)
+                tax = (Decimal(str(TaxService.calculate(total)["tax"])) if tax_amount is None else Decimal(str(tax_amount)).quantize(Decimal("0.01"),ROUND_HALF_UP))
                 if tax<0: raise ValueError("الضريبة لا يمكن أن تكون سالبة")
                 grand_total=(total+tax).quantize(Decimal("0.01"),ROUND_HALF_UP)
                 if paid>grand_total: raise ValueError("المدفوع أكبر من الإجمالي")
@@ -87,7 +88,7 @@ class PurchaseService:
     @classmethod
     def create_invoice(cls, supplier_id, items, warehouse_id=1, branch_id=1,
                        paid_amount=0, notes=None, payment_method="cash",
-                       tax_amount=0, session=None):
+                       tax_amount=None, session=None):
         """إنشاء فاتورة شراء، مع دعم تنفيذها داخل معاملة خارجية."""
         if session is not None:
             return cls._create_invoice_in_session(
