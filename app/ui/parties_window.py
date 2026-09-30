@@ -178,7 +178,10 @@ class PartiesWindow(QWidget):
         ])
         table.setSelectionBehavior(QAbstractItemView.SelectRows)
         table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        table.setAlternatingRowColors(True)\n        table.setWordWrap(False)\n        table.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)\n        table.setMinimumHeight(430)
+        table.setAlternatingRowColors(True)
+        table.setWordWrap(False)
+        table.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
+        table.setMinimumHeight(430)
         table.horizontalHeader().setStretchLastSection(True)
         return table
 
