@@ -5,7 +5,7 @@ from app.database.connection import get_session
 class InventoryService:
 
     @staticmethod
-    def search_products(term=""):
+    def search_products(term="", warehouse_id=1):
         with get_session() as s:
             q = """
             SELECT
@@ -14,10 +14,10 @@ class InventoryService:
                 COALESCE(st.quantity,0) AS quantity,
                 COALESCE(st.available_quantity,0) AS available_quantity
             FROM products p
-            LEFT JOIN stock st ON st.product_id=p.id
+            LEFT JOIN stock st ON st.product_id=p.id AND st.warehouse_id=:warehouse_id
             WHERE p.is_active=1
             """
-            params={}
+            params={"warehouse_id": warehouse_id}
             if term:
                 q += """
                 AND (
@@ -40,7 +40,7 @@ class InventoryService:
             ).fetchall()]
 
     @staticmethod
-    def get_product(product_id):
+    def get_product(product_id, warehouse_id=1):
         with get_session() as s:
             r=s.execute(text("""
                 SELECT
@@ -49,9 +49,9 @@ class InventoryService:
                     COALESCE(st.available_quantity,0) available_quantity,
                     COALESCE(st.average_cost,0) average_cost
                 FROM products p
-                LEFT JOIN stock st ON st.product_id=p.id
+                LEFT JOIN stock st ON st.product_id=p.id AND st.warehouse_id=:warehouse_id
                 WHERE p.id=:id
-            """),{"id":product_id}).fetchone()
+            """),{"id":product_id,"warehouse_id":warehouse_id}).fetchone()
 
             return dict(r._mapping) if r else None
 
