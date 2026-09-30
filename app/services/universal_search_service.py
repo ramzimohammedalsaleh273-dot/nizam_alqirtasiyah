@@ -172,9 +172,33 @@ class UniversalSearchService:
             }
 
     @classmethod
+    def document_profile(cls, kind, entity_id):
+        table = "sales" if kind == "sale" else "purchase_invoices"
+        item_table = "sale_items" if kind == "sale" else "purchase_invoice_items"
+        with get_session() as s:
+            row = s.execute(text(f"SELECT * FROM {table} WHERE id=:id"), {"id": entity_id}).fetchone()
+            if not row:
+                return None
+            data = dict(row._mapping)
+            ic = cls._cols(s, item_table)
+            fk = "sale_id" if kind == "sale" else ("invoice_id" if "invoice_id" in ic else "purchase_invoice_id")
+            items = []
+            if fk in ic:
+                rows = s.execute(text(f"SELECT i.*, p.name_ar, p.sku FROM {item_table} i LEFT JOIN products p ON p.id=i.product_id WHERE i.{fk}=:id ORDER BY i.id"), {"id": entity_id}).fetchall()
+                items = [dict(x._mapping) for x in rows]
+            data["_بنود_المستند"] = items
+            title = ("فاتورة بيع " if kind == "sale" else "فاتورة شراء ") + str(data.get("invoice_number") or entity_id)
+            return {"type": kind, "title": title, "code": data.get("invoice_number") or "", "data": data,
+                    "summary": [("عدد البنود", len(items)), ("الإجمالي", float(data.get("total_amount") or 0)),
+                                 ("المدفوع", float(data.get("paid_amount") or 0)),
+                                 ("المتبقي", float(data.get("due_amount") or 0)), ("الحالة", data.get("status") or "")] }
+
+    @classmethod
     def profile(cls, kind, entity_id):
         if kind == "product":
             return cls.product_profile(entity_id)
         if kind in {"customer", "supplier"}:
             return cls.party_profile(kind, entity_id)
+        if kind in {"sale", "purchase"}:
+            return cls.document_profile(kind, entity_id)
         return None
