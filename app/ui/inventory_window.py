@@ -16,7 +16,7 @@ class InventoryWindow(QWidget):
         self.setWindowTitle("المنتجات والمخزون")
         self.setMinimumSize(1150, 650)
 
-        layout = QVBoxLayout(self)
+        layout = QVBoxLayout(self)\n        self.setLayoutDirection(Qt.RightToLeft)
 
         title = QLabel("المنتجات والمخزون")
         title.setStyleSheet("font-size:28px;font-weight:bold")
@@ -60,7 +60,7 @@ class InventoryWindow(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(
             2, QHeaderView.Stretch
         )
-        self.table.setAlternatingRowColors(True)
+        self.table.setAlternatingRowColors(True)\n        self.table.setWordWrap(False)\n        self.table.setHorizontalScrollMode(QTableWidget.ScrollPerPixel)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         layout.addWidget(self.table)
@@ -113,7 +113,7 @@ class InventoryWindow(QWidget):
                     warehouse.addItem(str(r["name"]), int(r["id"]))
         except Exception:
             warehouse.addItem("المستودع الافتراضي",1)
-        cost.setValue(float(self.table.item(row,3).text() or 0)); sale.setValue(float(self.table.item(row,4).text() or 0)); quantity.setValue(float(self.table.item(row,7).text() or 0))
+        cost.setValue(float(self.table.item(row,3).text() or 0)); sale.setValue(float(self.table.item(row,4).text() or 0))\n        quantity.setValue(0)\n        def load_selected_warehouse_quantity():\n            try:\n                from app.database.connection import get_session\n                from sqlalchemy import text\n                with get_session() as s:\n                    current=s.execute(text("SELECT COALESCE(quantity,0) FROM stock WHERE product_id=:p AND warehouse_id=:w"), {"p":product_id,"w":int(warehouse.currentData() or 1)}).scalar()\n                    quantity.setValue(float(current or 0))\n            except Exception:\n                quantity.setValue(0)\n        warehouse.currentIndexChanged.connect(load_selected_warehouse_quantity)\n        load_selected_warehouse_quantity()
         dialog=QDialog(self); dialog.setWindowTitle("تعديل الصنف"); form=QFormLayout(dialog)
         form.addRow("رمز الصنف:",sku); form.addRow("اسم المنتج:",name); form.addRow("التكلفة:",cost); form.addRow("سعر البيع:",sale); form.addRow("الكمية الحالية:",quantity); form.addRow("المستودع:",warehouse)
         buttons=QDialogButtonBox(QDialogButtonBox.Ok|QDialogButtonBox.Cancel); buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject); form.addRow(buttons)
@@ -168,7 +168,7 @@ class InventoryWindow(QWidget):
                         row, column, QTableWidgetItem(str(value))
                     )
 
-            self.status.setText(f"تم العثور على {len(rows)} صنف")
+            self.status.setText(f"تم العثور على {len(rows)} صنف — الكميات المعروضة إجمالية، والتعديل يتم على مستودع محدد.")
         except Exception as exc:
             self.status.setText("تعذر تحميل المخزون")
             QMessageBox.critical(
