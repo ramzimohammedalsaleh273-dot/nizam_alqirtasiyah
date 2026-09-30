@@ -40,6 +40,27 @@ class BackupService:
         return target
 
     @staticmethod
+    def list_backups(destination_dir=None):
+        target_dir = Path(destination_dir) if destination_dir else PROJECT_ROOT / "backups"
+        if not target_dir.exists():
+            return []
+        return sorted(
+            [p for p in target_dir.glob("*.db") if p.is_file()],
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+
+    @staticmethod
+    def cleanup_backups(keep=20, destination_dir=None):
+        keep = max(1, int(keep))
+        backups = BackupService.list_backups(destination_dir)
+        removed = []
+        for path in backups[keep:]:
+            path.unlink(missing_ok=True)
+            removed.append(path)
+        return removed
+
+    @staticmethod
     def verify_backup(backup_path):
         path = Path(backup_path)
         if not path.exists():
