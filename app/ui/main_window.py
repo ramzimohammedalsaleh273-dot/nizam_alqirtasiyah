@@ -23,6 +23,7 @@ from app.ui.enterprise_tools_window import EnterpriseToolsWindow
 from app.ui.purchase_workflow_window import PurchaseWorkflowWindow
 from app.ui.purchase_returns_window import PurchaseReturnsWindow
 from app.ui.sales_returns_window import SalesReturnsWindow
+from app.ui.treasury_accounts_window import TreasuryAccountsWindow
 from app.database.connection import get_session
 from app.services.treasury_schema_service import TreasurySchemaService
 
@@ -95,6 +96,7 @@ class MainWindow(QMainWindow):
             ("مرتجعات المشتريات", self.open_purchase_returns),
             ("العملاء والموردون", self.open_parties),
             ("الخزينة والبنوك", self.open_treasury),
+            ("حسابات الخزينة والتحويلات", self.open_treasury_accounts),
             ("المحاسبة", self.open_accounting),
             ("التقارير", self.open_reports),
             ("الموظفون", self.open_employees),
@@ -251,6 +253,9 @@ class MainWindow(QMainWindow):
 
     def open_treasury(self):
         self.open_window("treasury", treasury_window)
+
+    def open_treasury_accounts(self):
+        self.open_window("treasury_accounts", TreasuryAccountsWindow)
 
     def open_employees(self):
         self.open_window("employees", employees_window)
