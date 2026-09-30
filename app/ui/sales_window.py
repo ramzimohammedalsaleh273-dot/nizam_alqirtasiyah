@@ -10,8 +10,8 @@ class SalesWindow(QWidget):
 
     def __init__(self,parent=None):
         super().__init__(parent)
-        self.setWindowTitle("المبيعات")
-        self.setMinimumSize(1000,600)
+        self.setWindowTitle("المبيعات والفواتير")
+        self.setMinimumSize(1250,720)
 
         layout=QVBoxLayout(self)
 
