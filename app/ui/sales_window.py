@@ -1,105 +1,167 @@
-
 from PySide6.QtWidgets import (
-    QWidget,QVBoxLayout,QTableWidget,QTableWidgetItem,
-    QPushButton,QHBoxLayout,QLabel,QMessageBox
+    QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem,
+    QPushButton, QHBoxLayout, QLabel, QMessageBox, QLineEdit,
+    QHeaderView, QAbstractItemView
 )
 from PySide6.QtCore import Qt
 from app.services.sales_service import SalesService
 from app.ui.sales_invoice_window import SalesInvoiceWindow
 
-class SalesWindow(QWidget):
 
-    def __init__(self,parent=None):
+class SalesWindow(QWidget):
+    """سجل المبيعات بجدول واضح وبحث مباشر برقم الفاتورة."""
+
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("المبيعات والفواتير")
-        self.setMinimumSize(1250,720)
+        self.setMinimumSize(1250, 720)
+        self.setLayoutDirection(Qt.RightToLeft)
 
-        layout=QVBoxLayout(self)
+        self.setStyleSheet("""
+            QWidget { font-size:14px; }
+            QTableWidget {
+                background:#0D1B2A;
+                color:#F4F7FB;
+                gridline-color:#29435C;
+                border:1px solid #29435C;
+                border-radius:10px;
+                selection-background-color:#244E72;
+                selection-color:#FFFFFF;
+            }
+            QTableWidget::item { padding:8px; }
+            QHeaderView::section {
+                background:#13263D;
+                color:#FFFFFF;
+                padding:9px;
+                border:0;
+                border-bottom:1px solid #29435C;
+                font-weight:700;
+            }
+            QLineEdit {
+                background:#0E1C2D;
+                color:#FFFFFF;
+                border:1px solid #29445F;
+                border-radius:8px;
+                padding:10px;
+            }
+            QPushButton { padding:9px 14px; min-height:36px; }
+        """)
 
-        title=QLabel("سجل المبيعات")
-        title.setStyleSheet("font-size:28px;font-weight:bold")
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(10)
+
+        title = QLabel("المبيعات والفواتير")
+        title.setStyleSheet("font-size:28px;font-weight:700;")
         layout.addWidget(title)
 
-        bar=QHBoxLayout()
+        subtitle = QLabel("ابحث برقم الفاتورة ثم افتح ملفها الكامل. يمكنك أيضًا فتح أي صف بالنقر المزدوج.")
+        subtitle.setStyleSheet("color:#9FB2C8;")
+        layout.addWidget(subtitle)
 
-        refresh=QPushButton("تحديث")
+        bar = QHBoxLayout()
+        self.search = QLineEdit()
+        self.search.setPlaceholderText("رقم الفاتورة...")
+        self.search.returnPressed.connect(self.open_by_number)
+
+        search_button = QPushButton("فتح الفاتورة")
+        search_button.clicked.connect(self.open_by_number)
+
+        refresh = QPushButton("تحديث")
         refresh.clicked.connect(self.load)
 
-        details=QPushButton("تفاصيل الفاتورة")
-        details.clicked.connect(self.show_details)
-
+        bar.addWidget(self.search, 1)
+        bar.addWidget(search_button)
         bar.addWidget(refresh)
-        bar.addWidget(details)
-        bar.addStretch()
-
-        full_invoice = QPushButton("فتح الفاتورة الكاملة")
-        full_invoice.clicked.connect(self.show_details)
-        bar.addWidget(full_invoice)
         layout.addLayout(bar)
 
-        self.table=QTableWidget(0,7)
-        self.table.setSelectionBehavior(QTableWidget.SelectRows)
-        self.table.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.table.setAlternatingRowColors(True)
-        self.table.horizontalHeader().setStretchLastSection(True)
-        self.table.doubleClicked.connect(lambda *_: self.show_details())
+        self.table = QTableWidget(0, 8)
         self.table.setHorizontalHeaderLabels([
-            "المعرف","رقم الفاتورة","قبل الضريبة",
-            "الضريبة","الإجمالي","المدفوع","المتبقي"
+            "المعرف", "رقم الفاتورة", "قبل الضريبة", "الخصم",
+            "الضريبة", "الإجمالي", "المدفوع", "المتبقي"
         ])
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.Fixed)
+        header.resizeSection(0, 80)
+        header.setSectionResizeMode(1, QHeaderView.Interactive)
+        header.resizeSection(1, 190)
+        for column in range(2, 8):
+            header.setSectionResizeMode(column, QHeaderView.Fixed)
+            header.resizeSection(column, 125)
 
-        layout.addWidget(self.table)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table.setAlternatingRowColors(True)
+        self.table.verticalHeader().setDefaultSectionSize(42)
+        self.table.doubleClicked.connect(lambda *_: self.show_details())
+
+        layout.addWidget(self.table, 1)
+
+        self.status = QLabel("جاهز")
+        self.status.setStyleSheet("color:#9FB2C8;padding:4px;")
+        layout.addWidget(self.status)
+
         self.load()
 
     def load(self):
-        rows=SalesService.list_sales()
-        self.table.setRowCount(0)
+        try:
+            rows = SalesService.list_sales()
+            self.table.setRowCount(0)
 
-        for r in rows:
-            row=self.table.rowCount()
-            self.table.insertRow(row)
+            for row_data in rows:
+                row = self.table.rowCount()
+                self.table.insertRow(row)
 
-            values=[
-                r["id"],
-                r["invoice_number"],
-                r["subtotal"],
-                r["tax_amount"],
-                r["total_amount"],
-                r["paid_amount"],
-                r["due_amount"]
-            ]
+                values = [
+                    row_data["id"],
+                    row_data["invoice_number"],
+                    f'{float(row_data["subtotal"] or 0):,.2f}',
+                    f'{float(row_data["discount_amount"] or 0):,.2f}',
+                    f'{float(row_data["tax_amount"] or 0):,.2f}',
+                    f'{float(row_data["total_amount"] or 0):,.2f}',
+                    f'{float(row_data["paid_amount"] or 0):,.2f}',
+                    f'{float(row_data["due_amount"] or 0):,.2f}',
+                ]
 
-            for c,v in enumerate(values):
-                self.table.setItem(
-                    row,c,QTableWidgetItem(str(v))
-                )
+                for column, value in enumerate(values):
+                    item = QTableWidgetItem(str(value))
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.table.setItem(row, column, item)
+
+            self.status.setText(f"تم تحميل {len(rows)} فاتورة.")
+        except Exception as exc:
+            self.status.setText("تعذر تحميل سجل المبيعات.")
+            QMessageBox.critical(self, "خطأ في المبيعات", str(exc))
+
+    def open_by_number(self):
+        number = self.search.text().strip()
+        if not number:
+            self.search.setFocus()
+            return
+
+        data = SalesInvoiceWindow.find_data_by_number(number)
+        if not data:
+            QMessageBox.warning(self, "غير موجود", "لم يتم العثور على فاتورة بهذا الرقم.")
+            self.search.selectAll()
+            self.search.setFocus()
+            return
+
+        window = SalesInvoiceWindow(self, data=data)
+        window.show()
+        window.raise_()
+        window.activateWindow()
+        self._invoice_window = window
 
     def show_details(self):
-        row=self.table.currentRow()
-        if row<0:
-            QMessageBox.warning(self,"تنبيه","اختر فاتورة أولاً")
+        row = self.table.currentRow()
+        if row < 0:
+            QMessageBox.warning(self, "تنبيه", "اختر فاتورة أولاً.")
             return
 
-        sale_id=int(self.table.item(row,0).text())
-        sale=SalesService.get_sale(sale_id)
-
-        if not sale:
-            return
-
-        self.invoice_window=SalesInvoiceWindow(self,sale_id)
-        self.invoice_window.show()
-        self.invoice_window.raise_()
-        self.invoice_window.activateWindow()
-        return
-
-        text=f"الفاتورة: {sale['invoice_number']}\n"
-        text+=f"الإجمالي: {sale['total_amount']}\n\n"
-
-        for item in sale["items"]:
-            text+=(
-                f"{item['name_ar']} | "
-                f"الكمية: {item['quantity']} | "
-                f"السعر: {item['unit_price']}\n"
-            )
-
-        QMessageBox.information(self,"تفاصيل الفاتورة",text)
+        sale_id = int(self.table.item(row, 0).text())
+        window = SalesInvoiceWindow(self, sale_id=sale_id)
+        window.show()
+        window.raise_()
+        window.activateWindow()
+        self._invoice_window = window
