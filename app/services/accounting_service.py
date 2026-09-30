@@ -73,6 +73,8 @@ class AccountingService:
         tax_amount = cls.money(tax_amount)
         AccountingControlService.ensure_schema(session)
         period = AccountingControlService.ensure_current_period(session)
+        AccountingControlService.ensure_schema(session)
+        period = AccountingControlService.ensure_current_period(session)
         total_amount = cls.money(total_amount)
         paid_amount = cls.money(paid_amount)
         due_amount = cls.money(due_amount)
