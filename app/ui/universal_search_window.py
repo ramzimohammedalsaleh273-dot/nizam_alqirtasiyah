@@ -46,7 +46,7 @@ class UniversalSearchWindow(QWidget):
         self.alerts = self._table(["النوع", "التنبيه"])
         self.data = self._table(["الحقل", "القيمة"])
         self.warehouses = self._table(["المستودع", "المخزون", "المتاح", "متوسط التكلفة"])
-        self.history = self._table(["النوع", "رقم المستند", "التاريخ", "الكمية/الإجمالي", "القيمة"])
+        self.history = self._table(["النوع", "رقم المستند", "التاريخ", "الطرف", "الكمية/الإجمالي", "القيمة"])
         self.tabs.addTab(self.overview, "الملخص")
         self.tabs.addTab(self.alerts, "التنبيهات الذكية")
         self.tabs.addTab(self.data, "بيانات الكيان")
@@ -126,11 +126,11 @@ class UniversalSearchWindow(QWidget):
 
             history = []
             for x in profile.get("sales", []):
-                history.append(("بيع", x.get("invoice_number"), x.get("event_date"), x.get("quantity"), x.get("amount")))
+                history.append(("بيع", x.get("invoice_number"), x.get("event_date"), x.get("customer_name") or "نقدي/غير محدد", x.get("quantity"), x.get("amount")))
             for x in profile.get("purchases", []):
-                history.append(("شراء", x.get("invoice_number"), x.get("event_date"), x.get("quantity"), x.get("amount")))
+                history.append(("شراء", x.get("invoice_number"), x.get("event_date"), x.get("supplier_name") or "غير محدد", x.get("quantity"), x.get("amount")))
             for x in profile.get("documents", []):
-                history.append(("مستند", x.get("invoice_number"), x.get("event_date"), "", x.get("total_amount")))
+                history.append(("مستند", x.get("invoice_number"), x.get("event_date"), "", "", x.get("total_amount")))
             self._fill(self.history, history)
             self.status.setText(
                 f"ملف 360° جاهز: {profile['title']} — "
