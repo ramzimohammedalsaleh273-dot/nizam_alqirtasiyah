@@ -124,7 +124,7 @@ class TreasuryOperationsService:
     def _account(cls, s, account_id):
         row = s.execute(text("""
             SELECT id,code,name_ar,account_type,currency_code,gl_account_code,
-                   branch_id,is_active
+                   branch_id,opening_balance,is_active
             FROM treasury_accounts WHERE id=:id
         """), {"id": account_id}).mappings().first()
         if not row:
@@ -197,7 +197,7 @@ class TreasuryOperationsService:
                 WHERE a.account_code=:code
                   AND COALESCE(je.status,'POSTED')='POSTED'
             """), {"code": account["gl_account_code"]}).scalar()
-            result = self_money = cls.money(account["opening_balance"] if "opening_balance" in account else 0)
+            result = cls.money(account["opening_balance"] or 0)
             result += cls.money(row or 0)
             s.rollback()
             return float(result)
