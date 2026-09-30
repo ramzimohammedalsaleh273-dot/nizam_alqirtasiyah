@@ -16,7 +16,8 @@ class InventoryWindow(QWidget):
         self.setWindowTitle("المنتجات والمخزون")
         self.setMinimumSize(1150, 650)
 
-        layout = QVBoxLayout(self)\n        self.setLayoutDirection(Qt.RightToLeft)
+        layout = QVBoxLayout(self)
+        self.setLayoutDirection(Qt.RightToLeft)
 
         title = QLabel("المنتجات والمخزون")
         title.setStyleSheet("font-size:28px;font-weight:bold")
