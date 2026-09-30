@@ -1,5 +1,6 @@
 from collections import defaultdict
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QApplication
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel,
     QTableWidget, QTableWidgetItem, QHeaderView, QComboBox, QFrame,
@@ -208,5 +209,6 @@ class UniversalSearchWindow(QWidget):
     def copy_code(self):
         profile = getattr(self, "current_profile", None)
         if profile:
-            QMessageBox.information(self, "الكود", str(profile.get("code") or "لا يوجد كود"))
+            QApplication.clipboard().setText(str(profile.get("code") or ""))
+            self.status.setText("تم نسخ الكود إلى الحافظة.")
 
