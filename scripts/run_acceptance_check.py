@@ -22,6 +22,13 @@ def main():
             }
             add("جلسات الكاشير", "cashier_sessions" in tables,
                 "جدول cashier_sessions موجود" if "cashier_sessions" in tables else "جدول cashier_sessions غير موجود")
+            for table in ("treasury_accounts", "bank_accounts", "cash_registers", "treasury_movements", "treasury_transfers"):
+                add(f"بنية {table}", table in tables, "الجدول موجود" if table in tables else "الجدول غير موجود")
+
+            cashier_cols = {r[1] for r in s.connection().exec_driver_sql("PRAGMA table_info(cashier_sessions)").fetchall()}
+            for column in ("opened_by", "closed_by", "close_notes"):
+                add(f"جلسات الكاشير/{column}", column in cashier_cols, "العمود موجود" if column in cashier_cols else "العمود غير موجود")
+
             for table in ("customer_payments", "supplier_payments"):
                 if table in tables:
                     cols = {r[1] for r in s.connection().exec_driver_sql(
