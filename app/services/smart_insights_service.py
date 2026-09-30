@@ -182,10 +182,65 @@ class SmartInsightsService:
                 "alerts": alerts,
             }
 
+
+    @classmethod
+    def document_360(cls, kind, entity_id):
+        table = "sales" if kind == "sale" else "purchase_invoices"
+        items = "sale_items" if kind == "sale" else "purchase_invoice_items"
+        with get_session() as s:
+            row = s.execute(text(f"SELECT * FROM {table} WHERE id=:id"), {"id": entity_id}).mappings().first()
+            if not row:
+                return None
+            data = dict(row)
+            ic = cls._cols(s, items)
+            fk = "sale_id" if kind == "sale" else cls._first(ic, "invoice_id", "purchase_invoice_id")
+            history = []
+            if fk and cls._exists(s, items):
+                rows = s.execute(text(f"""
+                    SELECT i.*, p.name_ar, p.sku
+                    FROM {items} i LEFT JOIN products p ON p.id=i.product_id
+                    WHERE i.{fk}=:id ORDER BY i.id
+                """), {"id": entity_id}).mappings().all()
+                history = [dict(x) for x in rows]
+            title = ("فاتورة بيع " if kind == "sale" else "فاتورة شراء ") + str(data.get("invoice_number") or entity_id)
+            return {
+                "type": kind, "title": title, "code": data.get("invoice_number") or "",
+                "data": data,
+                "metrics": [
+                    ("عدد البنود", len(history)),
+                    ("الإجمالي", float(data.get("total_amount") or 0)),
+                    ("المدفوع", float(data.get("paid_amount") or 0)),
+                    ("المتبقي", float(data.get("due_amount") or 0)),
+                ],
+                "alerts": [],
+                "documents": history,
+            }
+
+    @classmethod
+    def simple_360(cls, kind, entity_id):
+        table_map = {"account": "accounts", "employee": "employees", "warehouse": "warehouses"}
+        table = table_map.get(kind)
+        if not table:
+            return None
+        with get_session() as s:
+            if not cls._exists(s, table):
+                return None
+            row = s.execute(text(f"SELECT * FROM {table} WHERE id=:id"), {"id": entity_id}).mappings().first()
+            if not row:
+                return None
+            data = dict(row)
+            title = data.get("name") or data.get("account_name") or data.get("full_name") or data.get("code") or f"{kind} {entity_id}"
+            return {"type": kind, "title": title, "code": data.get("code") or data.get("account_code") or "",
+                    "data": data, "metrics": [], "alerts": [], "documents": []}
+
     @classmethod
     def profile(cls, kind, entity_id):
         if kind == "product":
             return cls.product_360(entity_id)
         if kind in {"customer", "supplier"}:
             return cls.party_360(kind, entity_id)
+        if kind in {"sale", "purchase"}:
+            return cls.document_360(kind, entity_id)
+        if kind in {"account", "employee", "warehouse"}:
+            return cls.simple_360(kind, entity_id)
         return None
