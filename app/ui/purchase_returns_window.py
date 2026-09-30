@@ -1,3 +1,4 @@
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
     QPushButton, QMessageBox, QInputDialog, QHeaderView
@@ -14,7 +15,7 @@ class PurchaseReturnsWindow(QWidget):
         super().__init__(parent)
         self.setWindowTitle("مرتجعات المشتريات")
         self.setMinimumSize(1150, 680)
-        self.setLayoutDirection(2)
+        self.setLayoutDirection(Qt.RightToLeft)
 
         root = QVBoxLayout(self)
         bar = QHBoxLayout()
@@ -122,8 +123,8 @@ class PurchaseReturnsWindow(QWidget):
             return
 
         purchase_id = int(self.table.item(row, 0).text())
-        product_id = int(self.table.item(row, 4).data(0) or 0) if self.table.item(row, 4) else 0
         # اسم المنتج ظاهر في العمود 4، والمعرف الحقيقي محفوظ في UserRole.
+        product_id = 0
         product_id_item = self.table.item(row, 4)
         if product_id_item is not None:
             product_id = int(product_id_item.data(32) or 0)
