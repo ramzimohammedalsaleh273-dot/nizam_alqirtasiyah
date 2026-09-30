@@ -142,14 +142,17 @@ class PartiesWindow(QWidget):
         self.add_customer_button = QPushButton("إضافة عميل")
         self.add_supplier_button = QPushButton("إضافة مورد")
         self.edit_button = QPushButton("تعديل المحدد")
+        self.delete_button = QPushButton("تعطيل/حذف المحدد")
         self.refresh_button = QPushButton("تحديث")
         self.add_customer_button.clicked.connect(self.add_customer)
         self.add_supplier_button.clicked.connect(self.add_supplier)
         self.edit_button.clicked.connect(self.edit_selected)
+        self.delete_button.clicked.connect(self.delete_selected)
         self.refresh_button.clicked.connect(self.load)
         bar.addWidget(self.add_customer_button)
         bar.addWidget(self.add_supplier_button)
         bar.addWidget(self.edit_button)
+        bar.addWidget(self.delete_button)
         bar.addWidget(self.refresh_button)
         bar.addStretch()
         layout.addLayout(bar)
@@ -241,6 +244,20 @@ class PartiesWindow(QWidget):
         except Exception as exc:
             QMessageBox.critical(self, "فشل الحفظ", str(exc))
 
+    def delete_selected(self):
+        supplier, party = self._selected()
+        if party is None:
+            QMessageBox.information(self, "الحذف", "اختر عميلًا أو موردًا أولًا.")
+            return
+        label = "المورد" if supplier else "العميل"
+        if QMessageBox.question(self, "تعطيل الطرف", f"سيتم إخفاء {label} من التشغيل مع الاحتفاظ بتاريخه. هل تريد المتابعة؟", QMessageBox.Yes|QMessageBox.No) != QMessageBox.Yes:
+            return
+        try:
+            PartyMasterService.deactivate_party("suppliers" if supplier else "customers", party["id"])
+            self.load()
+        except Exception as exc:
+            QMessageBox.critical(self, "تعذر التعطيل", str(exc))
+
     def add_customer(self):
         self._open_form(False)
 
@@ -253,3 +270,4 @@ class PartiesWindow(QWidget):
             QMessageBox.information(self, "التعديل", "اختر عميلًا أو موردًا أولًا.")
             return
         self._open_form(supplier, party)
+
