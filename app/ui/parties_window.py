@@ -133,7 +133,7 @@ class PartiesWindow(QWidget):
         self.setWindowTitle("العملاء والموردون")
         self.setMinimumSize(1150, 650)
 
-        layout = QVBoxLayout(self)
+        layout = QVBoxLayout(self)\n        self.setLayoutDirection(Qt.RightToLeft)
         title = QLabel("إدارة العملاء والموردين")
         title.setStyleSheet("font-size:28px;font-weight:bold")
         layout.addWidget(title)
@@ -177,7 +177,7 @@ class PartiesWindow(QWidget):
         ])
         table.setSelectionBehavior(QAbstractItemView.SelectRows)
         table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        table.setAlternatingRowColors(True)
+        table.setAlternatingRowColors(True)\n        table.setWordWrap(False)\n        table.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)\n        table.setMinimumHeight(430)
         table.horizontalHeader().setStretchLastSection(True)
         return table
 
@@ -190,7 +190,7 @@ class PartiesWindow(QWidget):
                 row_data.get("id"),
                 row_data.get("party_code"),
                 row_data.get("name"),
-                row_data.get("party_type") or "",
+                {"individual":"فرد","company":"شركة","school":"مدرسة","government":"جهة حكومية","local":"محلي","international":"دولي","manufacturer":"مصنّع","distributor":"موزع"}.get(str(row_data.get("party_type") or ""), row_data.get("party_type") or ""),
                 row_data.get("group_name") or "",
                 row_data.get("phone") or "",
                 row_data.get("email") or "",
