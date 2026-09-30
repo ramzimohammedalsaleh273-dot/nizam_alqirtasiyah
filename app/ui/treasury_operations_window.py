@@ -64,7 +64,7 @@ class TreasuryOperationsWindow(QWidget):
         amount=self._amount("رصيد افتتاح الصندوق")
         if amount is None:return
         try:
-            sid=CashierSessionService.open(None if cid==0 else cid,amount)
+            sid=CashierSessionService.open(None if cid==0 else cid,amount,opened_by=self._user())
             QMessageBox.information(self,"تم",f"تم فتح الجلسة رقم {sid}")
         except Exception as e: QMessageBox.critical(self,"فشل فتح الجلسة",str(e))
 
@@ -74,7 +74,7 @@ class TreasuryOperationsWindow(QWidget):
         amount=self._amount("النقد الفعلي في الصندوق")
         if amount is None:return
         try:
-            r=CashierSessionService.close(sid,amount)
+            r=CashierSessionService.close(sid,amount,closed_by=self._user())
             QMessageBox.information(
                 self,"تم",
                 f"المتوقع: {r['expected']:.2f}\n"
