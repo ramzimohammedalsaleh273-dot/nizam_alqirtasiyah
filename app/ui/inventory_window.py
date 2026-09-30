@@ -105,6 +105,14 @@ class InventoryWindow(QWidget):
         name=QLineEdit(self.table.item(row,2).text())
         cost=QDoubleSpinBox(); sale=QDoubleSpinBox(); quantity=QDoubleSpinBox(); warehouse=QComboBox()
         cost.setMaximum(999999999); sale.setMaximum(999999999); cost.setDecimals(2); sale.setDecimals(2)
+        try:
+            from app.database.connection import get_session
+            from sqlalchemy import text
+            with get_session() as s:
+                for r in s.execute(text("SELECT id,name FROM warehouses WHERE COALESCE(is_active,1)=1 ORDER BY id")).mappings():
+                    warehouse.addItem(str(r["name"]), int(r["id"]))
+        except Exception:
+            warehouse.addItem("المستودع الافتراضي",1)
         cost.setValue(float(self.table.item(row,3).text() or 0)); sale.setValue(float(self.table.item(row,4).text() or 0)); quantity.setValue(float(self.table.item(row,7).text() or 0))
         dialog=QDialog(self); dialog.setWindowTitle("تعديل الصنف"); form=QFormLayout(dialog)
         form.addRow("رمز الصنف:",sku); form.addRow("اسم المنتج:",name); form.addRow("التكلفة:",cost); form.addRow("سعر البيع:",sale); form.addRow("الكمية الحالية:",quantity); form.addRow("المستودع:",warehouse)
