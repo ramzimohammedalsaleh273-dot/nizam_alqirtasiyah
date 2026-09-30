@@ -62,8 +62,9 @@ class SmartInsightsService:
                     date_expr = f"s.{date}" if date else "NULL"
                     rows = s.execute(text(f"""
                         SELECT s.id, s.invoice_number, {date_expr} event_date,
-                               si.{qty} quantity, {amount} amount
+                               si.{qty} quantity, {amount} amount, c.name AS customer_name
                         FROM sale_items si JOIN sales s ON s.id=si.{fk}
+                        LEFT JOIN customers c ON c.id=s.customer_id
                         WHERE si.product_id=:id
                         ORDER BY s.id DESC LIMIT 100
                     """), {"id": product_id}).mappings().all()
@@ -83,8 +84,9 @@ class SmartInsightsService:
                     date_expr = f"pi.{date}" if date else "NULL"
                     rows = s.execute(text(f"""
                         SELECT pi.id, pi.invoice_number, {date_expr} event_date,
-                               piix.{qty} quantity, {amount} amount
+                               piix.{qty} quantity, {amount} amount, sp.name AS supplier_name
                         FROM purchase_invoice_items piix JOIN purchase_invoices pi ON pi.id=piix.{fk}
+                        LEFT JOIN suppliers sp ON sp.id=pi.supplier_id
                         WHERE piix.product_id=:id
                         ORDER BY pi.id DESC LIMIT 100
                     """), {"id": product_id}).mappings().all()
