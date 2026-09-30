@@ -109,10 +109,34 @@ class SecurityService:
 
             if not valid and not legacy_valid:
                 if "failed_login_attempts" in data:
+                    attempts = int(data.get("failed_login_attempts") or 0) + 1
+                    locked = 1 if attempts >= 5 else 0
                     con.execute(
-                        "UPDATE users SET failed_login_attempts=COALESCE(failed_login_attempts,0)+1 WHERE id=?",
-                        (data["id"],),
+                        "UPDATE users SET failed_login_attempts=?, is_locked=? WHERE id=?",
+                        (attempts, locked, data["id"]),
                     )
+                    if self._table_exists(con, "login_attempts"):
+                        cols = self._columns(con, "login_attempts")
+                        values = {}
+                        if "user_id" in cols:
+                            values["user_id"] = data["id"]
+                        if "username" in cols:
+                            values["username"] = username
+                        if "success" in cols:
+                            values["success"] = 0
+                        if "attempted_at" in cols:
+                            values["attempted_at"] = None
+                        if values:
+                            keys = list(values)
+                            binds = [
+                                "CURRENT_TIMESTAMP" if k == "attempted_at" else ":" + k
+                                for k in keys
+                            ]
+                            params = {k: v for k, v in values.items() if k != "attempted_at"}
+                            con.execute(
+                                f"INSERT INTO login_attempts ({', '.join(keys)}) VALUES ({', '.join(binds)})",
+                                params,
+                            )
                     con.commit()
                 return None
 
@@ -134,9 +158,31 @@ class SecurityService:
 
             if "last_login_at" in data:
                 con.execute(
-                    "UPDATE users SET last_login_at=CURRENT_TIMESTAMP, failed_login_attempts=0 WHERE id=?",
+                    "UPDATE users SET last_login_at=CURRENT_TIMESTAMP, failed_login_attempts=0, is_locked=0 WHERE id=?",
                     (data["id"],),
                 )
+            if self._table_exists(con, "login_attempts"):
+                cols = self._columns(con, "login_attempts")
+                values = {}
+                if "user_id" in cols:
+                    values["user_id"] = data["id"]
+                if "username" in cols:
+                    values["username"] = username
+                if "success" in cols:
+                    values["success"] = 1
+                if "attempted_at" in cols:
+                    values["attempted_at"] = None
+                if values:
+                    keys = list(values)
+                    binds = [
+                        "CURRENT_TIMESTAMP" if k == "attempted_at" else ":" + k
+                        for k in keys
+                    ]
+                    params = {k: v for k, v in values.items() if k != "attempted_at"}
+                    con.execute(
+                        f"INSERT INTO login_attempts ({', '.join(keys)}) VALUES ({', '.join(binds)})",
+                        params,
+                    )
 
             # يدعم نظام الجلسات الحديث، أو جدول الجلسات القديم إن كان هو الموجود.
             session_table = None
