@@ -18,3 +18,14 @@ def test_existing_product_has_360_profile():
     assert profile is not None
     assert profile["type"] == "product"
     assert "metrics" in profile
+
+
+def test_product_service_exposes_stock_controls():
+    from app.services.product_service import ProductService
+    assert callable(ProductService.deactivate_product)
+    assert callable(ProductService.adjust_quantity)
+
+
+def test_party_service_exposes_safe_deactivation():
+    from app.services.party_master_service import PartyMasterService
+    assert callable(PartyMasterService.deactivate_party)
