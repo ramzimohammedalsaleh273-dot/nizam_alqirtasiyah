@@ -2,6 +2,7 @@
 from datetime import datetime
 from sqlalchemy import text
 from app.services.document_number_service import DocumentNumberService
+from app.services.accounting_control_service import AccountingControlService
 
 
 class AccountingService:
@@ -66,8 +67,12 @@ class AccountingService:
         payments=None,
         customer_id=None,
     ):
+        AccountingControlService.ensure_schema(session)
+        period = AccountingControlService.ensure_current_period(session)
         subtotal = cls.money(subtotal)
         tax_amount = cls.money(tax_amount)
+        AccountingControlService.ensure_schema(session)
+        period = AccountingControlService.ensure_current_period(session)
         total_amount = cls.money(total_amount)
         paid_amount = cls.money(paid_amount)
         due_amount = cls.money(due_amount)
@@ -209,6 +214,7 @@ class AccountingService:
                 "entry_date": datetime.now().strftime("%Y-%m-%d"),
                 "description": f"ترحيل فاتورة بيع {invoice_number}",
                 "source_id": sale_id,
+                "period_id": period["id"],
             }
         )
 
@@ -293,9 +299,9 @@ class AccountingService:
             INSERT INTO journal_entries
             (entry_number, entry_date, description, source_type, source_id, status,
              fiscal_period_id, created_by, created_at)
-            VALUES (:n, :d, :desc, 'PURCHASE', :sid, 'POSTED', NULL, NULL, CURRENT_TIMESTAMP)
+            VALUES (:n, :d, :desc, 'PURCHASE', :sid, 'POSTED', :period_id, NULL, CURRENT_TIMESTAMP)
         """), {"n": entry_number, "d": datetime.now().strftime("%Y-%m-%d"),
-               "desc": f"ترحيل فاتورة شراء {invoice_number}", "sid": purchase_id})
+               "desc": f"ترحيل فاتورة شراء {invoice_number}", "sid": purchase_id, "period_id": period["id"]})
         entry_id = int(session.execute(text("SELECT last_insert_rowid()")).scalar())
         for line in lines:
             session.execute(text("""
