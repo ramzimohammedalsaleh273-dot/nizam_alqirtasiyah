@@ -1,17 +1,13 @@
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QPushButton, QFrame, QMessageBox, QDialog,
-    QLineEdit, QDialogButtonBox
+    QLineEdit, QDialogButtonBox, QScrollArea, QSizePolicy, QToolButton
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeySequence, QShortcut
 from app.core.config import APP_NAME, APP_VERSION
 from app.services.security_service import SecurityService
-from app.services.system_service import (
-    get_system_summary,
-    get_financial_summary,
-    get_health,
-)
+from app.services.system_service import get_system_summary, get_financial_summary, get_health
 from app.ui.pos_window import POSWindow
 from app.ui.sales_window import SalesWindow
 from app.ui.purchases_window import PurchasesWindow
@@ -34,38 +30,47 @@ from app.services.treasury_schema_service import TreasurySchemaService
 
 
 class LoginDialog(QDialog):
-    """بوابة دخول حقيقية قبل فتح واجهة النظام."""
+    """بوابة دخول قبل فتح النظام."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.user = None
         self.security = SecurityService()
         self.setWindowTitle("تسجيل الدخول — نظام القرطاسية")
-        self.setFixedSize(430, 300)
+        self.setFixedSize(440, 310)
         self.setLayoutDirection(Qt.RightToLeft)
 
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(28, 24, 28, 24)
+        layout.setSpacing(12)
+
         title = QLabel("نظام القرطاسية")
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("font-size:26px;font-weight:bold;padding:15px;")
+        title.setStyleSheet("font-size:26px;font-weight:700;padding:8px;")
         layout.addWidget(title)
+
+        subtitle = QLabel("تسجيل الدخول إلى بيئة التشغيل")
+        subtitle.setAlignment(Qt.AlignCenter)
+        subtitle.setStyleSheet("color:#9FB2C8;padding-bottom:8px;")
+        layout.addWidget(subtitle)
 
         self.username = QLineEdit()
         self.username.setPlaceholderText("اسم المستخدم")
+        self.username.setMinimumHeight(42)
         layout.addWidget(self.username)
 
         self.password = QLineEdit()
         self.password.setPlaceholderText("كلمة المرور")
         self.password.setEchoMode(QLineEdit.Password)
+        self.password.setMinimumHeight(42)
         layout.addWidget(self.password)
 
         self.message = QLabel("")
         self.message.setAlignment(Qt.AlignCenter)
+        self.message.setWordWrap(True)
         layout.addWidget(self.message)
 
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        )
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttons.accepted.connect(self.login)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -89,112 +94,175 @@ class LoginDialog(QDialog):
 
 
 class MainWindow(QMainWindow):
+    """الحاوية الرئيسية: تنقل منظم ومحتوى واسع بدل تكديس الوحدات."""
 
     def __init__(self):
         super().__init__()
-
         self.setWindowTitle(f"{APP_NAME} - {APP_VERSION}")
-        self.setMinimumSize(1200, 720)
+        self.setMinimumSize(1180, 720)
         self._child_windows = {}
         self._bootstrap_operational_schema()
         self.build_ui()
 
     def _bootstrap_operational_schema(self):
-        with get_session() as s:
-            TreasurySchemaService.ensure(s)
-            s.commit()
+        with get_session() as session:
+            TreasurySchemaService.ensure(session)
+            session.commit()
 
     def build_ui(self):
         self.setStyleSheet("""
-            QMainWindow { background: #07111F; }
-            QLabel { color: white; }
+            QMainWindow, QWidget#Root { background:#07111F; }
+            QLabel { color:#F4F7FB; }
             QFrame#Sidebar {
-                background: #0B1728;
-                border-radius: 12px;
+                background:#0B1728;
+                border:1px solid #1A3049;
+                border-radius:16px;
+            }
+            QFrame#BrandCard {
+                background:#10243A;
+                border:1px solid #234361;
+                border-radius:14px;
+            }
+            QFrame#Section {
+                background:#0E1C2D;
+                border:1px solid #1A3049;
+                border-radius:12px;
             }
             QFrame#Card {
-                background: #101F33;
-                border: 1px solid #1E3856;
-                border-radius: 14px;
+                background:#101F33;
+                border:1px solid #1E3856;
+                border-radius:14px;
             }
-            QPushButton {
-                background: #13263D;
-                color: white;
-                border: 1px solid #244566;
-                border-radius: 8px;
-                padding: 10px;
-                text-align: right;
+            QPushButton, QToolButton {
+                background:#13263D;
+                color:#F4F7FB;
+                border:1px solid #244566;
+                border-radius:9px;
+                padding:9px 12px;
+                min-height:20px;
             }
-            QPushButton:hover { background: #183452; }
+            QPushButton:hover, QToolButton:hover { background:#183452; }
+            QPushButton:pressed, QToolButton:pressed { background:#0F2034; }
+            QScrollArea { border:none; background:transparent; }
+            QLineEdit {
+                background:#0E1C2D;
+                color:#F4F7FB;
+                border:1px solid #28445F;
+                border-radius:9px;
+                padding:10px;
+            }
         """)
 
         root = QWidget()
+        root.setObjectName("Root")
         main = QHBoxLayout(root)
-        main.setContentsMargins(16, 16, 16, 16)
-        main.setSpacing(16)
+        main.setContentsMargins(14, 14, 14, 14)
+        main.setSpacing(14)
 
         sidebar = QFrame()
         sidebar.setObjectName("Sidebar")
-        sidebar.setFixedWidth(250)
-        side_layout = QVBoxLayout(sidebar)
+        sidebar.setFixedWidth(270)
+        side_outer = QVBoxLayout(sidebar)
+        side_outer.setContentsMargins(10, 10, 10, 10)
 
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        side_content = QWidget()
+        side_layout = QVBoxLayout(side_content)
+        side_layout.setContentsMargins(4, 4, 4, 4)
+        side_layout.setSpacing(8)
+
+        brand = QFrame()
+        brand.setObjectName("BrandCard")
+        brand_layout = QVBoxLayout(brand)
         logo = QLabel("نظام القرطاسية")
         logo.setAlignment(Qt.AlignCenter)
-        logo.setStyleSheet(
-            "font-size:22px;font-weight:bold;padding:20px;"
-        )
-        side_layout.addWidget(logo)
-
-        navigation = [
-            ("البحث الذكي 360°", self.open_universal_search),
-            ("مركز التشغيل الذكي", self.open_smart_operations),
-            ("لوحة التحكم", self.show_dashboard),
-            ("نقطة البيع", self.open_pos),
-            ("المنتجات والمخزون", self.open_inventory),
-            ("المبيعات", self.open_sales),
-            ("مرتجعات المبيعات", self.open_sales_returns),
-            ("المشتريات", self.open_purchases),
-            ("دورة المشتريات", self.open_purchase_workflow),
-            ("مرتجعات المشتريات", self.open_purchase_returns),
-            ("العملاء والموردون", self.open_parties),
-            ("الخزينة والبنوك", self.open_treasury),
-            ("حسابات الخزينة والتحويلات", self.open_treasury_accounts),
-            ("المحاسبة", self.open_accounting),
-            ("التقارير", self.open_reports),
-            ("الموظفون", self.open_employees),
-            ("الإعدادات", self.open_settings),
-            ("مركز التشغيل والفحص", self.open_enterprise_tools),
-        ]
-
-        for name, handler in navigation:
-            button = QPushButton(name)
-            button.clicked.connect(handler)
-            side_layout.addWidget(button)
-
-        health_button = QPushButton("فحص صحة النظام")
-        health_button.clicked.connect(self.open_health)
-        side_layout.addWidget(health_button)
-
-        backup = QPushButton("إنشاء نسخة احتياطية")
-        backup.clicked.connect(self.open_backup)
-        side_layout.addWidget(backup)
-
-        side_layout.addStretch()
-
+        logo.setStyleSheet("font-size:21px;font-weight:700;padding:7px;")
+        brand_layout.addWidget(logo)
         version = QLabel(f"الإصدار {APP_VERSION}")
         version.setAlignment(Qt.AlignCenter)
-        side_layout.addWidget(version)
+        version.setStyleSheet("color:#9FB2C8;font-size:12px;")
+        brand_layout.addWidget(version)
+        side_layout.addWidget(brand)
+
+        search_button = QPushButton("⌕  البحث العام 360°")
+        search_button.setMinimumHeight(42)
+        search_button.clicked.connect(self.open_universal_search)
+        side_layout.addWidget(search_button)
+
+        quick_button = QPushButton("⚡  مركز التشغيل الذكي")
+        quick_button.setMinimumHeight(42)
+        quick_button.clicked.connect(self.open_smart_operations)
+        side_layout.addWidget(quick_button)
+
+        groups = [
+            ("التشغيل اليومي", [
+                ("لوحة التحكم", self.show_dashboard),
+                ("نقطة البيع", self.open_pos),
+                ("المبيعات والفواتير", self.open_sales),
+                ("مرتجعات المبيعات", self.open_sales_returns),
+            ]),
+            ("المشتريات", [
+                ("المشتريات", self.open_purchases),
+                ("دورة المشتريات", self.open_purchase_workflow),
+                ("مرتجعات المشتريات", self.open_purchase_returns),
+            ]),
+            ("المخزون والأطراف", [
+                ("المنتجات والمخزون", self.open_inventory),
+                ("العملاء والموردون", self.open_parties),
+            ]),
+            ("المالية", [
+                ("الخزينة والبنوك", self.open_treasury),
+                ("حسابات الخزينة والتحويلات", self.open_treasury_accounts),
+                ("المحاسبة العامة", self.open_accounting),
+                ("التقارير والتحليلات", self.open_reports),
+            ]),
+            ("الإدارة والرقابة", [
+                ("الموظفون", self.open_employees),
+                ("الإعدادات", self.open_settings),
+                ("مركز التشغيل والفحص", self.open_enterprise_tools),
+                ("صحة النظام", self.open_health),
+                ("النسخ الاحتياطي", self.open_backup),
+            ]),
+        ]
+
+        for section_name, actions in groups:
+            section = QFrame()
+            section.setObjectName("Section")
+            section_layout = QVBoxLayout(section)
+            section_layout.setContentsMargins(8, 8, 8, 8)
+            section_layout.setSpacing(5)
+
+            header = QLabel(section_name)
+            header.setStyleSheet("color:#8FA8C0;font-size:12px;font-weight:700;padding:3px 6px;")
+            section_layout.addWidget(header)
+
+            for label, handler in actions:
+                button = QPushButton(label)
+                button.setMinimumHeight(38)
+                button.clicked.connect(handler)
+                section_layout.addWidget(button)
+
+            side_layout.addWidget(section)
+
+        side_layout.addStretch()
+        scroll.setWidget(side_content)
+        side_outer.addWidget(scroll)
+        main.addWidget(sidebar)
 
         self.content = QFrame()
+        self.content.setObjectName("Content")
         self.content_layout = QVBoxLayout(self.content)
-
-        main.addWidget(sidebar)
+        self.content_layout.setContentsMargins(4, 4, 4, 4)
         main.addWidget(self.content, 1)
 
         self.setCentralWidget(root)
+
         shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
         shortcut.activated.connect(self.open_universal_search)
         self._global_search_shortcut = shortcut
+
         self.show_dashboard()
 
     def clear_content(self):
@@ -204,31 +272,56 @@ class MainWindow(QMainWindow):
             if widget is not None:
                 widget.deleteLater()
 
+    def _add_summary_card(self, layout, title, value):
+        card = QFrame()
+        card.setObjectName("Card")
+        card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        card_layout = QVBoxLayout(card)
+        label = QLabel(title)
+        label.setAlignment(Qt.AlignCenter)
+        label.setStyleSheet("color:#9FB2C8;font-size:13px;")
+        number = QLabel(str(value))
+        number.setAlignment(Qt.AlignCenter)
+        number.setStyleSheet("font-size:23px;font-weight:700;padding:4px;")
+        card_layout.addWidget(label)
+        card_layout.addWidget(number)
+        layout.addWidget(card)
+
     def show_dashboard(self):
         self.clear_content()
 
+        header = QHBoxLayout()
         title = QLabel("لوحة التحكم")
-        title.setStyleSheet(
-            "font-size:30px;font-weight:bold;padding:10px;"
-        )
-        self.content_layout.addWidget(title)
+        title.setStyleSheet("font-size:30px;font-weight:700;padding:6px;")
+        header.addWidget(title)
+        header.addStretch()
+
+        refresh = QPushButton("تحديث اللوحة")
+        refresh.clicked.connect(self.show_dashboard)
+        header.addWidget(refresh)
+        self.content_layout.addLayout(header)
 
         try:
             health = get_health()
             summary = get_system_summary()
             financial = get_financial_summary()
 
-            status = QLabel(
+            status = QFrame()
+            status.setObjectName("Card")
+            status_layout = QHBoxLayout(status)
+            status_text = QLabel(
                 "● قاعدة البيانات سليمة"
                 if health["healthy"]
-                else "● توجد مشكلة في قاعدة البيانات"
+                else "● توجد مشكلة تحتاج إلى مراجعة"
             )
-            status.setStyleSheet(
-                "font-size:16px;font-weight:bold;padding:8px;"
-            )
+            status_text.setStyleSheet("font-size:15px;font-weight:700;padding:5px;")
+            status_layout.addWidget(status_text)
+            status_layout.addStretch()
             self.content_layout.addWidget(status)
 
-            cards = QHBoxLayout()
+            cards = QGridLayout()
+            cards.setHorizontalSpacing(10)
+            cards.setVerticalSpacing(10)
             data = [
                 ("المنتجات", summary["products"]),
                 ("العملاء", summary["customers"]),
@@ -238,41 +331,32 @@ class MainWindow(QMainWindow):
                 ("المخزون", summary["stock"]),
                 ("أصناف منخفضة", summary["low_stock"]),
             ]
-
-            for name, value in data:
-                card = QFrame()
-                card.setObjectName("Card")
-                card_layout = QVBoxLayout(card)
-
-                label = QLabel(name)
-                label.setAlignment(Qt.AlignCenter)
-
-                number = QLabel(str(value))
-                number.setAlignment(Qt.AlignCenter)
-                number.setStyleSheet(
-                    "font-size:24px;font-weight:bold;"
-                )
-
-                card_layout.addWidget(label)
-                card_layout.addWidget(number)
-                cards.addWidget(card)
+            for index, (name, value) in enumerate(data):
+                row, col = divmod(index, 4)
+                self._add_summary_card(cards, name, value)
 
             self.content_layout.addLayout(cards)
 
-            financial_text = (
-                f"النقدية: {financial['cash']:.2f}    "
-                f"البنوك: {financial['banks']:.2f}    "
-                f"العملاء: {financial['customers']:.2f}    "
-                f"المخزون: {financial['inventory']:.2f}"
+            financial_card = QFrame()
+            financial_card.setObjectName("Card")
+            financial_layout = QVBoxLayout(financial_card)
+            financial_title = QLabel("ملخص مالي")
+            financial_title.setStyleSheet("font-size:17px;font-weight:700;")
+            financial_layout.addWidget(financial_title)
+
+            financial_text = QLabel(
+                f"النقدية: {financial['cash']:,.2f}    "
+                f"البنوك: {financial['banks']:,.2f}    "
+                f"ذمم العملاء: {financial['customers']:,.2f}    "
+                f"قيمة المخزون: {financial['inventory']:,.2f}"
             )
-            financial_label = QLabel(financial_text)
-            financial_label.setStyleSheet("font-size:16px;padding:20px;")
-            self.content_layout.addWidget(financial_label)
+            financial_text.setWordWrap(True)
+            financial_text.setStyleSheet("color:#C7D5E5;padding:8px;")
+            financial_layout.addWidget(financial_text)
+            self.content_layout.addWidget(financial_card)
 
         except Exception as exc:
-            QMessageBox.critical(
-                self, "خطأ في لوحة التحكم", str(exc)
-            )
+            QMessageBox.critical(self, "خطأ في لوحة التحكم", str(exc))
 
         self.content_layout.addStretch()
 
@@ -281,7 +365,6 @@ class MainWindow(QMainWindow):
         if window is None:
             window = window_class()
             self._child_windows[key] = window
-
         window.show()
         window.raise_()
         window.activateWindow()
@@ -342,28 +425,6 @@ class MainWindow(QMainWindow):
 
     def open_health(self):
         self.open_window("health", HealthWindow)
-
-    def create_backup(self):
-        try:
-            path = BackupService.create_backup()
-            QMessageBox.information(
-                self,
-                "النسخ الاحتياطي",
-                f"تم إنشاء نسخة احتياطية سليمة بنجاح:\\n{path}",
-            )
-        except Exception as exc:
-            QMessageBox.critical(self, "فشل النسخ الاحتياطي", str(exc))
-
-    def not_ready(self):
-        button = self.sender()
-        name = button.text() if button else "هذه الوحدة"
-        QMessageBox.information(
-            self,
-            name,
-            "هذه الوحدة موجودة ضمن خارطة النظام، "
-            "لكن واجهتها التشغيلية لم تُربط بعد. "
-            "لن نعتبرها مكتملة حتى تُنفذ خدماتها واختباراتها وربطها بقاعدة البيانات."
-        )
 
 
 def run():
