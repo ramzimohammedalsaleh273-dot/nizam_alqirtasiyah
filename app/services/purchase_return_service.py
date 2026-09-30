@@ -203,23 +203,14 @@ class PurchaseReturnService:
                     lines.append({"account_id": vat_input, "debit": Decimal("0"), "credit": tax,
                                   "description": f"عكس ضريبة مدخلات {return_number}"})
 
-                entry_number = AccountingService.next_entry_number(s)
-                s.execute(text("""
-                    INSERT INTO journal_entries
-                    (entry_number, entry_date, description, source_type, source_id, status,
-                     fiscal_period_id, created_by, created_at)
-                    VALUES (:n, CURRENT_DATE, :d, 'PURCHASE_RETURN', :sid, 'POSTED',
-                            NULL, NULL, CURRENT_TIMESTAMP)
-                """), {"n": entry_number, "d": f"ترحيل مرتجع مشتريات {return_number}", "sid": return_id})
-                entry_id = int(s.execute(text("SELECT last_insert_rowid()")).scalar())
-                for line in lines:
-                    s.execute(text("""
-                        INSERT INTO journal_entry_lines
-                        (journal_entry_id, account_id, cost_center_id, description, debit, credit)
-                        VALUES (:eid, :aid, NULL, :description, :debit, :credit)
-                    """), {"eid": entry_id, "aid": line["account_id"], "description": line["description"],
-                           "debit": float(line["debit"]), "credit": float(line["credit"])})
-
+                accounting = AccountingService._post_lines(
+                    s,
+                    AccountingService.next_entry_number(s),
+                    f"ترحيل مرتجع مشتريات {return_number}",
+                    "PURCHASE_RETURN",
+                    return_id,
+                    lines,
+                )
                 if supplier_id and refund_method == "credit":
                     sc = cls._columns(s, "suppliers")
                     if "current_balance" in sc:
@@ -236,7 +227,7 @@ class PurchaseReturnService:
                     "id": return_id, "return_number": return_number,
                     "purchase_id": purchase_id, "subtotal": float(subtotal),
                     "tax": float(tax), "total": float(total),
-                    "journal_entry_id": entry_id, "journal_entry_number": entry_number
+                    "journal_entry_id": accounting["journal_entry_id"], "journal_entry_number": accounting["entry_number"]
                 }
             except Exception:
                 s.rollback()
