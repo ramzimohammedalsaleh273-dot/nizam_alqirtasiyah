@@ -61,7 +61,9 @@ class InventoryWindow(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(
             2, QHeaderView.Stretch
         )
-        self.table.setAlternatingRowColors(True)\n        self.table.setWordWrap(False)\n        self.table.setHorizontalScrollMode(QTableWidget.ScrollPerPixel)
+        self.table.setAlternatingRowColors(True)
+        self.table.setWordWrap(False)
+        self.table.setHorizontalScrollMode(QTableWidget.ScrollPerPixel)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         layout.addWidget(self.table)
@@ -114,7 +116,19 @@ class InventoryWindow(QWidget):
                     warehouse.addItem(str(r["name"]), int(r["id"]))
         except Exception:
             warehouse.addItem("المستودع الافتراضي",1)
-        cost.setValue(float(self.table.item(row,3).text() or 0)); sale.setValue(float(self.table.item(row,4).text() or 0))\n        quantity.setValue(0)\n        def load_selected_warehouse_quantity():\n            try:\n                from app.database.connection import get_session\n                from sqlalchemy import text\n                with get_session() as s:\n                    current=s.execute(text("SELECT COALESCE(quantity,0) FROM stock WHERE product_id=:p AND warehouse_id=:w"), {"p":product_id,"w":int(warehouse.currentData() or 1)}).scalar()\n                    quantity.setValue(float(current or 0))\n            except Exception:\n                quantity.setValue(0)\n        warehouse.currentIndexChanged.connect(load_selected_warehouse_quantity)\n        load_selected_warehouse_quantity()
+        cost.setValue(float(self.table.item(row,3).text() or 0)); sale.setValue(float(self.table.item(row,4).text() or 0))
+        quantity.setValue(0)
+        def load_selected_warehouse_quantity():
+            try:
+                from app.database.connection import get_session
+                from sqlalchemy import text
+                with get_session() as s:
+                    current=s.execute(text("SELECT COALESCE(quantity,0) FROM stock WHERE product_id=:p AND warehouse_id=:w"), {"p":product_id,"w":int(warehouse.currentData() or 1)}).scalar()
+                    quantity.setValue(float(current or 0))
+            except Exception:
+                quantity.setValue(0)
+        warehouse.currentIndexChanged.connect(load_selected_warehouse_quantity)
+        load_selected_warehouse_quantity()
         dialog=QDialog(self); dialog.setWindowTitle("تعديل الصنف"); form=QFormLayout(dialog)
         form.addRow("رمز الصنف:",sku); form.addRow("اسم المنتج:",name); form.addRow("التكلفة:",cost); form.addRow("سعر البيع:",sale); form.addRow("الكمية الحالية:",quantity); form.addRow("المستودع:",warehouse)
         buttons=QDialogButtonBox(QDialogButtonBox.Ok|QDialogButtonBox.Cancel); buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject); form.addRow(buttons)
