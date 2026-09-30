@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (
     QLineEdit, QDialogButtonBox
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QKeySequence, QShortcut
 from app.core.config import APP_NAME, APP_VERSION
 from app.services.security_service import SecurityService
 from app.services.system_service import (
@@ -27,6 +28,7 @@ from app.ui.purchase_returns_window import PurchaseReturnsWindow
 from app.ui.universal_search_window import UniversalSearchWindow
 from app.ui.sales_returns_window import SalesReturnsWindow
 from app.ui.treasury_accounts_window import TreasuryAccountsWindow
+from app.ui.smart_operations_window import SmartOperationsWindow
 from app.database.connection import get_session
 from app.services.treasury_schema_service import TreasurySchemaService
 
@@ -144,7 +146,8 @@ class MainWindow(QMainWindow):
         side_layout.addWidget(logo)
 
         navigation = [
-            ("البحث الذكي", self.open_universal_search),
+            ("البحث الذكي 360°", self.open_universal_search),
+            ("مركز التشغيل الذكي", self.open_smart_operations),
             ("لوحة التحكم", self.show_dashboard),
             ("نقطة البيع", self.open_pos),
             ("المنتجات والمخزون", self.open_inventory),
@@ -189,6 +192,9 @@ class MainWindow(QMainWindow):
         main.addWidget(self.content, 1)
 
         self.setCentralWidget(root)
+        shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
+        shortcut.activated.connect(self.open_universal_search)
+        self._global_search_shortcut = shortcut
         self.show_dashboard()
 
     def clear_content(self):
@@ -282,6 +288,9 @@ class MainWindow(QMainWindow):
 
     def open_universal_search(self):
         self.open_window("universal_search", UniversalSearchWindow)
+
+    def open_smart_operations(self):
+        self.open_window("smart_operations", SmartOperationsWindow)
 
     def open_pos(self):
         self.open_window("pos", POSWindow)
