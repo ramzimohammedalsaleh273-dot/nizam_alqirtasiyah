@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 from app.services.sales_service import SalesService
+from app.ui.sales_invoice_window import SalesInvoiceWindow
 
 class SalesWindow(QWidget):
 
@@ -31,9 +32,17 @@ class SalesWindow(QWidget):
         bar.addWidget(details)
         bar.addStretch()
 
+        full_invoice = QPushButton("فتح الفاتورة الكاملة")
+        full_invoice.clicked.connect(self.show_details)
+        bar.addWidget(full_invoice)
         layout.addLayout(bar)
 
         self.table=QTableWidget(0,7)
+        self.table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.table.setAlternatingRowColors(True)
+        self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.doubleClicked.connect(lambda *_: self.show_details())
         self.table.setHorizontalHeaderLabels([
             "المعرف","رقم الفاتورة","قبل الضريبة",
             "الضريبة","الإجمالي","المدفوع","المتبقي"
@@ -76,6 +85,12 @@ class SalesWindow(QWidget):
 
         if not sale:
             return
+
+        self.invoice_window=SalesInvoiceWindow(self,sale_id)
+        self.invoice_window.show()
+        self.invoice_window.raise_()
+        self.invoice_window.activateWindow()
+        return
 
         text=f"الفاتورة: {sale['invoice_number']}\n"
         text+=f"الإجمالي: {sale['total_amount']}\n\n"
