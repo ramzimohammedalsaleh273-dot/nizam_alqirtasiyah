@@ -46,9 +46,39 @@ class PurchaseReturnsWindow(QWidget):
             f"PRAGMA table_info({table})"
         ).fetchall()}
 
+    def _ensure_return_tables(self, session):
+        session.execute(text("""
+            CREATE TABLE IF NOT EXISTS purchase_returns (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                purchase_id INTEGER NOT NULL,
+                supplier_id INTEGER NULL,
+                warehouse_id INTEGER NULL,
+                return_number VARCHAR(100) NOT NULL UNIQUE,
+                subtotal NUMERIC NOT NULL DEFAULT 0,
+                tax_amount NUMERIC NOT NULL DEFAULT 0,
+                total_amount NUMERIC NOT NULL DEFAULT 0,
+                refund_method VARCHAR(30) NOT NULL DEFAULT 'credit',
+                status VARCHAR(30) NOT NULL DEFAULT 'POSTED',
+                reason TEXT NULL,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
+        session.execute(text("""
+            CREATE TABLE IF NOT EXISTS purchase_return_items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                return_id INTEGER NOT NULL,
+                product_id INTEGER NOT NULL,
+                quantity NUMERIC NOT NULL,
+                unit_cost NUMERIC NOT NULL DEFAULT 0,
+                line_total NUMERIC NOT NULL DEFAULT 0
+            )
+        """))
+        session.commit()
+
     def load(self):
         try:
             with get_session() as s:
+                self._ensure_return_tables(s)
                 pic = self._columns(s, "purchase_invoices")
                 iic = self._columns(s, "purchase_invoice_items")
                 if "id" not in pic or "id" not in iic:
