@@ -24,6 +24,7 @@ from app.ui.backup_window import BackupWindow
 from app.ui.enterprise_tools_window import EnterpriseToolsWindow
 from app.ui.purchase_workflow_window import PurchaseWorkflowWindow
 from app.ui.purchase_returns_window import PurchaseReturnsWindow
+from app.ui.universal_search_window import UniversalSearchWindow
 from app.ui.sales_returns_window import SalesReturnsWindow
 from app.ui.treasury_accounts_window import TreasuryAccountsWindow
 from app.database.connection import get_session
@@ -143,6 +144,7 @@ class MainWindow(QMainWindow):
         side_layout.addWidget(logo)
 
         navigation = [
+            ("البحث الذكي", self.open_universal_search),
             ("لوحة التحكم", self.show_dashboard),
             ("نقطة البيع", self.open_pos),
             ("المنتجات والمخزون", self.open_inventory),
@@ -277,6 +279,9 @@ class MainWindow(QMainWindow):
         window.show()
         window.raise_()
         window.activateWindow()
+
+    def open_universal_search(self):
+        self.open_window("universal_search", UniversalSearchWindow)
 
     def open_pos(self):
         self.open_window("pos", POSWindow)
