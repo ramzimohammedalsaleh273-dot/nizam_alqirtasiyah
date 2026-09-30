@@ -5,7 +5,7 @@ from app.database.connection import get_session
 
 class ProductService:
     @staticmethod
-    def create_product(sku,name_ar,cost_price,sale_price,barcode=None):
+    def create_product(sku,name_ar,cost_price,sale_price,barcode=None,opening_quantity=0,warehouse_id=1):
         sku=str(sku).strip(); name_ar=str(name_ar).strip()
         if not sku or not name_ar: raise ValueError("رمز الصنف واسم المنتج مطلوبان")
         if float(cost_price)<0 or float(sale_price)<0: raise ValueError("الأسعار لا يمكن أن تكون سالبة")
@@ -43,6 +43,28 @@ class ProductService:
             product_id=s.execute(text("SELECT last_insert_rowid()")).scalar()
             if barcode and "product_barcodes" in [r[0] for r in s.execute(text("SELECT name FROM sqlite_master WHERE type='table'")).fetchall()]:
                 s.execute(text("INSERT INTO product_barcodes(product_id,barcode,is_primary) VALUES(:id,:barcode,1)"),{"id":product_id,"barcode":str(barcode).strip()})
+            opening = float(opening_quantity or 0)
+            if opening < 0:
+                raise ValueError("الكمية الافتتاحية لا يمكن أن تكون سالبة")
+            if opening:
+                wh = s.execute(text("SELECT id FROM warehouses WHERE id=:id"), {"id": int(warehouse_id)}).scalar()
+                if wh is None:
+                    raise ValueError("المستودع المحدد غير موجود")
+                stock = s.execute(text("SELECT id FROM stock WHERE product_id=:p AND warehouse_id=:w"),
+                                  {"p": product_id, "w": int(warehouse_id)}).scalar()
+                if stock:
+                    s.execute(text("UPDATE stock SET quantity=COALESCE(quantity,0)+:q, available_quantity=COALESCE(available_quantity,0)+:q, average_cost=:c, updated_at=CURRENT_TIMESTAMP WHERE id=:id"),
+                              {"q": opening, "c": float(cost_price), "id": stock})
+                else:
+                    s.execute(text("INSERT INTO stock(product_id,warehouse_id,quantity,available_quantity,average_cost) VALUES(:p,:w,:q,:q,:c)"),
+                              {"p": product_id, "w": int(warehouse_id), "q": opening, "c": float(cost_price)})
+                if "stock_movements" in [r[0] for r in s.execute(text("SELECT name FROM sqlite_master WHERE type='table'")).fetchall()]:
+                    cols={r[1] for r in s.execute(text("PRAGMA table_info(stock_movements)")).fetchall()}
+                    fields=["product_id","warehouse_id","quantity"]; vals=[":p",":w",":q"]; params={"p":product_id,"w":int(warehouse_id),"q":opening}
+                    if "movement_type" in cols: fields.append("movement_type"); vals.append("'OPENING'")
+                    if "notes" in cols: fields.append("notes"); vals.append(":n"); params["n"]="رصيد افتتاحي عند إنشاء الصنف"
+                    if "created_at" in cols: fields.append("created_at"); vals.append("CURRENT_TIMESTAMP")
+                    s.execute(text(f"INSERT INTO stock_movements({','.join(fields)}) VALUES({','.join(vals)})"), params)
             s.commit()
             return int(product_id)
 
@@ -63,3 +85,17 @@ class ProductService:
             result=s.execute(text(f"UPDATE products SET {assignments} WHERE id=:id AND is_active=1"),data)
             if result.rowcount != 1: raise ValueError("الصنف غير موجود أو غير نشط")
             s.commit()
+
+
+    @staticmethod
+    def deactivate_product(product_id):
+        with get_session() as s:
+            result=s.execute(text("UPDATE products SET is_active=0, updated_at=CURRENT_TIMESTAMP WHERE id=:id AND is_active=1"),{"id":int(product_id)})
+            if result.rowcount != 1:
+                raise ValueError("الصنف غير موجود أو محذوف مسبقًا")
+            s.commit()
+
+    @staticmethod
+    def adjust_quantity(product_id, warehouse_id, quantity, reason="تعديل كمية من بطاقة الصنف"):
+        from app.services.inventory_operations_service import InventoryOperationsService
+        InventoryOperationsService.adjust(int(product_id), int(warehouse_id), float(quantity), reason)
