@@ -204,7 +204,7 @@ class AccountingService:
                     'SALE',
                     :source_id,
                     'POSTED',
-                    NULL,
+                    :period_id,
                     NULL,
                     CURRENT_TIMESTAMP
                 )
