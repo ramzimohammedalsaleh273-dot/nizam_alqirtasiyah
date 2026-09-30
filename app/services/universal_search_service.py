@@ -56,6 +56,30 @@ class UniversalSearchService:
                          "name": r.name, "code": r.code or "", "subtitle": r.phone or r.code or ""}
                         for r in rows]
 
+            for table, kind, label, names in [
+                ("accounts", "account", "حساب محاسبي", ("account_name", "account_code")),
+                ("employees", "employee", "موظف", ("full_name", "employee_code")),
+                ("warehouses", "warehouse", "مستودع", ("name", "code")),
+            ]:
+                if not cls._exists(s, table):
+                    continue
+                cols = cls._cols(s, table)
+                name_col = next((x for x in names if x in cols), None)
+                code_col = next((x for x in names[1:] if x in cols), None)
+                if not name_col:
+                    continue
+                code_expr = code_col or "''"
+                rows = s.execute(text(f"""
+                    SELECT id, {name_col} AS name, {code_expr} AS code
+                    FROM {table}
+                    WHERE (:term='' OR COALESCE({name_col},'') LIKE :like
+                           OR COALESCE({code_expr},'') LIKE :like)
+                    ORDER BY id DESC LIMIT :limit
+                """), {"term": term, "like": like, "limit": limit}).fetchall()
+                out += [{"kind": kind, "kind_name": label, "id": r.id,
+                         "name": r.name, "code": r.code or "", "subtitle": r.code or ""}
+                        for r in rows]
+
             if cls._exists(s, "sales"):
                 rows = s.execute(text("""
                     SELECT id, invoice_number AS code, total_amount, created_at
