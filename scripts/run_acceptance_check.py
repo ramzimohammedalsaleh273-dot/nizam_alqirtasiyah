@@ -14,6 +14,9 @@ def main():
 
     try:
         with get_session() as s:
+            from app.services.accounting_control_service import AccountingControlService
+            AccountingControlService.ensure_schema(s)
+            s.commit()
             TreasurySchemaService.ensure(s)
             TreasuryOperationsService.ensure_schema(s)
             s.commit()
