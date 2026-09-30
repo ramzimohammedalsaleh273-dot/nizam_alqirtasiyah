@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QPushButton, QFrame, QMessageBox, QDialog,
-    QLineEdit, QDialogButtonBox, QScrollArea, QSizePolicy, QToolButton
+    QLineEdit, QDialogButtonBox, QScrollArea, QSizePolicy
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeySequence, QShortcut
@@ -14,7 +14,6 @@ from app.ui.purchases_window import PurchasesWindow
 from app.ui.parties_window import PartiesWindow
 from app.ui.inventory_window import InventoryWindow
 from app.ui.reports_window import ReportsWindow
-from app.services.backup_service import BackupService
 from app.ui.administration_windows import accounting_window, treasury_window, employees_window, settings_window
 from app.ui.health_window import HealthWindow
 from app.ui.backup_window import BackupWindow
@@ -133,7 +132,12 @@ class MainWindow(QMainWindow):
                 border:1px solid #1E3856;
                 border-radius:14px;
             }
-            QPushButton, QToolButton {
+            QFrame#StatusCard {
+                background:#0E1C2D;
+                border:1px solid #244566;
+                border-radius:12px;
+            }
+            QPushButton {
                 background:#13263D;
                 color:#F4F7FB;
                 border:1px solid #244566;
@@ -141,8 +145,8 @@ class MainWindow(QMainWindow):
                 padding:9px 12px;
                 min-height:20px;
             }
-            QPushButton:hover, QToolButton:hover { background:#183452; }
-            QPushButton:pressed, QToolButton:pressed { background:#0F2034; }
+            QPushButton:hover { background:#183452; }
+            QPushButton:pressed { background:#0F2034; }
             QScrollArea { border:none; background:transparent; }
             QLineEdit {
                 background:#0E1C2D;
@@ -168,6 +172,7 @@ class MainWindow(QMainWindow):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
         side_content = QWidget()
         side_layout = QVBoxLayout(side_content)
         side_layout.setContentsMargins(4, 4, 4, 4)
@@ -176,10 +181,12 @@ class MainWindow(QMainWindow):
         brand = QFrame()
         brand.setObjectName("BrandCard")
         brand_layout = QVBoxLayout(brand)
+
         logo = QLabel("نظام القرطاسية")
         logo.setAlignment(Qt.AlignCenter)
         logo.setStyleSheet("font-size:21px;font-weight:700;padding:7px;")
         brand_layout.addWidget(logo)
+
         version = QLabel(f"الإصدار {APP_VERSION}")
         version.setAlignment(Qt.AlignCenter)
         version.setStyleSheet("color:#9FB2C8;font-size:12px;")
@@ -235,7 +242,9 @@ class MainWindow(QMainWindow):
             section_layout.setSpacing(5)
 
             header = QLabel(section_name)
-            header.setStyleSheet("color:#8FA8C0;font-size:12px;font-weight:700;padding:3px 6px;")
+            header.setStyleSheet(
+                "color:#8FA8C0;font-size:12px;font-weight:700;padding:3px 6px;"
+            )
             section_layout.addWidget(header)
 
             for label, handler in actions:
@@ -272,31 +281,62 @@ class MainWindow(QMainWindow):
             if widget is not None:
                 widget.deleteLater()
 
-    def _add_summary_card(self, layout, title, value):
+    def _add_summary_card(self, layout, row, column, title, value):
         card = QFrame()
         card.setObjectName("Card")
+        card.setMinimumHeight(112)
         card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
         card_layout = QVBoxLayout(card)
+        card_layout.setContentsMargins(14, 12, 14, 12)
+        card_layout.setSpacing(5)
+
         label = QLabel(title)
         label.setAlignment(Qt.AlignCenter)
         label.setStyleSheet("color:#9FB2C8;font-size:13px;")
-        number = QLabel(str(value))
+
+        number = QLabel(f"{value:,}" if isinstance(value, int) else str(value))
         number.setAlignment(Qt.AlignCenter)
-        number.setStyleSheet("font-size:23px;font-weight:700;padding:4px;")
+        number.setStyleSheet("font-size:25px;font-weight:700;padding:3px;")
+
         card_layout.addWidget(label)
         card_layout.addWidget(number)
-        layout.addWidget(card)
+        layout.addWidget(card, row, column)
+
+    def _add_financial_card(self, layout, row, column, title, value):
+        card = QFrame()
+        card.setObjectName("StatusCard")
+        card.setMinimumHeight(86)
+        card_layout = QVBoxLayout(card)
+        card_layout.setContentsMargins(12, 10, 12, 10)
+
+        label = QLabel(title)
+        label.setStyleSheet("color:#9FB2C8;font-size:12px;")
+        value_label = QLabel(f"{float(value or 0):,.2f}")
+        value_label.setStyleSheet("font-size:18px;font-weight:700;")
+
+        card_layout.addWidget(label)
+        card_layout.addWidget(value_label)
+        layout.addWidget(card, row, column)
 
     def show_dashboard(self):
         self.clear_content()
 
         header = QHBoxLayout()
+        title_box = QVBoxLayout()
+
         title = QLabel("لوحة التحكم")
-        title.setStyleSheet("font-size:30px;font-weight:700;padding:6px;")
-        header.addWidget(title)
+        title.setStyleSheet("font-size:30px;font-weight:700;")
+        subtitle = QLabel("ملخص تشغيلي سريع — التفاصيل الكاملة داخل كل وحدة")
+        subtitle.setStyleSheet("color:#9FB2C8;font-size:13px;")
+        title_box.addWidget(title)
+        title_box.addWidget(subtitle)
+
+        header.addLayout(title_box)
         header.addStretch()
 
         refresh = QPushButton("تحديث اللوحة")
+        refresh.setMinimumHeight(40)
         refresh.clicked.connect(self.show_dashboard)
         header.addWidget(refresh)
         self.content_layout.addLayout(header)
@@ -307,53 +347,63 @@ class MainWindow(QMainWindow):
             financial = get_financial_summary()
 
             status = QFrame()
-            status.setObjectName("Card")
+            status.setObjectName("StatusCard")
             status_layout = QHBoxLayout(status)
+            status_layout.setContentsMargins(14, 10, 14, 10)
+
             status_text = QLabel(
                 "● قاعدة البيانات سليمة"
                 if health["healthy"]
                 else "● توجد مشكلة تحتاج إلى مراجعة"
             )
-            status_text.setStyleSheet("font-size:15px;font-weight:700;padding:5px;")
+            status_text.setStyleSheet("font-size:15px;font-weight:700;")
             status_layout.addWidget(status_text)
+
+            hint = QLabel("اللوحة تعرض المؤشرات فقط؛ لا يتم حشر تفاصيل السجلات هنا.")
+            hint.setStyleSheet("color:#9FB2C8;")
             status_layout.addStretch()
+            status_layout.addWidget(hint)
             self.content_layout.addWidget(status)
 
             cards = QGridLayout()
-            cards.setHorizontalSpacing(10)
-            cards.setVerticalSpacing(10)
+            cards.setHorizontalSpacing(12)
+            cards.setVerticalSpacing(12)
+            cards.setColumnStretch(0, 1)
+            cards.setColumnStretch(1, 1)
+            cards.setColumnStretch(2, 1)
+            cards.setColumnStretch(3, 1)
+
             data = [
                 ("المنتجات", summary["products"]),
                 ("العملاء", summary["customers"]),
                 ("الموردون", summary["suppliers"]),
-                ("المبيعات", summary["sales"]),
-                ("المشتريات", summary["purchase_invoices"]),
-                ("المخزون", summary["stock"]),
+                ("فواتير المبيعات", summary["sales"]),
+                ("فواتير المشتريات", summary["purchase_invoices"]),
+                ("أرصدة المخزون", summary["stock"]),
                 ("أصناف منخفضة", summary["low_stock"]),
             ]
             for index, (name, value) in enumerate(data):
-                row, col = divmod(index, 4)
-                self._add_summary_card(cards, name, value)
+                row, column = divmod(index, 4)
+                self._add_summary_card(cards, row, column, name, value)
 
             self.content_layout.addLayout(cards)
 
-            financial_card = QFrame()
-            financial_card.setObjectName("Card")
-            financial_layout = QVBoxLayout(financial_card)
-            financial_title = QLabel("ملخص مالي")
-            financial_title.setStyleSheet("font-size:17px;font-weight:700;")
-            financial_layout.addWidget(financial_title)
+            financial_title = QLabel("الملخص المالي")
+            financial_title.setStyleSheet("font-size:18px;font-weight:700;padding-top:8px;")
+            self.content_layout.addWidget(financial_title)
 
-            financial_text = QLabel(
-                f"النقدية: {financial['cash']:,.2f}    "
-                f"البنوك: {financial['banks']:,.2f}    "
-                f"ذمم العملاء: {financial['customers']:,.2f}    "
-                f"قيمة المخزون: {financial['inventory']:,.2f}"
-            )
-            financial_text.setWordWrap(True)
-            financial_text.setStyleSheet("color:#C7D5E5;padding:8px;")
-            financial_layout.addWidget(financial_text)
-            self.content_layout.addWidget(financial_card)
+            financial_grid = QGridLayout()
+            financial_grid.setHorizontalSpacing(12)
+            financial_grid.setVerticalSpacing(10)
+            for column in range(4):
+                financial_grid.setColumnStretch(column, 1)
+
+            self._add_financial_card(financial_grid, 0, 0, "النقدية", financial["cash"])
+            self._add_financial_card(financial_grid, 0, 1, "البنوك", financial["banks"])
+            self._add_financial_card(financial_grid, 0, 2, "ذمم العملاء", financial["customers"])
+            self._add_financial_card(financial_grid, 0, 3, "قيمة المخزون", financial["inventory"])
+
+            self.content_layout.addLayout(financial_grid)
 
         except Exception as exc:
             QMessageBox.critical(self, "خطأ في لوحة التحكم", str(exc))
