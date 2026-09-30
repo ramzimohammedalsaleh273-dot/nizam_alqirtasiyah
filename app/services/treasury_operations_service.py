@@ -222,7 +222,7 @@ class TreasuryOperationsService:
                 source = cls._account(s, source_account_id)
                 destination = cls._account(s, destination_account_id)
 
-                source_balance = cls.money(s.execute(text("""
+                source_balance = cls.money(source["opening_balance"] or 0) + cls.money(s.execute(text("""
                     SELECT COALESCE(SUM(jl.debit-jl.credit),0)
                     FROM journal_entry_lines jl
                     JOIN journal_entries je ON je.id=jl.journal_entry_id
