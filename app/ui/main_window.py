@@ -1,9 +1,11 @@
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QFrame, QMessageBox
+    QLabel, QPushButton, QFrame, QMessageBox, QDialog,
+    QLineEdit, QDialogButtonBox
 )
 from PySide6.QtCore import Qt
 from app.core.config import APP_NAME, APP_VERSION
+from app.services.security_service import SecurityService
 from app.services.system_service import (
     get_system_summary,
     get_financial_summary,
@@ -26,6 +28,61 @@ from app.ui.sales_returns_window import SalesReturnsWindow
 from app.ui.treasury_accounts_window import TreasuryAccountsWindow
 from app.database.connection import get_session
 from app.services.treasury_schema_service import TreasurySchemaService
+
+
+class LoginDialog(QDialog):
+    """بوابة دخول حقيقية قبل فتح واجهة النظام."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.user = None
+        self.security = SecurityService()
+        self.setWindowTitle("تسجيل الدخول — نظام القرطاسية")
+        self.setFixedSize(430, 300)
+        self.setLayoutDirection(Qt.RightToLeft)
+
+        layout = QVBoxLayout(self)
+        title = QLabel("نظام القرطاسية")
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("font-size:26px;font-weight:bold;padding:15px;")
+        layout.addWidget(title)
+
+        self.username = QLineEdit()
+        self.username.setPlaceholderText("اسم المستخدم")
+        layout.addWidget(self.username)
+
+        self.password = QLineEdit()
+        self.password.setPlaceholderText("كلمة المرور")
+        self.password.setEchoMode(QLineEdit.Password)
+        layout.addWidget(self.password)
+
+        self.message = QLabel("")
+        self.message.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.message)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        )
+        buttons.accepted.connect(self.login)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+        self.password.returnPressed.connect(self.login)
+        self.username.setFocus()
+
+    def login(self):
+        try:
+            user = self.security.authenticate(
+                self.username.text().strip(),
+                self.password.text(),
+            )
+        except Exception as exc:
+            self.message.setText(f"تعذر تسجيل الدخول: {exc}")
+            return
+        if not user:
+            self.message.setText("اسم المستخدم أو كلمة المرور غير صحيحة.")
+            return
+        self.user = user
+        self.accept()
 
 
 class MainWindow(QMainWindow):
@@ -302,9 +359,14 @@ def run():
     app = QApplication(sys.argv)
     app.setLayoutDirection(Qt.RightToLeft)
 
-    window = MainWindow()
-    window.show()
+    login = LoginDialog()
+    if login.exec() != QDialog.Accepted:
+        return 0
 
+    window = MainWindow()
+    username = login.user.get("username", "admin") if login.user else "admin"
+    window.setWindowTitle(f"{APP_NAME} - {APP_VERSION} | المستخدم: {username}")
+    window.show()
     sys.exit(app.exec())
 
 
