@@ -58,7 +58,7 @@ class SmartInsightsService:
                 total = cls._first(ic, "line_total")
                 date = cls._first(sc, "created_at", "sale_date", "invoice_date")
                 if fk and qty:
-                    amount = f"COALESCE(si.{total}, si.{qty}*COALESCE(si.{price},0))" if total else f"si.{qty}*COALESCE(si.{price},0)"
+                    amount = f"COALESCE(si.{total},0)" if total else (f"si.{qty}*COALESCE(si.{price},0)" if price else f"si.{qty}")
                     date_expr = f"s.{date}" if date else "NULL"
                     rows = s.execute(text(f"""
                         SELECT s.id, s.invoice_number, {date_expr} event_date,
@@ -79,7 +79,7 @@ class SmartInsightsService:
                 total = cls._first(ic, "line_total")
                 date = cls._first(pc, "invoice_date", "created_at", "purchase_date")
                 if fk and qty:
-                    amount = f"COALESCE(piix.{total}, piix.{qty}*COALESCE(piix.{cost},0))" if total else f"piix.{qty}*COALESCE(piix.{cost},0)"
+                    amount = f"COALESCE(piix.{total},0)" if total else (f"piix.{qty}*COALESCE(piix.{cost},0)" if cost else f"piix.{qty}")
                     date_expr = f"pi.{date}" if date else "NULL"
                     rows = s.execute(text(f"""
                         SELECT pi.id, pi.invoice_number, {date_expr} event_date,
