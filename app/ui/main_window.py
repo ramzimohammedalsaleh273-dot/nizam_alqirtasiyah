@@ -496,9 +496,9 @@ class MainWindow(QMainWindow):
                     FROM products p
                     LEFT JOIN stock_balances st ON st.product_id=p.id
                     WHERE p.is_active=1
-                      AND COALESCE(st.available_quantity,0)
+                      AND COALESCE(st.quantity - st.reserved_quantity,0)
                           <= COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)
-                    ORDER BY COALESCE(st.available_quantity,0), p.name_ar
+                    ORDER BY COALESCE(st.quantity - st.reserved_quantity,0), p.name_ar
                     LIMIT 8
                 """)).all()
 
