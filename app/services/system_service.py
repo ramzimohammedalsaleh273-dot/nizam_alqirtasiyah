@@ -5,10 +5,11 @@ from app.database.connection import get_session, database_health
 def get_system_summary():
     with get_session() as session:
 
+        tables={r[0] for r in session.execute(text("SELECT name FROM sqlite_master WHERE type='table'")).all()}
         def count(table):
-            return session.execute(
-                text(f'SELECT COUNT(*) FROM "{table}"')
-            ).scalar() or 0
+            if table not in tables:
+                return 0
+            return session.execute(text(f'SELECT COUNT(*) FROM "{table}"')).scalar() or 0
 
         summary = {
             "products": count("products"),
@@ -19,7 +20,10 @@ def get_system_summary():
             "purchase_invoices": count("purchase_invoices"),
             "stock": count("stock_balances"),
             "journal_entries": count("journal_entries"),
-            "low_stock": session.execute(text("""SELECT COUNT(*) FROM products p LEFT JOIN stock_balances st ON st.product_id=p.id WHERE p.is_active=1 AND COALESCE(st.quantity - st.reserved_quantity,0) <= COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)""")).scalar() or 0,
+            "low_stock": (
+                session.execute(text("""SELECT COUNT(*) FROM products p LEFT JOIN stock_balances st ON st.product_id=p.id WHERE p.is_active=1 AND COALESCE(st.quantity - st.reserved_quantity,0) <= COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)""")).scalar() or 0
+                if {"products","stock_balances"}.issubset(tables) else 0
+            ),
         }
 
         return summary
@@ -27,12 +31,12 @@ def get_system_summary():
 def get_financial_summary():
     with get_session() as session:
 
+        tables={r[0] for r in session.execute(text("SELECT name FROM sqlite_master WHERE type='table'")).all()}
         def balance(code):
+            if not {"journal_entry_lines","accounts"}.issubset(tables):
+                return 0.0
             value = session.execute(text("""
-                SELECT
-                    COALESCE(SUM(j.debit),0)
-                    -
-                    COALESCE(SUM(j.credit),0)
+                SELECT COALESCE(SUM(j.debit),0)-COALESCE(SUM(j.credit),0)
                 FROM journal_entry_lines j
                 JOIN accounts a ON a.id=j.account_id
                 WHERE a.account_code=:code
