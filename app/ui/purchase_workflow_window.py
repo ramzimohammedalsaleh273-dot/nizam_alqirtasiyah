@@ -94,7 +94,7 @@ class PurchaseWorkflowWindow(QWidget):
         row=self.selected()
         if not row or row[1]!="أمر شراء": QMessageBox.warning(self,"تنبيه","اختر أمر شراء."); return
         try:
-            result=PurchaseWorkflowService.receive_order(int(row[0]))
+            result=PurchaseWorkflowService.receive_order(int(row[0]),user_id=self._user_id())
             self.load()
             QMessageBox.information(self,"تم الاستلام",f"تم إنشاء فاتورة شراء {result['purchase_invoice']['invoice_number']}.")
         except Exception as e: QMessageBox.critical(self,"فشل الاستلام",str(e))
