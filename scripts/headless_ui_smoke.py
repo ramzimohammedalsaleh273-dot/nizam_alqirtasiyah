@@ -23,7 +23,6 @@ objects=[
     AccessDataWindow("products","المنتجات"),
     ReportsWindow(),
     BackupWindow(),
-    SettingsWindow(),
     UniversalSearchWindow(),
     SalesInvoiceWindow(),
     PurchaseWorkflowWindow(),
