@@ -126,9 +126,8 @@ class InventoryWindow(QWidget):
 
         self.table = QTableWidget(0, 10)
         self.table.setHorizontalHeaderLabels([
-            "المعرف", "الباركود", "رمز الصنف", "اسم المنتج", "تكلفة",
-            "سعر البيع", "سعر الجملة", "سعر المدارس",
-            "الكمية", "المتاح"
+            "رقم", "الباركود", "رمز الصنف", "اسم المنتج", "التصنيف",
+            "الوحدة", "التكلفة", "سعر البيع", "الكمية", "الحالة"
         ])
         self.table.horizontalHeader().setSectionResizeMode(
             2, QHeaderView.Stretch
@@ -254,12 +253,12 @@ class InventoryWindow(QWidget):
                     item.get("barcode", "") or "",
                     item.get("sku", "") or "",
                     item.get("name_ar", "") or "",
+                    item.get("category_name", "") or "",
+                    item.get("unit_name", "") or "",
                     item.get("cost_price", 0),
                     item.get("sale_price", 0),
-                    item.get("wholesale_price", 0),
-                    item.get("school_price", 0),
                     item.get("quantity", 0),
-                    item.get("available_quantity", 0),
+                    "نشط",
                 ]
 
                 for column, value in enumerate(values):
