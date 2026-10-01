@@ -122,7 +122,12 @@ class PurchaseReturnService:
                 accounting=AccountingService._post_lines(s,AccountingService.next_entry_number(s),f"ترحيل مرتجع مشتريات {return_number}","PURCHASE_RETURN",return_id,lines)
 
                 if refund_method=="credit":
-                    s.execute(text("UPDATE suppliers SET current_balance=COALESCE(current_balance,0)-:amount,updated_at=CURRENT_TIMESTAMP WHERE id=:id"),{"amount":float(total),"id":invoice["supplier_id"]})
+                    supplier_cols = {r[1] for r in s.connection().exec_driver_sql("PRAGMA table_info(suppliers)").fetchall()}
+                    set_parts = ["current_balance=COALESCE(current_balance,0)-:amount"]
+                    if "updated_at" in supplier_cols:
+                        set_parts.append("updated_at=CURRENT_TIMESTAMP")
+                    s.execute(text(f"UPDATE suppliers SET {','.join(set_parts)} WHERE id=:id"),
+                              {"amount": float(total), "id": invoice["supplier_id"]})
 
                 AuditService.log(s,"PURCHASE_RETURN_POSTED","purchase_return",return_id)
                 s.commit()
