@@ -1,4 +1,5 @@
 from decimal import Decimal, ROUND_HALF_UP
+from datetime import datetime
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QKeySequence, QShortcut
@@ -19,7 +20,7 @@ from app.ui.theme import APP_STYLE
 class PaymentDialog(QDialog):
     """نافذة دفع موحدة تدعم الدفع المختلط والآجل مع اختيار العميل."""
 
-    def __init__(self, total, parent=None):
+    def __init__(self, total, customer_id=None, parent=None):
         super().__init__(parent)
         self.total = Decimal(str(total)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         self.setWindowTitle("إتمام الدفع")
@@ -33,6 +34,11 @@ class PaymentDialog(QDialog):
         self.credit = self._money_box()
         self.customer = QComboBox()
         self.customer.addItem("بدون عميل", None)
+        if customer_id is not None:
+            for i in range(self.customer.count()):
+                if self.customer.itemData(i) == customer_id:
+                    self.customer.setCurrentIndex(i)
+                    break
         try:
             for row in PartyService.customers():
                 if row.get("is_active", 1):
@@ -114,8 +120,9 @@ class PaymentDialog(QDialog):
 class POSWindow(QWidget):
     """نقطة بيع بجدول إدخال أصناف شبيه بجدول Access/Excel."""
 
-    def __init__(self, parent=None):
+    def __init__(self, user=None, parent=None):
         super().__init__(parent)
+        self.user = dict(user or {})
         self.cart = []
         self.search_engine = POSProductSearch()
         self._loading_table = False
@@ -146,6 +153,20 @@ class POSWindow(QWidget):
         self.search.textChanged.connect(self.search_live)
         search_row.addWidget(self.search, 1)
         root.addLayout(search_row)
+
+        customer_row = QHBoxLayout()
+        customer_row.addWidget(QLabel("العميل:"))
+        self.header_customer = QComboBox()
+        self.header_customer.addItem("بدون عميل", None)
+        try:
+            for row in PartyService.customers():
+                if row.get("is_active", 1):
+                    self.header_customer.addItem(f'{row["id"]} - {row["name"]}', row["id"])
+        except Exception:
+            pass
+        customer_row.addWidget(self.header_customer, 1)
+        customer_row.addStretch()
+        root.addLayout(customer_row)
 
         self.suggestions = QTableWidget(0, 5)
         self.suggestions.setHorizontalHeaderLabels(["الكود", "الصنف", "الباركود", "السعر", "المتاح"])
@@ -476,7 +497,7 @@ class POSWindow(QWidget):
         if not self.cart:
             QMessageBox.warning(self, "تنبيه", "الفاتورة فارغة.")
             return
-        dialog = PaymentDialog(self.current_total(), self)
+        dialog = PaymentDialog(self.current_total(), self.header_customer.currentData(), self)
         if dialog.exec() != QDialog.Accepted:
             return
         try:
