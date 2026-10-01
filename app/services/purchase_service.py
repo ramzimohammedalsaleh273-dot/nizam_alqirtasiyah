@@ -78,13 +78,15 @@ class PurchaseService:
                     s, iid, invoice, grand_total, paid, due, supplier_id,
                     tax_amount=tax, payment_method=payment_method
                 )
-                if "current_balance" in cls._columns(s,"suppliers") and due > 0:
-                    s.execute(text("""
-                        UPDATE suppliers
-                        SET current_balance=COALESCE(current_balance,0)+:amount,
-                            updated_at=CURRENT_TIMESTAMP
-                        WHERE id=:id
-                    """), {"amount":float(due),"id":supplier_id})
+                supplier_cols = cls._columns(s, "suppliers")
+                if "current_balance" in supplier_cols and due > 0:
+                    set_parts = ["current_balance=COALESCE(current_balance,0)+:amount"]
+                    if "updated_at" in supplier_cols:
+                        set_parts.append("updated_at=CURRENT_TIMESTAMP")
+                    s.execute(
+                        text(f"UPDATE suppliers SET {','.join(set_parts)} WHERE id=:id"),
+                        {"amount": float(due), "id": supplier_id},
+                    )
                 AuditService.log(s,"PURCHASE_POSTED","purchase_invoice",iid)
                 return {"id":iid,"invoice_number":invoice,"subtotal":float(total),"tax":float(tax),"total":float(grand_total),"paid":float(paid),"due":float(due),"journal":accounting}
         except Exception:
