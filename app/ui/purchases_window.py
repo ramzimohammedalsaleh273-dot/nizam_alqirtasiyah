@@ -51,7 +51,7 @@ class PurchasesWindow(QWidget):
     def load(self,*_):
         term=self.search.text().strip().lower()
         rows=PurchaseService.list_purchases()
-        if term: rows=[r for r in rows if term in str(r.get("invoice_number") or "").lower()]
+        if term: rows=[r for r in rows if any(term in str(r.get(k) or "").lower() for k in ("invoice_number","supplier_name","status"))]
         self.table.setRowCount(0)
 
         for r in rows:
