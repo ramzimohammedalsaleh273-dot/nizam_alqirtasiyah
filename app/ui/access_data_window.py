@@ -136,7 +136,19 @@ class AccessDataWindow(QWidget):
         clauses=[]; p={}; q=self.search.text().strip()
         if q:
             cols=[x["name"] for x in self.columns if x["name"] not in {"id","created_at","updated_at"}]
-            if cols: clauses.append("("+" OR ".join(f'CAST("{c}" AS TEXT) LIKE :q' for c in cols)+")"); p["q"]=f"%{q}%"
+            if cols:
+                def norm(expr):
+                    return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE("+expr+",'أ','ا'),'إ','ا'),'آ','ا'),'ى','ي'),'ة','ه')"
+                # البحث يطبع الحروف العربية للمقارنة فقط؛ البيانات المخزنة لا تتغير.
+                clauses.append("("+" OR ".join(
+                    f'{norm(f"CAST(\"{c}\" AS TEXT)")} LIKE :q_norm OR CAST("{c}" AS TEXT) LIKE :q'
+                    for c in cols
+                )+")")
+                p["q"]=f"%{q}%"
+                nq=q
+                for a,b in (("أ","ا"),("إ","ا"),("آ","ا"),("ى","ي"),("ة","ه")):
+                    nq=nq.replace(a,b)
+                p["q_norm"]=f"%{nq}%"
         fv=self.filter.currentData()
         if fv!="":
             st=next((x["name"] for x in self.columns if x["name"] in {"status","is_active","is_read"}),None)
