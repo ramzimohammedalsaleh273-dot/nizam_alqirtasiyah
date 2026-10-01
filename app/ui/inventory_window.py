@@ -32,6 +32,7 @@ class InventoryWindow(QWidget):
             "ابحث بالباركود أو رمز الصنف أو اسم المنتج..."
         )
         self.search.returnPressed.connect(self.load)
+        self.search.textChanged.connect(lambda _: self.load())
 
         search_button = QPushButton("بحث")
         search_button.clicked.connect(self.load)
