@@ -36,6 +36,7 @@ from app.ui.expense_window import ExpenseWindow
 from app.ui.analytics_window import AnalyticsWindow
 from app.ui.permissions_window import PermissionsWindow
 from app.ui.settings_window import SettingsWindow
+from app.ui.documents_window import DocumentsWindow
 
 
 class LoginDialog(QDialog):
@@ -266,7 +267,7 @@ class MainWindow(QMainWindow):
                 ("التنبيهات", self.open_smart_operations),
                 ("الخدمات والطباعة", lambda: self.open_data("printing_services", "خدمات الطباعة")),
                 ("طلبات الطباعة", lambda: self.open_data("printing_orders", "طلبات الطباعة")),
-                ("المستندات", lambda: self.open_data("documents", "المستندات")),
+                ("المستندات", lambda: self.open_window("documents", DocumentsWindow)),
                 ("طلبات الاعتماد", lambda: self.open_data("approval_requests", "طلبات الاعتماد")),
                 ("سجل التدقيق", lambda: self.open_data("audit_logs", "سجل التدقيق", editable=False)),
                 ("المزامنة", lambda: self.open_data("sync_queue", "طابور المزامنة", editable=False)),
