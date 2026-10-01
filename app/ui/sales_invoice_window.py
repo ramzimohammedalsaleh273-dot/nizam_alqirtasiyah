@@ -97,8 +97,9 @@ class ReturnDialog(QDialog):
 class SalesInvoiceWindow(QWidget):
     """ملف فاتورة 360° مرتب: رأس الفاتورة، الأصناف، المدفوعات، المرتجعات والتدقيق."""
 
-    def __init__(self, parent=None, sale_id=None, data=None):
+    def __init__(self, user=None, parent=None, sale_id=None, data=None):
         super().__init__(parent)
+        self.user = dict(user or {})
         self.setWindowTitle("فاتورة البيع — الملف الكامل")
         self.setMinimumSize(1280, 820)
         self.setLayoutDirection(Qt.RightToLeft)
@@ -402,6 +403,7 @@ class SalesInvoiceWindow(QWidget):
                 int(self.data["sale"]["id"]),
                 items,
                 reason,
+                user_id=self.user.get("id"),
             )
             QMessageBox.information(
                 self,
