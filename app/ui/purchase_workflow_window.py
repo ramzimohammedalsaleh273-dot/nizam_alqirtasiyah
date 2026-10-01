@@ -1,3 +1,4 @@
+from app.ui.theme import APP_STYLE
 from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QTableWidget,QTableWidgetItem,QPushButton,QMessageBox,QInputDialog,QDoubleSpinBox,QFormLayout,QDialog,QDialogButtonBox,QSpinBox
 from sqlalchemy import text
 from app.database.connection import get_session
@@ -9,6 +10,7 @@ class PurchaseWorkflowWindow(QWidget):
     """واجهة تشغيلية لدورة طلبات وأوامر الشراء والاستلام."""
     def __init__(self,parent=None):
         super().__init__(parent)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("دورة المشتريات")
         self.setMinimumSize(1100,650)
         root=QVBoxLayout(self)
@@ -86,3 +88,5 @@ class PurchaseWorkflowWindow(QWidget):
             self.load()
             QMessageBox.information(self,"تم الاستلام",f"تم إنشاء فاتورة شراء {result['purchase_invoice']['invoice_number']}.")
         except Exception as e: QMessageBox.critical(self,"فشل الاستلام",str(e))
+
+# UI reference theme is applied by the main application shell.
