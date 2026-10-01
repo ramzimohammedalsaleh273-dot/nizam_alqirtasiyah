@@ -206,6 +206,10 @@ class PartiesWindow(QWidget):
         self.add_supplier_button = QPushButton("إضافة مورد")
         self.open_button = QPushButton("فتح البطاقة")
         self.open_button.clicked.connect(self.open_card)
+        self.statement_button = QPushButton("كشف الحساب")
+        self.statement_button.clicked.connect(self.open_statement)
+        self.new_invoice_button = QPushButton("فاتورة جديدة")
+        self.new_invoice_button.clicked.connect(self.new_invoice)
         self.edit_button = QPushButton("تعديل المحدد")
         self.delete_button = QPushButton("تعطيل/حذف المحدد")
         self.refresh_button = QPushButton("تحديث")
@@ -217,6 +221,8 @@ class PartiesWindow(QWidget):
         bar.addWidget(self.add_customer_button)
         bar.addWidget(self.add_supplier_button)
         bar.addWidget(self.open_button)
+        bar.addWidget(self.statement_button)
+        bar.addWidget(self.new_invoice_button)
         bar.addWidget(self.edit_button)
         bar.addWidget(self.delete_button)
         bar.addWidget(self.refresh_button)
@@ -287,6 +293,26 @@ class PartiesWindow(QWidget):
             self._populate(self.suppliers, suppliers)
         except Exception as exc:
             QMessageBox.critical(self, "فشل تحميل الأطراف", str(exc))
+
+    def open_statement(self):
+        supplier, party = self._selected()
+        if party is None:
+            QMessageBox.information(self,"كشف الحساب","اختر عميلًا أو موردًا أولًا."); return
+        dialog=PartyCardDialog(party["id"],supplier=supplier,parent=self)
+        dialog.tabs.setCurrentIndex(4)
+        dialog.exec()
+
+    def new_invoice(self):
+        supplier, party = self._selected()
+        if party is None:
+            QMessageBox.information(self,"فاتورة جديدة","اختر عميلًا أو موردًا أولًا."); return
+        if supplier:
+            from app.ui.purchases_window import PurchasesWindow
+            self._invoice_window=PurchasesWindow(self)
+        else:
+            from app.ui.pos_window import POSWindow
+            self._invoice_window=POSWindow(parent=self)
+        self._invoice_window.show(); self._invoice_window.raise_(); self._invoice_window.activateWindow()
 
     def open_card(self):
         supplier, party = self._selected()
