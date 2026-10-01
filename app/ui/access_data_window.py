@@ -3,14 +3,15 @@ from decimal import Decimal
 from typing import Any
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QLineEdit,QPushButton,QLabel,
+    QApplication,QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QLineEdit,QPushButton,QLabel,
     QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QMessageBox,QApplication,
     QDialog,QDialogButtonBox,QTextEdit,QDoubleSpinBox,QSpinBox,QCheckBox,
-    QComboBox,QMenu,QFileDialog,QInputDialog
+    QComboBox,QMenu,QFileDialog,QFileDialog,QInputDialog
 )
 from sqlalchemy import text
 from app.database.connection import get_session
 from app.ui.theme import APP_STYLE
+from openpyxl import Workbook
 
 FIELD_LABELS={
 "id":"الرقم","code":"الكود","name":"الاسم","name_ar":"اسم الصنف","name_en":"الاسم بالإنجليزية",
@@ -100,7 +101,7 @@ class AccessDataWindow(QWidget):
             b=QPushButton(cap); b.setObjectName(obj); b.clicked.connect(fn); a.addWidget(b)
         a.addStretch(); root.addLayout(a)
         self.table=QTableWidget(0,0); self.table.setSortingEnabled(True); self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.table.setSelectionMode(QAbstractItemView.SingleSelection); self.table.setEditTriggers(QAbstractItemView.NoEditTriggers); self.table.setAlternatingRowColors(True)
+        self.table.setSelectionMode(QAbstractItemView.ExtendedSelection); self.table.setEditTriggers(QAbstractItemView.NoEditTriggers); self.table.setAlternatingRowColors(True)
         self.table.setContextMenuPolicy(Qt.CustomContextMenu); self.table.customContextMenuRequested.connect(self.menu); self.table.cellDoubleClicked.connect(lambda *_:self.edit()); self.table.itemSelectionChanged.connect(self._selection_changed)
         root.addWidget(self.table,1)
         f=QHBoxLayout(); self.status=QLabel("جاهز"); f.addWidget(self.status); f.addStretch()
@@ -108,7 +109,17 @@ class AccessDataWindow(QWidget):
             b=QPushButton(cap); b.setMaximumWidth(52); b.clicked.connect(fn); f.addWidget(b)
         self.page_label=QLabel(); f.addWidget(self.page_label); root.addLayout(f)
     def _schema(self):
-        with get_session() as s: rows=s.execute(text(f'PRAGMA table_info("{self.table_name}")')).mappings().all()
+        with get_session() as s:
+            exists=s.execute(text("SELECT 1 FROM sqlite_master WHERE type='table' AND name=:n"),{"n":self.table_name}).scalar()
+            if not exists:
+                self.columns=[]
+                self.table.setColumnCount(1)
+                self.table.setHorizontalHeaderLabels(["الحالة"])
+                self.status.setText(f"الجدول غير موجود: {self.table_name}")
+                for b in self.findChildren(QPushButton):
+                    if b.text() in {"جديد","تعديل","حذف","فتح"}: b.setEnabled(False)
+                return
+            rows=s.execute(text(f'PRAGMA table_info("{self.table_name}")')).mappings().all()
         self.columns=[dict(x) for x in rows if x["name"] not in HIDDEN]
         if self.requested_columns: self.columns=[x for x in self.columns if x["name"] in set(self.requested_columns)]
         self.table.setColumnCount(len(self.columns)); self.table.setHorizontalHeaderLabels([FIELD_LABELS.get(x["name"],x["name"]) for x in self.columns])
@@ -257,9 +268,39 @@ class AccessDataWindow(QWidget):
             self.load()
         except Exception as e:QMessageBox.critical(self,"تعذر الحذف",str(e))
     def menu(self,pos):
-        m=QMenu(self); m.addAction("فتح / تعديل",self.edit); m.addAction("تحديث",self.load)
+        m=QMenu(self); m.addAction("فتح / تعديل",self.edit); m.addAction("نسخ المحدد",self.copy_selected); m.addAction("تحديث",self.load)
         if self.editable:m.addSeparator();m.addAction("حذف",self.delete)
         m.exec(self.table.viewport().mapToGlobal(pos))
+    def copy_selected(self):
+        rows=sorted({i.row() for i in self.table.selectedIndexes()})
+        if not rows:return
+        QApplication.clipboard().setText("\n".join("\t".join(self.table.item(r,col).text() if self.table.item(r,col) else "" for col in range(self.table.columnCount())) for r in rows))
+
+    def export_excel(self):
+        if not self.columns:return
+        path,_=QFileDialog.getSaveFileName(self,"تصدير Excel",f"{self.title_text}.xlsx","Excel (*.xlsx)")
+        if not path:return
+        try:
+            wb=Workbook(); ws=wb.active; ws.title="البيانات"
+            ws.append([FIELD_LABELS.get(x["name"],x["name"]) for x in self.columns])
+            for r in range(self.table.rowCount()):
+                ws.append([self.table.item(r,col).text() if self.table.item(r,col) else "" for col in range(self.table.columnCount())])
+            wb.save(path); self.status.setText("تم التصدير إلى Excel.")
+        except Exception as e: QMessageBox.critical(self,"فشل التصدير",str(e))
+
+    def print_table(self):
+        from PySide6.QtPrintSupport import QPrinter,QPrintDialog
+        from PySide6.QtGui import QTextDocument
+        if not self.columns:return
+        printer=QPrinter(QPrinter.HighResolution); dlg=QPrintDialog(printer,self)
+        if dlg.exec()!=QPrintDialog.Accepted:return
+        headers=[FIELD_LABELS.get(x["name"],x["name"]) for x in self.columns]
+        html="<html dir='rtl'><meta charset='utf-8'><h2>"+self.title_text+"</h2><table border='1' cellspacing='0' cellpadding='4'><tr>"+''.join(f"<th>{h}</th>" for h in headers)+"</tr>"
+        for r in range(self.table.rowCount()):
+            html+="<tr>"+''.join(f"<td>{self.table.item(r,col).text() if self.table.item(r,col) else ''}</td>" for col in range(self.table.columnCount()))+"</tr>"
+        html+="</table></html>"
+        doc=QTextDocument(self); doc.setHtml(html); doc.print_(printer)
+
     def first(self):self.page=0;self.load()
     def prev(self):self.page=max(0,self.page-1);self.load()
     def next(self):self.page=min(max(0,(self.total+self.page_size-1)//self.page_size-1),self.page+1);self.load()
