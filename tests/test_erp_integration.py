@@ -31,9 +31,21 @@ def isolated_db(tmp_path, monkeypatch):
 
 def _first_ids():
     with connection.get_session() as s:
+        PermissionService.ensure_schema(s)
+        admin_role = s.execute(
+            __import__("sqlalchemy").text("SELECT id FROM erp_roles WHERE code='admin' LIMIT 1")
+        ).scalar()
         user = s.execute(
             __import__("sqlalchemy").text("SELECT id FROM users ORDER BY id LIMIT 1")
         ).scalar()
+        if user and admin_role:
+            s.execute(
+                __import__("sqlalchemy").text(
+                    "INSERT OR IGNORE INTO erp_user_roles(user_id,role_id) VALUES(:u,:r)"
+                ),
+                {"u": int(user), "r": int(admin_role)},
+            )
+        s.commit()
         product = s.execute(
             __import__("sqlalchemy").text(
                 "SELECT id FROM products WHERE is_active=1 ORDER BY id LIMIT 1"
