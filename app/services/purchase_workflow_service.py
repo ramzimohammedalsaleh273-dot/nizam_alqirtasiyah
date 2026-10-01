@@ -111,11 +111,14 @@ class PurchaseWorkflowService:
                 s.rollback(); raise
 
     @classmethod
-    def create_purchase_order(cls, request_id, supplier_id, items, notes=None):
+    def create_purchase_order(cls, request_id, supplier_id, items, notes=None, user_id=None):
         if not items: raise ValueError("أمر الشراء فارغ")
         with get_session() as s:
             try:
                 cls.ensure_schema(s)
+                PermissionService.ensure_schema(s)
+                if user_id is None or not PermissionService.has_in_session(s, user_id, "purchase.order.create"):
+                    raise PermissionError("لا توجد صلاحية لإنشاء أمر شراء")
                 req=s.execute(text("SELECT * FROM purchase_requests WHERE id=:id"),{"id":request_id}).fetchone()
                 if not req or req.status!="APPROVED": raise ValueError("يجب اعتماد طلب الشراء أولاً")
                 n=DocumentNumberService.next_number(s,"PURCHASE_ORDER","PO",6)
@@ -140,11 +143,14 @@ class PurchaseWorkflowService:
                 s.rollback(); raise
 
     @classmethod
-    def receive_order(cls, order_id, paid_amount=0, tax_amount=None, payment_method="cash", notes=None):
+    def receive_order(cls, order_id, paid_amount=0, tax_amount=None, payment_method="cash", notes=None, user_id=None):
         """استلام أمر الشراء وفوترته داخل معاملة واحدة."""
         with get_session() as s:
             try:
                 cls.ensure_schema(s)
+                PermissionService.ensure_schema(s)
+                if user_id is None or not PermissionService.has_in_session(s, user_id, "purchase.order.receive"):
+                    raise PermissionError("لا توجد صلاحية لاستلام أمر شراء")
                 order=s.execute(
                     text("SELECT * FROM purchase_orders WHERE id=:id"),
                     {"id":order_id},
