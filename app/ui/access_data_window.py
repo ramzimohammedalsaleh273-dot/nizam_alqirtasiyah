@@ -4,9 +4,9 @@ from typing import Any
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QLineEdit,QPushButton,QLabel,
-    QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QMessageBox,
+    QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QMessageBox,QApplication,
     QDialog,QDialogButtonBox,QTextEdit,QDoubleSpinBox,QSpinBox,QCheckBox,
-    QComboBox,QMenu
+    QComboBox,QMenu,QFileDialog,QInputDialog
 )
 from sqlalchemy import text
 from app.database.connection import get_session
@@ -96,12 +96,12 @@ class AccessDataWindow(QWidget):
         s=QHBoxLayout(); s.addWidget(QLabel("بحث:")); self.search=QLineEdit(); self.search.setPlaceholderText("بحث لحظي في كل الأعمدة…"); self.search.textChanged.connect(self._changed); s.addWidget(self.search,1)
         self.filter=QComboBox(); self.filter.addItem("كل الحالات",""); self.filter.currentIndexChanged.connect(lambda *_:self.load(reset=True)); s.addWidget(self.filter); root.addLayout(s)
         a=QHBoxLayout()
-        for cap,fn,obj in [("إضافة",self.add,"Success"),("تعديل",self.edit,"Primary"),("حذف",self.delete,"Danger"),("تحديث",self.load,"Secondary")]:
+        for cap,fn,obj in [("جديد",self.add,"Success"),("فتح",self.edit,"Primary"),("تعديل",self.edit,"Primary"),("حذف",self.delete,"Danger"),("تصفية",self.advanced_search,"Secondary"),("تحديث",self.load,"Secondary"),("نسخ",self.copy_selection,"Secondary"),("Excel",self.export_excel,"Secondary"),("طباعة",self.print_table,"Secondary")]:
             b=QPushButton(cap); b.setObjectName(obj); b.clicked.connect(fn); a.addWidget(b)
         a.addStretch(); root.addLayout(a)
         self.table=QTableWidget(0,0); self.table.setSortingEnabled(True); self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SingleSelection); self.table.setEditTriggers(QAbstractItemView.NoEditTriggers); self.table.setAlternatingRowColors(True)
-        self.table.setContextMenuPolicy(Qt.CustomContextMenu); self.table.customContextMenuRequested.connect(self.menu); self.table.cellDoubleClicked.connect(lambda *_:self.edit())
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu); self.table.customContextMenuRequested.connect(self.menu); self.table.cellDoubleClicked.connect(lambda *_:self.edit()); self.table.itemSelectionChanged.connect(self._selection_changed)
         root.addWidget(self.table,1)
         f=QHBoxLayout(); self.status=QLabel("جاهز"); f.addWidget(self.status); f.addStretch()
         for cap,fn in [("|<",self.first),("<",self.prev),(">",self.next),(">|",self.last)]:
@@ -147,6 +147,72 @@ class AccessDataWindow(QWidget):
         self.table.setSortingEnabled(True); pages=max(1,(self.total+self.page_size-1)//self.page_size); self.page=min(self.page,pages-1)
         self.page_label.setText(f"{self.page+1} / {pages}"); self.count.setText(f"إجمالي السجلات: {self.total:,}")
         self.status.setText(f"السجلات: {self.total:,}    المحدد: {1 if self.table.currentRow()>=0 else 0}")
+
+    def _selection_changed(self):
+        self.status.setText(f"السجلات: {self.total:,}    المحدد: {len(self.table.selectionModel().selectedRows())}")
+
+    def advanced_search(self):
+        value, ok = QInputDialog.getText(self, "بحث متقدم", "ابحث في الحقول المعروضة:")
+        if ok:
+            self.search.setText(value)
+
+    def copy_selection(self):
+        ranges = self.table.selectedRanges()
+        if not ranges:
+            return
+        rows = []
+        for rg in ranges:
+            for r in range(rg.topRow(), rg.bottomRow() + 1):
+                vals = []
+                for col in range(rg.leftColumn(), rg.rightColumn() + 1):
+                    it = self.table.item(r, col)
+                    vals.append("" if it is None else it.text())
+                rows.append("\t".join(vals))
+        QApplication.clipboard().setText("\n".join(rows))
+        self.status.setText("تم نسخ البيانات المحددة.")
+
+    def export_excel(self):
+        path, _ = QFileDialog.getSaveFileName(self, "تصدير Excel", f"{self.title_text}.xlsx", "Excel (*.xlsx)")
+        if not path:
+            return
+        try:
+            from openpyxl import Workbook
+            wb = Workbook()
+            ws = wb.active
+            ws.title = self.title_text[:31]
+            for col, x in enumerate(self.columns, 1):
+                ws.cell(1, col, FIELD_LABELS.get(x["name"], x["name"]))
+            for row in range(self.table.rowCount()):
+                for col in range(self.table.columnCount()):
+                    it = self.table.item(row, col)
+                    ws.cell(row + 2, col + 1, "" if it is None else it.text())
+            wb.save(path)
+            self.status.setText(f"تم التصدير: {path}")
+        except Exception as e:
+            QMessageBox.critical(self, "فشل التصدير", str(e))
+
+    def print_table(self):
+        try:
+            from PySide6.QtPrintSupport import QPrinter, QPrintDialog
+            from PySide6.QtGui import QTextDocument
+            printer = QPrinter(QPrinter.HighResolution)
+            dialog = QPrintDialog(printer, self)
+            if dialog.exec() != QDialog.Accepted:
+                return
+            headers = [self.table.horizontalHeaderItem(i).text() for i in range(self.table.columnCount())]
+            html = ["<html><body dir='rtl'><h2>" + self.title_text + "</h2><table border='1' cellspacing='0' cellpadding='4'><tr>"]
+            html += [f"<th>{h}</th>" for h in headers]
+            html.append("</tr>")
+            for r in range(self.table.rowCount()):
+                html.append("<tr>" + "".join(f"<td>{'' if self.table.item(r,c) is None else self.table.item(r,c).text()}</td>" for c in range(self.table.columnCount())) + "</tr>")
+            html.append("</table></body></html>")
+            doc = QTextDocument()
+            doc.setHtml("".join(html))
+            doc.print(printer)
+            self.status.setText("تم إرسال الجدول إلى الطابعة.")
+        except Exception as e:
+            QMessageBox.critical(self, "فشل الطباعة", str(e))
+
     def _id(self):
         r=self.table.currentRow(); ic=next((i for i,x in enumerate(self.columns) if x["name"]=="id"),None)
         if r<0 or ic is None:return None
