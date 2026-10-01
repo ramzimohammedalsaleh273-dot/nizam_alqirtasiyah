@@ -53,16 +53,12 @@ class PurchaseReturnsWindow(QWidget):
         session.execute(text("""
             CREATE TABLE IF NOT EXISTS purchase_returns (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                purchase_id INTEGER NOT NULL,
-                supplier_id INTEGER NULL,
-                warehouse_id INTEGER NULL,
                 return_number VARCHAR(100) NOT NULL UNIQUE,
-                subtotal NUMERIC NOT NULL DEFAULT 0,
-                tax_amount NUMERIC NOT NULL DEFAULT 0,
-                total_amount NUMERIC NOT NULL DEFAULT 0,
-                refund_method VARCHAR(30) NOT NULL DEFAULT 'credit',
-                status VARCHAR(30) NOT NULL DEFAULT 'POSTED',
+                supplier_id INTEGER NOT NULL,
+                invoice_id INTEGER NULL,
                 reason TEXT NULL,
+                total_amount NUMERIC NOT NULL DEFAULT 0,
+                status VARCHAR(50) NOT NULL DEFAULT 'completed',
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         """))
@@ -110,7 +106,7 @@ class PurchaseReturnsWindow(QWidget):
                                SELECT SUM(pri.quantity)
                                FROM purchase_return_items pri
                                JOIN purchase_returns pr ON pr.id=pri.return_id
-                               WHERE pr.purchase_id=pi.id
+                               WHERE pr.invoice_id=pi.id
                                  AND pri.product_id=pii.product_id
                                  AND pr.status <> 'VOID'
                            ),0) AS returned_quantity,
