@@ -1,15 +1,20 @@
 from datetime import datetime
 from sqlalchemy import text
 from app.database.connection import get_session
+from app.services.permission_service import PermissionService
+from app.services.audit_service import AuditService
 
 
 class ProductService:
     @staticmethod
-    def create_product(sku,name_ar,cost_price,sale_price,barcode=None,opening_quantity=0,warehouse_id=1):
+    def create_product(sku,name_ar,cost_price,sale_price,barcode=None,opening_quantity=0,warehouse_id=1,user_id=None):
         sku=str(sku).strip(); name_ar=str(name_ar).strip()
         if not sku or not name_ar: raise ValueError("رمز الصنف واسم المنتج مطلوبان")
         if float(cost_price)<0 or float(sale_price)<0: raise ValueError("الأسعار لا يمكن أن تكون سالبة")
         with get_session() as s:
+            PermissionService.ensure_schema(s)
+            if user_id is None or not PermissionService.has_in_session(s, user_id, "inventory.create"):
+                raise PermissionError("لا توجد صلاحية لإضافة صنف")
             if s.execute(text("SELECT 1 FROM products WHERE sku=:sku LIMIT 1"),{"sku":sku}).scalar():
                 raise ValueError("رمز الصنف موجود مسبقاً")
             table_info=s.execute(text("PRAGMA table_info(products)")).fetchall()
@@ -65,15 +70,19 @@ class ProductService:
                     if "notes" in cols: fields.append("notes"); vals.append(":n"); params["n"]="رصيد افتتاحي عند إنشاء الصنف"
                     if "created_at" in cols: fields.append("created_at"); vals.append("CURRENT_TIMESTAMP")
                     s.execute(text(f"INSERT INTO stock_movements({','.join(fields)}) VALUES({','.join(vals)})"), params)
+            AuditService.log(s,"PRODUCT_CREATED","product",product_id,username=str(user_id))
             s.commit()
             return int(product_id)
 
     @staticmethod
-    def update_product(product_id, sku, name_ar, cost_price, sale_price):
+    def update_product(product_id, sku, name_ar, cost_price, sale_price, user_id=None):
         sku=str(sku).strip(); name_ar=str(name_ar).strip()
         if not sku or not name_ar: raise ValueError("رمز الصنف واسم المنتج مطلوبان")
         if float(cost_price)<0 or float(sale_price)<0: raise ValueError("الأسعار لا يمكن أن تكون سالبة")
         with get_session() as s:
+            PermissionService.ensure_schema(s)
+            if user_id is None or not PermissionService.has_in_session(s, user_id, "inventory.edit"):
+                raise PermissionError("لا توجد صلاحية لتعديل الصنف")
             duplicate=s.execute(text("SELECT id FROM products WHERE sku=:sku AND id<>:id LIMIT 1"),{"sku":sku,"id":product_id}).scalar()
             if duplicate: raise ValueError("رمز الصنف مستخدم لصنف آخر")
             cols={r[1] for r in s.execute(text("PRAGMA table_info(products)")).fetchall()}
@@ -84,15 +93,20 @@ class ProductService:
             data["id"]=int(product_id)
             result=s.execute(text(f"UPDATE products SET {assignments} WHERE id=:id AND is_active=1"),data)
             if result.rowcount != 1: raise ValueError("الصنف غير موجود أو غير نشط")
+            AuditService.log(s,"PRODUCT_UPDATED","product",product_id,username=str(user_id))
             s.commit()
 
 
     @staticmethod
-    def deactivate_product(product_id):
+    def deactivate_product(product_id, user_id=None):
         with get_session() as s:
+            PermissionService.ensure_schema(s)
+            if user_id is None or not PermissionService.has_in_session(s, user_id, "inventory.delete"):
+                raise PermissionError("لا توجد صلاحية لتعطيل الصنف")
             result=s.execute(text("UPDATE products SET is_active=0, updated_at=CURRENT_TIMESTAMP WHERE id=:id AND is_active=1"),{"id":int(product_id)})
             if result.rowcount != 1:
                 raise ValueError("الصنف غير موجود أو محذوف مسبقًا")
+            AuditService.log(s,"PRODUCT_DEACTIVATED","product",product_id,username=str(user_id))
             s.commit()
 
     @staticmethod
