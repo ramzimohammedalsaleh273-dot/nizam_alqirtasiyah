@@ -1,3 +1,4 @@
+from app.ui.theme import APP_STYLE
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
@@ -13,6 +14,7 @@ class PurchaseReturnsWindow(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("مرتجعات المشتريات")
         self.setMinimumSize(1150, 680)
         self.setLayoutDirection(Qt.RightToLeft)
@@ -190,3 +192,5 @@ class PurchaseReturnsWindow(QWidget):
             )
         except Exception as exc:
             QMessageBox.critical(self, "فشل المرتجع", str(exc))
+
+# UI reference theme is applied by the main application shell.
