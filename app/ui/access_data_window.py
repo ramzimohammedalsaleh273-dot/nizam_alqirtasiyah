@@ -45,9 +45,8 @@ TITLES={
 "notifications":"التنبيهات","system_settings":"إعدادات النظام","stocktakes":"الجرد","stock_movements":"حركات المخزون",
 "audit_logs":"سجل التدقيق","audit_log":"سجل التدقيق","security_audit":"التدقيق الأمني","sync_queue":"طابور المزامنة",
 "sync_devices":"أجهزة المزامنة","approval_requests":"طلبات الاعتماد","fiscal_periods":"الفترات المالية",
-"payroll_periods":"فترات الرواتب","payroll_runs":"مسيرات الرواتب","assets":"الأصول","contracts":"العقود",
-"printing_services":"خدمات الطباعة","printing_orders":"طلبات الطباعة","integrations":"التكاملات",
-"ecommerce_orders":"طلبات التجارة الإلكترونية"
+"payroll_periods":"فترات الرواتب","payroll_runs":"مسيرات الرواتب",
+"printing_services":"خدمات الطباعة","printing_orders":"طلبات الطباعة"
 }
 
 class RecordDialog(QDialog):
