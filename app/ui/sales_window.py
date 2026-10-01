@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from app.services.sales_service import SalesService
 from app.ui.sales_invoice_window import SalesInvoiceWindow
+from app.ui.theme import APP_STYLE
 
 
 class SalesWindow(QWidget):
@@ -13,6 +14,7 @@ class SalesWindow(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("المبيعات والفواتير")
         self.setMinimumSize(1250, 720)
         self.setLayoutDirection(Qt.RightToLeft)
@@ -165,3 +167,5 @@ class SalesWindow(QWidget):
         window.raise_()
         window.activateWindow()
         self._invoice_window = window
+
+# UI reference theme is applied by the main application shell.
