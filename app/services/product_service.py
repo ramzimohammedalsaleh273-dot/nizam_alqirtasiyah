@@ -110,6 +110,6 @@ class ProductService:
             s.commit()
 
     @staticmethod
-    def adjust_quantity(product_id, warehouse_id, quantity, reason="تعديل كمية من بطاقة الصنف"):
+    def adjust_quantity(product_id, warehouse_id, quantity, reason="تعديل كمية من بطاقة الصنف", user_id=None):
         from app.services.inventory_operations_service import InventoryOperationsService
-        InventoryOperationsService.adjust(int(product_id), int(warehouse_id), float(quantity), reason)
+        InventoryOperationsService.adjust(int(product_id), int(warehouse_id), float(quantity), reason, user_id=user_id)
