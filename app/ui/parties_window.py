@@ -1,3 +1,4 @@
+from app.ui.theme import APP_STYLE
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QTabWidget, QTableWidget, QTableWidgetItem,
@@ -14,6 +15,7 @@ class PartyDialog(QDialog):
 
     def __init__(self, supplier=False, groups=None, party=None, parent=None):
         super().__init__(parent)
+        self.setStyleSheet(APP_STYLE)
         self.supplier = supplier
         self.party = party or {}
         self.setWindowTitle(
@@ -275,3 +277,5 @@ class PartiesWindow(QWidget):
             return
         self._open_form(supplier, party)
 
+
+# UI reference theme is applied by the main application shell.
