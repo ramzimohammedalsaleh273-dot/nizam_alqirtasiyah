@@ -116,6 +116,7 @@ try:
 
     seed_by_columns("warehouses", [
         {"name":"المستودع الرئيسي","warehouse_code":"WH-001","code":"WH-001","branch_id":branch_id,"company_id":company_id,"is_active":1,"created_at":now},
+        {"name":"مستودع الفرع","warehouse_code":"WH-002","code":"WH-002","branch_id":branch_id,"company_id":company_id,"is_active":1,"created_at":now},
     ])
 
     warehouse = cur.execute("SELECT id FROM warehouses ORDER BY id LIMIT 1").fetchone()
