@@ -35,11 +35,15 @@ def ensure_reference_schema(session) -> int:
             continue
 
         definitions = []
-        for column in spec.get("columns", []):
+        columns = spec.get("columns", [])
+        primary_columns = [column for column in columns if column.get("primary_key")]
+        for column in columns:
             name = _quote(column["name"])
             typ = str(column.get("type") or "TEXT")
             definition = f"{name} {typ}"
-            if column.get("primary_key"):
+            # SQLite permits AUTOINCREMENT only for a single INTEGER PRIMARY KEY.
+            # Reference tables can legitimately use composite primary keys.
+            if len(primary_columns) == 1 and column.get("primary_key"):
                 definition += " PRIMARY KEY"
                 if typ.upper() == "INTEGER":
                     definition += " AUTOINCREMENT"
@@ -49,6 +53,10 @@ def ensure_reference_schema(session) -> int:
             if default is not None:
                 definition += f" DEFAULT {default}"
             definitions.append(definition)
+        if len(primary_columns) > 1:
+            definitions.append(
+                "PRIMARY KEY (" + ", ".join(_quote(column["name"]) for column in primary_columns) + ")"
+            )
 
         for fk in spec.get("foreign_keys", []):
             definitions.append(
