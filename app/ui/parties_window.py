@@ -235,9 +235,8 @@ class PartiesWindow(QWidget):
         self.tabs.addTab(self.suppliers, "الموردون")
         layout.addWidget(self.tabs)
 
-        self.customers.cellDoubleClicked.connect(lambda *_: self.edit_selected())
-        self.suppliers.cellDoubleClicked.connect(lambda *_: self.open_card())
         self.customers.cellDoubleClicked.connect(lambda *_: self.open_card())
+        self.suppliers.cellDoubleClicked.connect(lambda *_: self.open_card())
         self.load()
 
     @staticmethod
