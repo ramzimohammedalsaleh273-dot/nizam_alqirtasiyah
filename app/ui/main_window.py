@@ -258,7 +258,7 @@ class MainWindow(QMainWindow):
                 ("مرتجعات المشتريات", self.open_purchase_returns),
             ]),
             ("المخزون والأطراف", [
-                ("المنتجات", lambda: self.open_data("products", "المنتجات")),
+                ("المنتجات", self.open_inventory),
                 ("التصنيفات", lambda: self.open_data("product_categories", "التصنيفات")),
                 ("الوحدات", lambda: self.open_data("units", "الوحدات")),
                 ("المستودعات", lambda: self.open_data("warehouses", "المستودعات")),
@@ -271,8 +271,8 @@ class MainWindow(QMainWindow):
                 ("مرتجعات المبيعات", self.open_sales_returns),
                 ("مرتجعات المشتريات", self.open_purchase_returns),
                 ("الجرد", lambda: self.open_data("stocktakes", "الجرد")),
-                ("العملاء", lambda: self.open_data("customers", "العملاء")),
-                ("الموردون", lambda: self.open_data("suppliers", "الموردون")),
+                ("العملاء", self.open_parties),
+                ("الموردون", self.open_parties),
             ]),
             ("المالية", [
                 ("الخزينة", self.open_treasury),
