@@ -16,6 +16,7 @@ from app.ui.sales_window import SalesWindow
 from app.ui.purchases_window import PurchasesWindow
 from app.ui.parties_window import PartiesWindow
 from app.ui.inventory_window import InventoryWindow
+from app.ui.stocktake_window import StocktakeWindow
 from app.ui.reports_window import ReportsWindow
 from app.ui.administration_windows import accounting_window, treasury_window, employees_window, settings_window
 from app.ui.backup_window import BackupWindow
@@ -269,7 +270,7 @@ class MainWindow(QMainWindow):
                 ("حركات المخزون", lambda: self.open_data("stock_movements", "حركات المخزون", editable=False)),
                 ("مرتجعات المبيعات", self.open_sales_returns),
                 ("مرتجعات المشتريات", self.open_purchase_returns),
-                ("الجرد", lambda: self.open_data("stocktakes", "الجرد")),
+                ("الجرد", self.open_stocktake),
                 ("العملاء", self.open_parties),
                 ("الموردون", self.open_parties),
             ]),
@@ -568,6 +569,9 @@ class MainWindow(QMainWindow):
 
     def open_inventory(self):
         self.open_window("inventory", InventoryWindow)
+
+    def open_stocktake(self):
+        self.open_window("stocktake", StocktakeWindow)
 
     def open_sales(self):
         self.open_window("sales", SalesWindow)
