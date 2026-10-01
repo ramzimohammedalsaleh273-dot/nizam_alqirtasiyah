@@ -16,7 +16,7 @@ class SalesService:
                 FROM sales s
                 LEFT JOIN customers c ON c.id=s.customer_id
                 LEFT JOIN users u ON u.id=s.cashier_id
-                ORDER BY id DESC
+                ORDER BY s.id DESC
                 LIMIT :limit
             """), {"limit": limit}).fetchall()
             return [dict(r._mapping) for r in rows]
