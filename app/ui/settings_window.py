@@ -19,7 +19,7 @@ class SettingsWindow(QWidget):
     def _tab(self,title,items):
         w=QWidget(); f=QFormLayout(w); f.setLabelAlignment(Qt.AlignRight)
         for key,label in items:
-            if key in {"credit_sales_enabled","customer_credit_limit_enabled","negative_stock_allowed","stocktake_enabled"}: q=QCheckBox()
+            if key in {"credit_sales_enabled","customer_credit_limit_enabled","negative_stock_allowed","stocktake_enabled","units_enabled","price_override_requires_permission","discount_requires_permission","invoice_customer_copy"}: q=QCheckBox()
             elif key in {"default_tax_rate","default_price"}: q=QDoubleSpinBox(); q.setRange(0,999999999); q.setDecimals(2)
             elif key=="session_minutes": q=QSpinBox(); q.setRange(1,1440)
             elif key=="max_login_attempts": q=QSpinBox(); q.setRange(1,100)
