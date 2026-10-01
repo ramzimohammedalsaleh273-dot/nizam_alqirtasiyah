@@ -9,6 +9,9 @@ from app.database import connection
 from app.services.cashier_session_service import CashierSessionService
 from app.services.inventory_operations_service import InventoryOperationsService
 from app.services.party_payment_service import PartyPaymentService
+from app.services.purchase_service import PurchaseService
+from app.services.purchase_return_service import PurchaseReturnService
+from app.services.stocktake_service import StocktakeService
 from app.services.pos_service import POSService
 from app.services.sales_return_service import SalesReturnService
 from app.services.backup_service import BackupService
@@ -258,3 +261,99 @@ def test_backup_creation_and_integrity(isolated_db, tmp_path):
     path = BackupService.create_backup(target_dir)
     assert path.exists()
     assert BackupService.verify_backup(path) is True
+
+
+def test_purchase_invoice_updates_stock_supplier_and_accounting(isolated_db):
+    user, product, warehouse, _ = _first_ids()
+    with connection.get_session() as s:
+        supplier = s.execute(
+            __import__("sqlalchemy").text("SELECT id FROM suppliers WHERE is_active=1 ORDER BY id LIMIT 1")
+        ).scalar()
+        assert supplier
+        PermissionService.ensure_schema(s)
+        s.commit()
+
+    result = PurchaseService.create_invoice(
+        supplier_id=int(supplier),
+        items=[{"product_id": product, "quantity": 1, "unit_cost": 5}],
+        warehouse_id=warehouse,
+        branch_id=1,
+        paid_amount=0,
+        payment_method="cash",
+        tax_amount=0,
+    )
+    assert result["id"] > 0
+    assert result["due"] == 5.0
+
+    with connection.get_session() as s:
+        balance = s.execute(
+            __import__("sqlalchemy").text("SELECT current_balance FROM suppliers WHERE id=:id"),
+            {"id": int(supplier)},
+        ).scalar()
+        assert Decimal(str(balance)) >= Decimal("5")
+        stock = s.execute(
+            __import__("sqlalchemy").text(
+                "SELECT quantity FROM stock_balances WHERE product_id=:p AND warehouse_id=:w"
+            ),
+            {"p": product, "w": warehouse},
+        ).scalar()
+        assert Decimal(str(stock or 0)) >= Decimal("1")
+
+
+def test_purchase_return_reverses_inventory_and_balances(isolated_db):
+    _, product, warehouse, _ = _first_ids()
+    with connection.get_session() as s:
+        supplier = s.execute(
+            __import__("sqlalchemy").text("SELECT id FROM suppliers WHERE is_active=1 ORDER BY id LIMIT 1")
+        ).scalar()
+        assert supplier
+
+    invoice = PurchaseService.create_invoice(
+        supplier_id=int(supplier),
+        items=[{"product_id": product, "quantity": 1, "unit_cost": 5}],
+        warehouse_id=warehouse,
+        branch_id=1,
+        paid_amount=0,
+        payment_method="cash",
+        tax_amount=0,
+    )
+    with connection.get_session() as s:
+        before = s.execute(
+            __import__("sqlalchemy").text(
+                "SELECT quantity FROM stock_balances WHERE product_id=:p AND warehouse_id=:w"
+            ),
+            {"p": product, "w": warehouse},
+        ).scalar()
+
+    returned = PurchaseReturnService.create_return(
+        purchase_id=invoice["id"],
+        items=[{"product_id": product, "quantity": 1}],
+        refund_method="credit",
+    )
+    assert returned["id"] > 0
+
+    with connection.get_session() as s:
+        after = s.execute(
+            __import__("sqlalchemy").text(
+                "SELECT quantity FROM stock_balances WHERE product_id=:p AND warehouse_id=:w"
+            ),
+            {"p": product, "w": warehouse},
+        ).scalar()
+        assert Decimal(str(before)) - Decimal(str(after)) == Decimal("1")
+
+
+def test_stocktake_service_uses_operational_stock_and_finalizes(isolated_db):
+    _, product, warehouse, _ = _first_ids()
+    stocktake_id = StocktakeService.create(warehouse)
+    result = StocktakeService.add_count(stocktake_id, product, 0)
+    assert "difference" in result
+    final = StocktakeService.finalize(stocktake_id)
+    assert final["status"] == "COMPLETED"
+    with connection.get_session() as s:
+        qty = s.execute(
+            __import__("sqlalchemy").text(
+                "SELECT quantity FROM stock_balances WHERE product_id=:p AND warehouse_id=:w"
+            ),
+            {"p": product, "w": warehouse},
+        ).scalar()
+        assert Decimal(str(qty or 0)) == Decimal("0")
