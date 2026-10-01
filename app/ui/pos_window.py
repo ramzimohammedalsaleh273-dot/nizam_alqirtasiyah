@@ -145,6 +145,20 @@ class POSWindow(QWidget):
         title_row.addStretch()
         root.addLayout(title_row)
 
+        info_row = QHBoxLayout()
+        for caption, value in [
+            ("رقم الفاتورة", "سيُنشأ عند الحفظ"),
+            ("التاريخ", datetime.now().strftime("%Y-%m-%d")),
+            ("المستخدم", self.user.get("username") or self.user.get("name") or "—"),
+            ("الفرع", self.user.get("branch_name") or "الفرع الافتراضي"),
+            ("الوردية", "غير محددة"),
+        ]:
+            label = QLabel(f"{caption}: {value}")
+            label.setObjectName("SectionSubTitle")
+            info_row.addWidget(label)
+        info_row.addStretch()
+        root.addLayout(info_row)
+
         search_row = QHBoxLayout()
         search_row.addWidget(QLabel("بحث لحظي:"))
         self.search = QLineEdit()
