@@ -18,7 +18,6 @@ from app.ui.parties_window import PartiesWindow
 from app.ui.inventory_window import InventoryWindow
 from app.ui.reports_window import ReportsWindow
 from app.ui.administration_windows import accounting_window, treasury_window, employees_window, settings_window
-from app.ui.health_window import HealthWindow
 from app.ui.backup_window import BackupWindow
 from app.ui.enterprise_tools_window import EnterpriseToolsWindow
 from app.ui.purchase_workflow_window import PurchaseWorkflowWindow
@@ -313,7 +312,6 @@ class MainWindow(QMainWindow):
                 ("تعارضات المزامنة", lambda: self.open_data("sync_conflicts", "تعارضات المزامنة", editable=False)),
                 ("أجهزة المزامنة", lambda: self.open_data("sync_devices", "أجهزة المزامنة", editable=False)),
                 ("الإعدادات", self.open_settings),
-                ("صحة النظام", self.open_health),
             ]),
         ]
         for name, actions in groups:
@@ -612,9 +610,6 @@ class MainWindow(QMainWindow):
 
     def open_backup(self):
         self.open_window("backup", BackupWindow)
-
-    def open_health(self):
-        self.open_window("health", HealthWindow)
 
 
 def run():
