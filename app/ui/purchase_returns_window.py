@@ -181,6 +181,7 @@ class PurchaseReturnsWindow(QWidget):
                 purchase_id=purchase_id,
                 items=[{"product_id": product_id, "quantity": qty}],
                 refund_method=method,
+                user_id=self.user.get("id"),
             )
             self.load()
             QMessageBox.information(
