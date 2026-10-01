@@ -87,7 +87,7 @@ class RecordDialog(QDialog):
 
 class AccessDataWindow(QWidget):
     def __init__(self,table_name,title=None,columns=None,editable=True,parent=None):
-        super().__init__(parent); self.table_name=table_name; self.title_text=title or TITLES.get(table_name,table_name)
+        super().__init__(parent); self.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint); self.setAttribute(Qt.WA_DeleteOnClose, False); self.table_name=table_name; self.title_text=title or TITLES.get(table_name,table_name)
         self.requested_columns=columns; self.editable=editable; self.page_size=100; self.page=0; self.total=0; self.columns=[]
         self.setWindowTitle(self.title_text); self.setMinimumSize(1100,680); self.setLayoutDirection(Qt.RightToLeft); self.setStyleSheet(APP_STYLE)
         self._build(); self._schema(); self.load()
