@@ -38,8 +38,8 @@ class PurchasesWindow(QWidget):
 
         self.table=QTableWidget(0,7)
         self.table.setHorizontalHeaderLabels([
-            "المعرف","رقم الفاتورة","قبل الضريبة",
-            "الضريبة","الإجمالي","المدفوع","المتبقي"
+            "رقم الفاتورة","التاريخ","المورد",
+            "الإجمالي","المدفوع","المتبقي","الحالة"
         ])
 
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -59,13 +59,13 @@ class PurchasesWindow(QWidget):
             self.table.insertRow(row)
 
             values=[
-                r["id"],
                 r["invoice_number"],
-                r["subtotal"],
-                r["tax_amount"],
+                r.get("invoice_date") or "",
+                r.get("supplier_name") or "—",
                 r["total_amount"],
                 r["paid_amount"],
-                r["due_amount"]
+                r["due_amount"],
+                r.get("status") or "",
             ]
 
             for c,v in enumerate(values):
@@ -80,7 +80,9 @@ class PurchasesWindow(QWidget):
             QMessageBox.warning(self,"تنبيه","اختر فاتورة أولاً")
             return
 
-        invoice_id=int(self.table.item(row,0).text())
+        invoice_number=self.table.item(row,0).text()
+        invoice=next((x for x in PurchaseService.list_purchases() if str(x.get("invoice_number"))==invoice_number),None)
+        invoice_id=int(invoice["id"]) if invoice else 0
         invoice=PurchaseService.get_purchase(invoice_id)
 
         if not invoice:
