@@ -7,7 +7,8 @@ from app.services.sales_return_service import SalesReturnService
 
 class SalesReturnsWindow(QWidget):
     """واجهة تشغيلية لمرتجعات المبيعات."""
-    def __init__(self,parent=None):
+    def __init__(self,user=None,parent=None):
+        self.user = dict(user or {})
         super().__init__(parent)
         self.setStyleSheet(APP_STYLE)
         self.setStyleSheet(APP_STYLE)
@@ -51,7 +52,7 @@ class SalesReturnsWindow(QWidget):
         reason,ok=QInputDialog.getText(self,"سبب المرتجع","السبب:","")
         if not ok or not reason.strip():return
         try:
-            result=SalesReturnService.create_return(sale_id,[{"product_id":product_id,"quantity":qty}],reason)
+            result=SalesReturnService.create_return(sale_id,[{"product_id":product_id,"quantity":qty}],reason,user_id=self.user.get("id"))
             self.load()
             QMessageBox.information(self,"تم",f"تم ترحيل المرتجع {result['return_number']} بإجمالي {result['total']:.2f}.")
         except Exception as e:
