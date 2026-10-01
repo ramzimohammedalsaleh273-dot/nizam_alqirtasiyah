@@ -6,9 +6,13 @@ required_files=[
 "app/ui/main_window.py","app/ui/pos_window.py","app/ui/access_data_window.py","app/ui/permissions_window.py",
 "app/ui/expense_window.py","app/ui/analytics_window.py","app/ui/universal_search_window.py",
 "app/ui/reports_window.py","app/services/reference_compatibility_service.py","app/services/expense_service.py",
+"app/database/schema_bootstrap.py","app/services/sales_return_service.py","app/services/purchase_return_service.py",
 ]
 required_tokens={
-"app/ui/main_window.py":["QTimer","AccessDataWindow","ReferenceCompatibilityService","show_dashboard"],
+"app/ui/main_window.py":["QTimer","AccessDataWindow","ReferenceCompatibilityService","show_dashboard","ensure_reference_schema"],
+"app/database/schema_bootstrap.py":["database_schema.json","CREATE TABLE IF NOT EXISTS"],
+"app/services/sales_return_service.py":["sale_returns","sale_return_items","stock_balances"],
+"app/services/purchase_return_service.py":["purchase_returns","purchase_return_items","stock_balances"],
 "app/ui/pos_window.py":["QShortcut","self.search.textChanged","QTableWidget(1, 10)","self._focus_product_cell"],
 "app/ui/access_data_window.py":["textChanged","QTableWidget","cellDoubleClicked","QMenu","LIMIT"],
 "app/ui/universal_search_window.py":["textChanged","UniversalSearchService"],
