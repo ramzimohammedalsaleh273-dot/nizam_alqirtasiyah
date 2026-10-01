@@ -1,3 +1,4 @@
+from app.ui.theme import APP_STYLE
 
 from PySide6.QtWidgets import (
     QWidget,QVBoxLayout,QTableWidget,QTableWidgetItem,
@@ -9,6 +10,7 @@ class PurchasesWindow(QWidget):
 
     def __init__(self,parent=None):
         super().__init__(parent)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("المشتريات")
         self.setMinimumSize(1000,600)
 
@@ -90,3 +92,5 @@ class PurchasesWindow(QWidget):
         QMessageBox.information(
             self,"تفاصيل فاتورة الشراء",text
         )
+
+# UI reference theme is applied by the main application shell.
