@@ -128,6 +128,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(f"{APP_NAME} - {APP_VERSION}")
         self.setMinimumSize(1180, 720)
         self._child_windows = {}
+        self.current_user = {}
         self._bootstrap_operational_schema()
         self.build_ui()
 
@@ -349,6 +350,12 @@ class MainWindow(QMainWindow):
         self._set_datetime()
         self.show_dashboard()
 
+    def set_session_user(self, user):
+        self.current_user = dict(user or {})
+        self.user_meta.setText(f"المستخدم: {self.current_user.get('username') or self.current_user.get('name') or '—'}")
+        self.branch_meta.setText(f"الفرع: {self.current_user.get('branch_name') or 'الفرع الافتراضي'}")
+        self.status_bar.showMessage("تم تسجيل الدخول بنجاح")
+
     def _set_datetime(self):
         self.datetime_meta.setText(datetime.now().strftime("%Y-%m-%d  %H:%M"))
 
@@ -538,7 +545,13 @@ class MainWindow(QMainWindow):
     def open_window(self, key, window_class):
         window = self._child_windows.get(key)
         if window is None:
-            window = window_class()
+            try:
+                window = window_class(user=self.current_user, parent=self)
+            except TypeError:
+                try:
+                    window = window_class(parent=self)
+                except TypeError:
+                    window = window_class()
             self._child_windows[key] = window
         window.show()
         window.raise_()
@@ -548,7 +561,7 @@ class MainWindow(QMainWindow):
         key = "data:" + table_name
         window = self._child_windows.get(key)
         if window is None:
-            window = AccessDataWindow(table_name, title, columns, editable=editable)
+            window = AccessDataWindow(table_name, title, columns, editable=editable, parent=self)
             self._child_windows[key] = window
         window.show()
         window.raise_()
@@ -625,6 +638,7 @@ def run():
         return 0
 
     window = MainWindow()
+    window.set_session_user(login.user or {})
     username = login.user.get("username", "admin") if login.user else "admin"
     window.setWindowTitle(f"{APP_NAME} - {APP_VERSION} | المستخدم: {username}")
     window.show()
