@@ -34,16 +34,16 @@ class SalesInvoiceService:
             WHERE si.sale_id=:id ORDER BY si.id
         """), {"id": sale_id}).mappings().all()
         returns = []
-        if cls._exists(s, "sales_returns"):
+        if cls._exists(s, "sale_returns"):
             returns = s.execute(text("""
                 SELECT id,return_number,subtotal,tax_amount,total_amount,reason,status,created_at
-                FROM sales_returns WHERE sale_id=:id ORDER BY id
+                FROM sale_returns WHERE sale_id=:id ORDER BY id
             """), {"id": sale_id}).mappings().all()
         return_items = []
-        if cls._exists(s, "sales_return_items"):
+        if cls._exists(s, "sale_return_items"):
             return_items = s.execute(text("""
                 SELECT sri.*,sr.return_number
-                FROM sales_return_items sri JOIN sales_returns sr ON sr.id=sri.return_id
+                FROM sales_return_items sri JOIN sale_returns sr ON sr.id=sri.return_id
                 WHERE sr.sale_id=:id ORDER BY sri.id
             """), {"id": sale_id}).mappings().all()
         payments = []
