@@ -18,9 +18,9 @@ class TreasuryOperationsWindow(QWidget):
         self.tabs=QTabWidget(); root.addWidget(self.tabs,1)
         self.tables={}
         for key,caption,table,cols in [
-            ("receipts","سندات القبض","cash_receipts",["id","receipt_number","receipt_date","customer_id","amount","payment_method","description"]),
-            ("payments","سندات الصرف","cash_payments",["id","payment_number","payment_date","supplier_id","amount","payment_method","description"]),
-            ("sessions","الورديات","cash_sessions",["id","cashier_id","opened_at","opening_balance","closed_at","actual_balance","difference","status"]),
+            ("receipts","سندات القبض","cash_receipts",["id","receipt_number","receipt_date","customer_id","amount","payment_method","reference_number","notes"]),
+            ("payments","سندات الصرف","cash_payments",["id","payment_number","payment_date","supplier_id","amount","payment_method","reference_number","notes"]),
+            ("sessions","الورديات","cash_sessions",["id","register_id","user_id","opened_at","opening_balance","expected_balance","actual_balance","difference","closed_at","status"]),
             ("movements","حركات الخزينة","treasury_movements",["id","document_number","treasury_account_id","movement_type","amount","created_at"])
         ]:
             w=QTableWidget(0,len(cols)); w.setHorizontalHeaderLabels(cols); w.setSelectionBehavior(QAbstractItemView.SelectRows); w.setEditTriggers(QAbstractItemView.NoEditTriggers); w.setAlternatingRowColors(True); w.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents); self.tabs.addTab(w,caption); self.tables[key]=(w,table,cols)
