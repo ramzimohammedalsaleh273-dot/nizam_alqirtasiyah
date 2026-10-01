@@ -52,8 +52,8 @@ class SalesWindow(QWidget):
 
         self.table = QTableWidget(0, 8)
         self.table.setHorizontalHeaderLabels([
-            "المعرف", "رقم الفاتورة", "قبل الضريبة", "الخصم",
-            "الضريبة", "الإجمالي", "المدفوع", "المتبقي"
+            "رقم", "التاريخ", "العميل", "المستخدم",
+            "الإجمالي", "المدفوع", "المتبقي", "الحالة"
         ])
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.Fixed)
@@ -82,7 +82,7 @@ class SalesWindow(QWidget):
     def _live_filter(self):
         term = self.search.text().strip()
         if term:
-            rows = [r for r in SalesService.list_sales() if term.lower() in str(r.get("invoice_number") or "").lower()]
+            rows = [r for r in SalesService.list_sales() if any(term.lower() in str(r.get(k) or "").lower() for k in ("invoice_number","customer_name","cashier_name","status"))]
             self._render_rows(rows)
         else:
             self.load()
@@ -91,7 +91,7 @@ class SalesWindow(QWidget):
         self.table.setRowCount(0)
         for row_data in rows:
             row = self.table.rowCount(); self.table.insertRow(row)
-            values=[row_data["id"],row_data["invoice_number"],f'{float(row_data["subtotal"] or 0):,.2f}',f'{float(row_data["discount_amount"] or 0):,.2f}',f'{float(row_data["tax_amount"] or 0):,.2f}',f'{float(row_data["total_amount"] or 0):,.2f}',f'{float(row_data["paid_amount"] or 0):,.2f}',f'{float(row_data["due_amount"] or 0):,.2f}']
+            values=[row_data["invoice_number"],row_data["created_at"],row_data.get("customer_name") or "نقدي",row_data.get("cashier_name") or "—",f'{float(row_data["total_amount"] or 0):,.2f}',f'{float(row_data["paid_amount"] or 0):,.2f}',f'{float(row_data["due_amount"] or 0):,.2f}',row_data.get("status") or ""]
             for column,value in enumerate(values):
                 item=QTableWidgetItem(str(value)); item.setTextAlignment(Qt.AlignCenter); self.table.setItem(row,column,item)
         self.status.setText(f"تم تحميل {len(rows)} فاتورة.")
@@ -106,14 +106,14 @@ class SalesWindow(QWidget):
                 self.table.insertRow(row)
 
                 values = [
-                    row_data["id"],
                     row_data["invoice_number"],
-                    f'{float(row_data["subtotal"] or 0):,.2f}',
-                    f'{float(row_data["discount_amount"] or 0):,.2f}',
-                    f'{float(row_data["tax_amount"] or 0):,.2f}',
+                    row_data["created_at"],
+                    row_data.get("customer_name") or "نقدي",
+                    row_data.get("cashier_name") or "—",
                     f'{float(row_data["total_amount"] or 0):,.2f}',
                     f'{float(row_data["paid_amount"] or 0):,.2f}',
                     f'{float(row_data["due_amount"] or 0):,.2f}',
+                    row_data.get("status") or "",
                 ]
 
                 for column, value in enumerate(values):
@@ -151,7 +151,12 @@ class SalesWindow(QWidget):
             QMessageBox.warning(self, "تنبيه", "اختر فاتورة أولاً.")
             return
 
-        sale_id = int(self.table.item(row, 0).text())
+        invoice_number = self.table.item(row, 0).text()
+        data = SalesInvoiceWindow.find_data_by_number(invoice_number)
+        if not data:
+            QMessageBox.warning(self, "غير موجود", "تعذر فتح الفاتورة المحددة.")
+            return
+        sale_id = int(data["sale"]["id"])
         window = SalesInvoiceWindow(self, sale_id=sale_id)
         window.show()
         window.raise_()
