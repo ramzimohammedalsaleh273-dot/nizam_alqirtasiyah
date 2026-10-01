@@ -1,3 +1,4 @@
+from app.ui.theme import APP_STYLE
 from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QPushButton,QTableWidget,QTableWidgetItem,QMessageBox,QHeaderView
 from app.services.backup_service import BackupService
 from app.services.backup_manager_service import BackupManagerService
@@ -6,6 +7,7 @@ from app.services.backup_manager_service import BackupManagerService
 class BackupWindow(QWidget):
     def __init__(self,parent=None):
         super().__init__(parent)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("النسخ الاحتياطي والاستعادة")
         self.setMinimumSize(950,600)
         layout=QVBoxLayout(self)
@@ -63,3 +65,5 @@ class BackupWindow(QWidget):
             restored,safety=BackupManagerService.restore(path)
             QMessageBox.information(self,"تمت الاستعادة",f"تمت الاستعادة بنجاح.\nالنسخة الأمنية: {safety}\n\nأعد تشغيل البرنامج لتأكيد تحميل القاعدة الجديدة.")
         except Exception as exc: QMessageBox.critical(self,"فشل الاستعادة",str(exc))
+
+# UI reference theme is applied by the main application shell.
