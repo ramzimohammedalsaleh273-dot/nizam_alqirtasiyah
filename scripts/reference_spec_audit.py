@@ -42,13 +42,6 @@ for p in required_files:
     if p.endswith(".py"):
         try: ast.parse((ROOT/p).read_text(encoding="utf-8-sig"),filename=p)
         except Exception as e: errors.append(f"SYNTAX:{p}:{e}")
-print("REFERENCE_FILES:",len(required_files))
-print("REFERENCE_TOKEN_CHECKS:",sum(len(v) for v in required_tokens.values()))
-if errors:
-    print("REFERENCE_SPEC_AUDIT: FAIL")
-    print("\n".join(errors))
-    sys.exit(1)
-print("REFERENCE_SPEC_AUDIT: PASS")
 
 
 # منع عودة الوحدات الزائدة التي لا تظهر في المواصفة المرجعية النهائية.
@@ -56,3 +49,11 @@ main_text=(ROOT/"app/ui/main_window.py").read_text(encoding="utf-8-sig")
 for forbidden in ["HealthWindow", "صحة النظام", '("الأصول"', '("العقود"']:
     if forbidden in main_text:
         errors.append(f"FORBIDDEN_VISIBLE_MODULE:{forbidden}")
+
+print("REFERENCE_FILES:",len(required_files))
+print("REFERENCE_TOKEN_CHECKS:",sum(len(v) for v in required_tokens.values()))
+if errors:
+    print("REFERENCE_SPEC_AUDIT: FAIL")
+    print("\n".join(errors))
+    sys.exit(1)
+print("REFERENCE_SPEC_AUDIT: PASS")
