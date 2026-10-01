@@ -26,6 +26,7 @@ class PartyService:
                         p.name,
                         p.{type_field} AS party_type,
                         p.phone,
+                        p.mobile,
                         p.email,
                         p.tax_number,
                         p.credit_limit,
