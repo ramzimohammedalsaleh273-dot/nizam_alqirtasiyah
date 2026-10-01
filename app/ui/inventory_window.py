@@ -2,12 +2,77 @@ from app.ui.theme import APP_STYLE
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton,
     QTableWidget, QTableWidgetItem, QLabel, QMessageBox,
-    QHeaderView, QDialog, QFormLayout, QDialogButtonBox, QDoubleSpinBox, QComboBox
+    QHeaderView, QDialog, QFormLayout, QDialogButtonBox, QDoubleSpinBox, QComboBox,
+    QTabWidget, QAbstractItemView
 )
+from sqlalchemy import text
+from app.database.connection import get_session
 from PySide6.QtCore import Qt
 from app.services.inventory_service import InventoryService
 from app.services.product_service import ProductService
 
+
+
+class ProductCardDialog(QDialog):
+    """بطاقة الصنف المرجعية: بيانات وأسعار وباركود ومخزون وحركات ومبيعات ومشتريات وموردون وملاحظات."""
+    def __init__(self, product_id, parent=None):
+        super().__init__(parent)
+        self.product_id=int(product_id)
+        self.setWindowTitle("بطاقة الصنف")
+        self.setMinimumSize(1180,760)
+        self.setLayoutDirection(Qt.RightToLeft)
+        self.setStyleSheet(APP_STYLE)
+        root=QVBoxLayout(self)
+        self.title=QLabel("بطاقة الصنف"); self.title.setObjectName("SectionTitle"); root.addWidget(self.title)
+        self.meta=QLabel(""); root.addWidget(self.meta)
+        self.tabs=QTabWidget(); root.addWidget(self.tabs,1)
+        self._build()
+
+    def _query(self, sql, params):
+        with get_session() as s:
+            return s.execute(text(sql), params).mappings().all()
+
+    def _table(self, headers, rows):
+        t=QTableWidget(0,len(headers))
+        t.setHorizontalHeaderLabels(headers)
+        t.setSelectionBehavior(QAbstractItemView.SelectRows)
+        t.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        t.setAlternatingRowColors(True)
+        t.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        t.horizontalHeader().setStretchLastSection(True)
+        for row in rows:
+            r=t.rowCount(); t.insertRow(r)
+            for col,v in enumerate(row):
+                t.setItem(r,col,QTableWidgetItem("" if v is None else str(v)))
+        return t
+
+    def _add_tab(self, title, headers, rows):
+        self.tabs.addTab(self._table(headers,rows),title)
+
+    def _build(self):
+        with get_session() as s:
+            product=s.execute(text("SELECT * FROM products WHERE id=:id"),{"id":self.product_id}).mappings().first()
+        if not product:
+            self.title.setText("الصنف غير موجود"); return
+        self.title.setText(f"بطاقة الصنف: {product.get('name_ar') or product.get('name_en') or '—'}")
+        self.meta.setText(f"المعرف: {product.get('id')}   |   الكود: {product.get('sku') or '—'}   |   الباركود: {product.get('barcode') or '—'}")
+        basic=[(k,v) for k,v in product.items() if k not in {"id","created_at","updated_at","description","notes"}]
+        self._add_tab("البيانات",["الحقل","القيمة"],basic)
+        prices=[("سعر التكلفة",product.get("cost_price")),("سعر البيع",product.get("sale_price")),("سعر الجملة",product.get("wholesale_price")),("سعر المدارس",product.get("school_price")),("سعر الشركات",product.get("corporate_price")),("أقل سعر",product.get("min_price"))]
+        self._add_tab("الأسعار",["السعر","القيمة"],prices)
+        barcodes=self._query("SELECT barcode,barcode_type,is_primary,is_active FROM product_barcodes WHERE product_id=:id ORDER BY id",{"id":self.product_id})
+        self._add_tab("الباركود",["الباركود","النوع","أساسي","نشط"],[(x.get("barcode"),x.get("barcode_type"),x.get("is_primary"),x.get("is_active")) for x in barcodes])
+        stock=self._query("SELECT w.name,sb.quantity,sb.reserved_quantity,sb.quantity-sb.reserved_quantity,sb.average_cost,sb.last_movement_at FROM stock_balances sb JOIN warehouses w ON w.id=sb.warehouse_id WHERE sb.product_id=:id ORDER BY w.name",{"id":self.product_id})
+        self._add_tab("المخزون",["المستودع","الكمية","محجوز","المتاح","متوسط التكلفة","آخر حركة"],[(x.get("name"),x.get("quantity"),x.get("reserved_quantity"),x.get("quantity")-x.get("reserved_quantity"),x.get("average_cost"),x.get("last_movement_at")) for x in stock])
+        moves=self._query("SELECT sm.created_at,sm.movement_type,sm.reference_type,sm.reference_id,sm.quantity,sm.unit_cost,w.name FROM stock_movements sm LEFT JOIN warehouses w ON w.id=sm.warehouse_id WHERE sm.product_id=:id ORDER BY sm.id DESC LIMIT 500",{"id":self.product_id})
+        self._add_tab("الحركات",["التاريخ","الحركة","المصدر","المرجع","الكمية","التكلفة","المستودع"],[(x.get("created_at"),x.get("movement_type"),x.get("reference_type"),x.get("reference_id"),x.get("quantity"),x.get("unit_cost"),x.get("name")) for x in moves])
+        sales=self._query("SELECT s.created_at,s.invoice_number,si.quantity,si.unit_price,si.line_total FROM sale_items si JOIN sales s ON s.id=si.sale_id WHERE si.product_id=:id ORDER BY s.id DESC LIMIT 500",{"id":self.product_id})
+        self._add_tab("المبيعات",["التاريخ","الفاتورة","الكمية","السعر","الإجمالي"],[(x.get("created_at"),x.get("invoice_number"),x.get("quantity"),x.get("unit_price"),x.get("line_total")) for x in sales])
+        purchases=self._query("SELECT pi.invoice_date,pi.invoice_number,pii.quantity,pii.unit_cost FROM purchase_invoice_items pii JOIN purchase_invoices pi ON pi.id=pii.purchase_invoice_id WHERE pii.product_id=:id ORDER BY pi.id DESC LIMIT 500",{"id":self.product_id})
+        self._add_tab("المشتريات",["التاريخ","الفاتورة","الكمية","التكلفة"],[(x.get("invoice_date"),x.get("invoice_number"),x.get("quantity"),x.get("unit_cost")) for x in purchases])
+        suppliers=self._query("SELECT s.name,ps.supplier_sku,ps.unit_cost,ps.is_preferred FROM supplier_products ps JOIN suppliers s ON s.id=ps.supplier_id WHERE ps.product_id=:id ORDER BY s.name",{"id":self.product_id})
+        self._add_tab("الموردون",["المورد","رمز المورد للصنف","التكلفة","مفضل"],[(x.get("name"),x.get("supplier_sku"),x.get("unit_cost"),x.get("is_preferred")) for x in suppliers])
+        self._add_tab("الملاحظات",["البيان","النص"],[("الوصف",product.get("description")),("الملاحظات",product.get("notes"))])
 
 class InventoryWindow(QWidget):
     """واجهة تشغيلية لعرض المخزون والبحث في الأصناف."""
@@ -39,11 +104,14 @@ class InventoryWindow(QWidget):
 
         add_button = QPushButton("إضافة صنف")
         add_button.clicked.connect(self.add_product)
+        open_button = QPushButton("فتح بطاقة الصنف")
+        open_button.clicked.connect(self.open_product_card)
         edit_button = QPushButton("تعديل الصنف")
         edit_button.clicked.connect(self.edit_product)
         delete_button = QPushButton("تعطيل/حذف الصنف")
         delete_button.clicked.connect(self.delete_product)
         bar.addWidget(add_button)
+        bar.addWidget(open_button)
         bar.addWidget(edit_button)
         bar.addWidget(delete_button)
 
@@ -69,6 +137,7 @@ class InventoryWindow(QWidget):
         self.table.setHorizontalScrollMode(QTableWidget.ScrollPerPixel)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.table.doubleClicked.connect(lambda *_: self.open_product_card())
         layout.addWidget(self.table)
 
         self.status = QLabel("جاهز")
@@ -76,6 +145,16 @@ class InventoryWindow(QWidget):
         layout.addWidget(self.status)
 
         self.load("")
+
+    def open_product_card(self):
+        row=self.table.currentRow()
+        if row<0:
+            QMessageBox.warning(self,"بطاقة الصنف","اختر صنفًا أولًا."); return
+        try:
+            dialog=ProductCardDialog(int(self.table.item(row,0).text()),self)
+            dialog.exec()
+        except Exception as exc:
+            QMessageBox.critical(self,"فشل فتح بطاقة الصنف",str(exc))
 
     def add_product(self):
         dialog=QDialog(self); dialog.setWindowTitle("إضافة صنف جديد")
