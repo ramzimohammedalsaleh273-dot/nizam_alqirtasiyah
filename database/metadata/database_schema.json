@@ -11258,6 +11258,12 @@
           "default": "0"
         },
         {
+          "name": "available_quantity",
+          "type": "NUMERIC",
+          "not_null": true,
+          "default": "0"
+        },
+        {
           "name": "average_cost",
           "type": "NUMERIC",
           "not_null": true,
