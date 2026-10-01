@@ -225,6 +225,7 @@ try:
             {
                 "username":"admin",
                 "login_name":"admin",
+                "password_hash":"$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
                 "name":"مدير النظام",
                 "full_name":"مدير النظام",
                 "display_name":"مدير النظام",
@@ -238,6 +239,7 @@ try:
             {
                 "username":"cashier",
                 "login_name":"cashier",
+                "password_hash":"$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
                 "name":"كاشير",
                 "full_name":"كاشير",
                 "display_name":"كاشير",
