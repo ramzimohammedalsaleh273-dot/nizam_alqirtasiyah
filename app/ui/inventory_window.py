@@ -1,3 +1,4 @@
+from app.ui.theme import APP_STYLE
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton,
     QTableWidget, QTableWidgetItem, QLabel, QMessageBox,
@@ -13,6 +14,7 @@ class InventoryWindow(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("المنتجات والمخزون")
         self.setMinimumSize(1150, 650)
 
@@ -189,3 +191,5 @@ class InventoryWindow(QWidget):
             QMessageBox.critical(
                 self, "خطأ في المخزون", str(exc)
             )
+
+# UI reference theme is applied by the main application shell.
