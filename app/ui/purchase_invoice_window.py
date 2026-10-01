@@ -145,7 +145,7 @@ class PurchaseInvoiceWindow(QWidget):
             """),{"supplier":data.get("supplier_id")}).all()
             audit=s.execute(text("""
                 SELECT created_at,action FROM audit_logs
-                WHERE entity_id=:id AND entity IN ('purchase','purchase_invoice')
+                WHERE entity_id=:id AND entity_type IN ('purchase','purchase_invoice')
                 ORDER BY rowid DESC LIMIT 100
             """),{"id":invoice_id}).all()
 
