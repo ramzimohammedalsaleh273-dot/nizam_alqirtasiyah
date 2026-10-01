@@ -1,3 +1,4 @@
+from app.ui.theme import APP_STYLE
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, QMessageBox
 from app.services.smart_operations_service import SmartOperationsService
@@ -8,6 +9,7 @@ class SmartOperationsWindow(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("مركز التشغيل الذكي")
         self.setMinimumSize(1000, 650)
         self.setLayoutDirection(Qt.RightToLeft)
