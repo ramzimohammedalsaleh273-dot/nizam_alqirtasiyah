@@ -54,13 +54,21 @@ class StocktakeService:
             """),{"p":product_id,"w":st.warehouse_id}).fetchone()
             system=Decimal(str((row[0] if row else 0) or 0))
             diff=q-system
-            s.execute(text("""
-                INSERT INTO stocktake_items(stocktake_id,product_id,system_quantity,counted_quantity,difference)
-                VALUES(:st,:p,:sys,:cnt,:dif)
-                ON CONFLICT(stocktake_id,product_id) DO UPDATE SET
-                counted_quantity=excluded.counted_quantity,
-                difference=excluded.difference
-            """),{"st":stocktake_id,"p":product_id,"sys":float(system),"cnt":float(q),"dif":float(diff)})
+            existing = s.execute(text("""
+                SELECT id FROM stocktake_items
+                WHERE stocktake_id=:st AND product_id=:p LIMIT 1
+            """), {"st": stocktake_id, "p": product_id}).scalar()
+            if existing:
+                s.execute(text("""
+                    UPDATE stocktake_items
+                    SET counted_quantity=:cnt, difference=:dif
+                    WHERE id=:id
+                """), {"id": int(existing), "cnt": float(q), "dif": float(diff)})
+            else:
+                s.execute(text("""
+                    INSERT INTO stocktake_items(stocktake_id,product_id,system_quantity,counted_quantity,difference)
+                    VALUES(:st,:p,:sys,:cnt,:dif)
+                """), {"st": stocktake_id, "p": product_id, "sys": float(system), "cnt": float(q), "dif": float(diff)})
             s.commit()
             return {"system_quantity":float(system),"counted_quantity":float(q),"difference":float(diff)}
 
