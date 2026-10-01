@@ -1,10 +1,13 @@
+from datetime import datetime
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QPushButton, QFrame, QMessageBox, QDialog,
-    QLineEdit, QDialogButtonBox, QScrollArea, QSizePolicy
+    QLineEdit, QDialogButtonBox, QScrollArea, QSizePolicy,
+    QTableWidget, QTableWidgetItem, QAbstractItemView
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeySequence, QShortcut
+from sqlalchemy import text
 from app.core.config import APP_NAME, APP_VERSION
 from app.services.security_service import SecurityService
 from app.services.system_service import get_system_summary, get_financial_summary, get_health
