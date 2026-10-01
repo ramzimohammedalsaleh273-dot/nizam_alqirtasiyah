@@ -12,7 +12,15 @@ required_tokens={
 "app/ui/pos_window.py":["QShortcut","self.search.textChanged","QTableWidget(1, 10)","self._focus_product_cell"],
 "app/ui/access_data_window.py":["textChanged","QTableWidget","cellDoubleClicked","QMenu","LIMIT"],
 "app/ui/universal_search_window.py":["textChanged","UniversalSearchService"],
-"app/ui/reports_window.py":["DateEdit","to_excel","to_pdf"],
+"app/ui/reports_window.py":["QDateEdit","to_excel","to_pdf","sales_day","low_stock","journal","income","cashflow"],
+"app/ui/main_window.py":["LoginDialog","QComboBox","AccessDataWindow","stock_balances","warehouse_zones","employee_attendance"],
+"app/ui/backup_window.py":["إنشاء نسخة الآن","استعادة النسخة المحددة"],
+"app/ui/sales_invoice_window.py":["QTabWidget","مرتجع جزئي / كامل","طباعة الفاتورة"],
+"app/ui/purchase_workflow_window.py":["طلب شراء جديد","اعتماد الطلب","استلام أمر"],
+"app/ui/treasury_operations_window.py":["سند قبض","سند صرف","فتح وردية","إغلاق وردية"],
+"app/services/inventory_service.py":["stock_balances","product_barcodes"],
+"app/services/pos_service.py":["stock_balances","sale_payments","AccountingService"],
+"app/services/purchase_service.py":["stock_balances","purchase_invoice_items","AccountingService"],
 }
 errors=[]
 for p in required_files:
