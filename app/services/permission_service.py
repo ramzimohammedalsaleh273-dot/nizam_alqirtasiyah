@@ -106,16 +106,28 @@ class PermissionService:
         """))
         cls._upgrade_legacy_tables(s)
 
+        permission_cols = cls._columns(s, "erp_permissions")
         for code, name in cls.DEFAULTS:
-            s.execute(text("""
-                INSERT OR IGNORE INTO erp_permissions(code,name_ar,is_active)
-                VALUES(:code,:name,1)
-            """), {"code": code, "name": name})
-        s.execute(text("""
-            INSERT OR IGNORE INTO erp_roles(code,name_ar,is_active)
-            VALUES('admin','مدير النظام',1)
-        """))
-        admin_role = s.execute(text("SELECT id FROM erp_roles WHERE code='admin'")).scalar()
+            values = {"code": code, "name_ar": name, "name": name, "module": code.split(".", 1)[0]}
+            fields = [k for k in ("code", "name", "name_ar", "module", "is_active") if k in permission_cols]
+            params = {k: values[k] for k in fields}
+            params["is_active"] = 1
+            s.execute(
+                text(f"INSERT OR IGNORE INTO erp_permissions({",".join(fields)}) VALUES({",".join(":"+k for k in fields)})"),
+                params,
+            )
+
+        role_cols = cls._columns(s, "erp_roles")
+        role_values = {"code": "admin", "name": "مدير النظام", "name_ar": "مدير النظام", "is_active": 1}
+        role_fields = [k for k in ("code", "name", "name_ar", "is_active") if k in role_cols]
+        role_params = {k: role_values[k] for k in role_fields}
+        s.execute(
+            text(f"INSERT OR IGNORE INTO erp_roles({",".join(role_fields)}) VALUES({",".join(":"+k for k in role_fields)})"),
+            role_params,
+        )
+        admin_role = s.execute(text("SELECT id FROM erp_roles WHERE code='admin' AND COALESCE(is_active,1)=1")).scalar()
+        if admin_role is None:
+            raise RuntimeError("تعذر إنشاء دور مدير النظام")
         s.execute(text("""
             INSERT OR IGNORE INTO erp_role_permissions(role_id,permission_id)
             SELECT :role,id FROM erp_permissions WHERE is_active=1
