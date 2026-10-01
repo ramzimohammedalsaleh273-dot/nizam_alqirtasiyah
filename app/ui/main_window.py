@@ -241,8 +241,11 @@ class MainWindow(QMainWindow):
                 ("دليل الحسابات", lambda: self.open_data("accounts", "دليل الحسابات")),
                 ("الصناديق", lambda: self.open_data("cash_registers", "الصناديق")),
                 ("الضرائب", lambda: self.open_data("tax_rates", "الضرائب")),
+                ("الفترات المالية", lambda: self.open_data("fiscal_periods", "الفترات المالية")),
             ]),
             ("الإدارة والرقابة", [
+                ("الشركات", lambda: self.open_data("companies", "الشركات")),
+                ("الفروع", lambda: self.open_data("branches", "الفروع")),
                 ("الموظفون", lambda: self.open_data("employees", "الموظفون")),
                 ("المستخدمون", lambda: self.open_data("users", "المستخدمون")),
                 ("الأدوار والصلاحيات", lambda: self.open_data("roles", "الأدوار")),
