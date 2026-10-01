@@ -43,7 +43,7 @@ class SalesInvoiceService:
         if cls._exists(s, "sale_return_items"):
             return_items = s.execute(text("""
                 SELECT sri.*,sr.return_number
-                FROM sales_return_items sri JOIN sale_returns sr ON sr.id=sri.return_id
+                FROM sale_return_items sri JOIN sale_returns sr ON sr.id=sri.return_id
                 WHERE sr.sale_id=:id ORDER BY sri.id
             """), {"id": sale_id}).mappings().all()
         payments = []
@@ -66,10 +66,30 @@ class SalesInvoiceService:
                     f"WHERE {entity_col} IN ('sale','sales','invoice') AND {id_col}=:id "
                     "ORDER BY rowid DESC LIMIT 100"
                 ), {"id":sale_id}).mappings().all()
+        journal = []
+        if cls._exists(s, "journal_entries"):
+            journal = s.execute(text("""
+                SELECT je.entry_number,je.entry_date,je.description,je.status,
+                       a.account_code,a.account_name,jl.debit,jl.credit
+                FROM journal_entries je
+                LEFT JOIN journal_entry_lines jl ON jl.journal_entry_id=je.id
+                LEFT JOIN accounts a ON a.id=jl.account_id
+                WHERE je.source_type='SALE' AND je.source_id=:id
+                ORDER BY je.id DESC,jl.id
+            """), {"id":sale_id}).mappings().all()
+        documents = []
+        if cls._exists(s, "documents"):
+            documents = s.execute(text("""
+                SELECT document_no,title,document_type,file_name,file_path,created_at
+                FROM documents
+                WHERE entity_id=:id AND entity_type IN ('sale','sales','invoice')
+                ORDER BY id DESC
+            """), {"id":sale_id}).mappings().all()
         return {
             "sale":dict(sale),"items":[dict(x) for x in items],
             "returns":[dict(x) for x in returns],"return_items":[dict(x) for x in return_items],
-            "payments":[dict(x) for x in payments],"audit":[dict(x) for x in audit]
+            "payments":[dict(x) for x in payments],"audit":[dict(x) for x in audit],
+            "journal":[dict(x) for x in journal],"documents":[dict(x) for x in documents]
         }
 
     @staticmethod
