@@ -20,3 +20,9 @@ jobs:
         run: python -m compileall -q app
       - name: Reference specification audit
         run: python scripts/reference_spec_audit.py
+      - name: Headless UI smoke test
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python scripts/headless_ui_smoke.py
+      - name: Test suite
+        run: pytest -q
