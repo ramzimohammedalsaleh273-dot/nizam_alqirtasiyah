@@ -6,7 +6,7 @@ from PySide6.QtPrintSupport import QPrinter, QPrintDialog
 from PySide6.QtGui import QTextDocument
 from PySide6.QtWidgets import (
     QApplication,QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QLineEdit,QPushButton,QLabel,
-    QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QMessageBox,QApplication,
+    QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QMessageBox,
     QDialog,QDialogButtonBox,QTextEdit,QDoubleSpinBox,QSpinBox,QCheckBox,
     QComboBox,QMenu,QFileDialog,QFileDialog,QFileDialog,QInputDialog
 )
