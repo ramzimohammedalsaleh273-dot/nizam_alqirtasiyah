@@ -1,5 +1,5 @@
 from collections import defaultdict
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel,
@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
 )
 from app.services.universal_search_service import UniversalSearchService
 from app.services.smart_insights_service import SmartInsightsService
+from app.ui.theme import APP_STYLE
 
 
 class UniversalSearchWindow(QWidget):
@@ -19,6 +20,11 @@ class UniversalSearchWindow(QWidget):
         self.setMinimumSize(1320, 820)
         self.setLayoutDirection(Qt.RightToLeft)
         self.results = []
+        self.setStyleSheet(APP_STYLE)
+        self._search_timer = QTimer(self)
+        self._search_timer.setSingleShot(True)
+        self._search_timer.setInterval(180)
+        self._search_timer.timeout.connect(self.load_results)
 
         root = QVBoxLayout(self)
 
@@ -37,6 +43,7 @@ class UniversalSearchWindow(QWidget):
         self.search = QLineEdit()
         self.search.setPlaceholderText("ابحث عن منتج أو عميل أو مورد أو فاتورة أو حساب أو موظف أو مستودع...")
         self.search.returnPressed.connect(self.load_results)
+        self.search.textChanged.connect(lambda _text: self._queue_search())
         button = QPushButton("بحث")
         button.clicked.connect(self.load_results)
         clear = QPushButton("مسح")
@@ -103,6 +110,9 @@ class UniversalSearchWindow(QWidget):
             table.insertRow(r)
             for c, value in enumerate(values):
                 table.setItem(r, c, QTableWidgetItem("" if value is None else str(value)))
+
+    def _queue_search(self):
+        self._search_timer.start()
 
     def clear_all(self):
         self.search.clear()
