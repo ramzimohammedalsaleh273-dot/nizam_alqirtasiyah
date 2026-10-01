@@ -569,7 +569,7 @@ class MainWindow(QMainWindow):
         self._close_other_windows(key)
         window = self._child_windows.get(key)
         if window is None:
-            window = AccessDataWindow(table_name, title, columns, editable=editable, parent=self)
+            window = AccessDataWindow(table_name, title, columns, editable=editable, user=self.current_user, parent=self)
             self._child_windows[key] = window
         window.show()
         window.raise_()
