@@ -11,7 +11,6 @@ class PurchasesWindow(QWidget):
     def __init__(self,parent=None):
         super().__init__(parent)
         self.setStyleSheet(APP_STYLE)
-        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("المشتريات")
         self.setMinimumSize(1000,600)
 
