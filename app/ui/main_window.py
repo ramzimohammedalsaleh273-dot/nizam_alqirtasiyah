@@ -469,27 +469,13 @@ class MainWindow(QMainWindow):
                 il.addLayout(b)
             self.content_layout.addWidget(info)
 
-            metrics = QFrame()
-            metrics.setObjectName("Card")
-            ml = QHBoxLayout(metrics)
-            for name, value in [
-                ("المنتجات", summary["products"]),
-                ("العملاء", summary["customers"]),
-                ("الموردون", summary["suppliers"]),
-                ("المبيعات", summary["sales"]),
-                ("المشتريات", summary["purchase_invoices"]),
-                ("أصناف منخفضة", summary["low_stock"]),
-                ("قيمة المخزون", f'{financial["inventory"]:,.2f}'),
-            ]:
-                b = QVBoxLayout()
-                a = QLabel(name)
-                a.setStyleSheet("color:#64748b;font-size:11px;")
-                v = QLabel(f"{value:,}" if isinstance(value, int) else str(value))
-                v.setStyleSheet("font-size:17px;font-weight:700;color:#0f172a;")
-                b.addWidget(a)
-                b.addWidget(v)
-                ml.addLayout(b)
-            self.content_layout.addWidget(metrics)
+            summary_line = QLabel(
+                f"السجلات الحالية — المنتجات: {summary['products']:,} | "
+                f"العملاء: {summary['customers']:,} | الموردون: {summary['suppliers']:,} | "
+                f"المبيعات: {summary['sales']:,} | المشتريات: {summary['purchase_invoices']:,}"
+            )
+            summary_line.setObjectName("SectionSubTitle")
+            self.content_layout.addWidget(summary_line)
 
             with get_session() as session:
                 sales = self._preview_table(
