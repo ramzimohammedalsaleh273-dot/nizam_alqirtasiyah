@@ -2,7 +2,7 @@ from app.ui.theme import APP_STYLE
 
 from PySide6.QtWidgets import (
     QWidget,QVBoxLayout,QTableWidget,QTableWidgetItem,
-    QPushButton,QHBoxLayout,QLabel,QMessageBox
+    QPushButton,QHBoxLayout,QLabel,QMessageBox,QLineEdit,QHeaderView,QAbstractItemView
 )
 from app.services.purchase_service import PurchaseService
 
@@ -21,6 +21,7 @@ class PurchasesWindow(QWidget):
         layout.addWidget(title)
 
         bar=QHBoxLayout()
+        self.search=QLineEdit(); self.search.setPlaceholderText("بحث فوري برقم الفاتورة…"); self.search.textChanged.connect(self.load)
 
         refresh=QPushButton("تحديث")
         refresh.clicked.connect(self.load)
@@ -28,6 +29,7 @@ class PurchasesWindow(QWidget):
         details=QPushButton("تفاصيل الفاتورة")
         details.clicked.connect(self.show_details)
 
+        bar.addWidget(self.search,1)
         bar.addWidget(refresh)
         bar.addWidget(details)
         bar.addStretch()
@@ -40,11 +42,16 @@ class PurchasesWindow(QWidget):
             "الضريبة","الإجمالي","المدفوع","المتبقي"
         ])
 
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table.horizontalHeader().setSectionResizeMode(1,QHeaderView.Stretch)
         layout.addWidget(self.table)
         self.load()
 
-    def load(self):
+    def load(self,*_):
+        term=self.search.text().strip().lower()
         rows=PurchaseService.list_purchases()
+        if term: rows=[r for r in rows if term in str(r.get("invoice_number") or "").lower()]
         self.table.setRowCount(0)
 
         for r in rows:
