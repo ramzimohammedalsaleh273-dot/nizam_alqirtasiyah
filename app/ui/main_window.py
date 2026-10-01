@@ -493,11 +493,11 @@ class MainWindow(QMainWindow):
             with get_session() as session:
                 sales = self._preview_table(
                     session, "sales",
-                    ["invoice_number", "invoice_date", "customer_id", "total", "payment_method", "status"],
+                    ["invoice_number", "created_at", "customer_id", "total_amount", "status"],
                 )
                 purchases = self._preview_table(
                     session, "purchase_invoices",
-                    ["invoice_number", "invoice_date", "supplier_id", "total", "status"],
+                    ["invoice_number", "invoice_date", "supplier_id", "total_amount", "status"],
                 )
                 alerts = self._preview_table(
                     session, "notifications",
@@ -519,7 +519,7 @@ class MainWindow(QMainWindow):
             top = QHBoxLayout()
             top.addWidget(self._dashboard_section(
                 "آخر المبيعات",
-                ["رقم الفاتورة", "التاريخ", "العميل", "الإجمالي", "طريقة الدفع", "الحالة"],
+                ["رقم الفاتورة", "التاريخ", "العميل", "الإجمالي", "الحالة"],
                 sales,
             ), 1)
             top.addWidget(self._dashboard_section(
