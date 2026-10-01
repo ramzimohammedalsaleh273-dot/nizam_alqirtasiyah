@@ -49,7 +49,7 @@ class StocktakeService:
             if not st: raise ValueError("الجرد غير موجود")
             if st.status!="DRAFT": raise ValueError("الجرد مغلق")
             row=s.execute(text("""
-                SELECT COALESCE(quantity,0) FROM stock
+                SELECT COALESCE(quantity,0) FROM stock_balances
                 WHERE product_id=:p AND warehouse_id=:w
             """),{"p":product_id,"w":st.warehouse_id}).fetchone()
             system=Decimal(str((row[0] if row else 0) or 0))
@@ -74,14 +74,14 @@ class StocktakeService:
             items=s.execute(text("SELECT product_id,counted_quantity FROM stocktake_items WHERE stocktake_id=:id"),{"id":stocktake_id}).fetchall()
             movement_cols={r[1] for r in s.connection().exec_driver_sql("PRAGMA table_info(stock_movements)").fetchall()}
             for item in items:
-                row=s.execute(text("SELECT quantity FROM stock WHERE product_id=:p AND warehouse_id=:w"),{"p":item.product_id,"w":st.warehouse_id}).fetchone()
+                row=s.execute(text("SELECT quantity FROM stock_balances WHERE product_id=:p AND warehouse_id=:w"),{"p":item.product_id,"w":st.warehouse_id}).fetchone()
                 old=Decimal(str((row[0] if row else 0) or 0))
                 counted=Decimal(str(item.counted_quantity))
                 delta=counted-old
                 if row:
-                    s.execute(text("UPDATE stock SET quantity=:q,available_quantity=:q,updated_at=CURRENT_TIMESTAMP WHERE product_id=:p AND warehouse_id=:w"),{"q":float(counted),"p":item.product_id,"w":st.warehouse_id})
+                    s.execute(text("UPDATE stock_balances SET quantity=:q,last_movement_at=CURRENT_TIMESTAMP WHERE product_id=:p AND warehouse_id=:w"),{"q":float(counted),"p":item.product_id,"w":st.warehouse_id})
                 else:
-                    s.execute(text("INSERT INTO stock(product_id,warehouse_id,quantity,available_quantity,average_cost) VALUES(:p,:w,:q,:q,0)"),{"p":item.product_id,"w":st.warehouse_id,"q":float(counted)})
+                    s.execute(text("INSERT INTO stock_balances(product_id,warehouse_id,quantity,reserved_quantity,average_cost,last_movement_at) VALUES(:p,:w,:q,0,0,CURRENT_TIMESTAMP)"),{"p":item.product_id,"w":st.warehouse_id,"q":float(counted)})
                 fields=["product_id","warehouse_id","quantity"]; vals=[":p",":w",":q"]; params={"p":item.product_id,"w":st.warehouse_id,"q":float(delta)}
                 if "movement_type" in movement_cols: fields.append("movement_type"); vals.append("'ADJUSTMENT'")
                 if "notes" in movement_cols: fields.append("notes"); vals.append(":n"); params["n"]=reason
