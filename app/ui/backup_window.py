@@ -8,6 +8,7 @@ class BackupWindow(QWidget):
     def __init__(self,parent=None):
         super().__init__(parent)
         self.setStyleSheet(APP_STYLE)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("النسخ الاحتياطي والاستعادة")
         self.setMinimumSize(950,600)
         layout=QVBoxLayout(self)
