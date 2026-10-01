@@ -6,6 +6,8 @@ from app.services.accounting_service import AccountingService
 from app.services.audit_service import AuditService
 from app.services.document_number_service import DocumentNumberService
 from app.services.tax_service import TaxService
+from app.services.permission_service import PermissionService
+from app.services.cashier_session_service import CashierSessionService
 
 
 class POSService:
@@ -44,11 +46,17 @@ class POSService:
         if payment_method not in cls.PAYMENT_METHODS:
             raise ValueError(f"طريقة الدفع غير مدعومة: {payment_method}")
 
+        if cashier_id is None:
+            raise PermissionError("يجب تحديد المستخدم الحالي قبل إنشاء فاتورة البيع")
+
         if payment_method == "credit" and not customer_id and not payments:
             raise ValueError("البيع الآجل يحتاج إلى عميل مسجل")
 
         with get_session() as s:
             try:
+                PermissionService.ensure_schema(s)
+                if not PermissionService.has_in_session(s, cashier_id, "sale.create"):
+                    raise PermissionError("لا توجد صلاحية لإنشاء فاتورة بيع")
                 subtotal = Decimal("0")
                 total_discount = Decimal("0")
                 cost_of_goods_sold = Decimal("0")
@@ -198,6 +206,9 @@ class POSService:
                         )
                     if due > 0 and not customer_id:
                         raise ValueError("البيع الآجل يحتاج إلى عميل مسجل")
+                if any(x["method"] == "cash" and x["amount"] > 0 for x in normalized_payments):
+                    if CashierSessionService.active_for(cashier_id) is None:
+                        raise ValueError("يجب فتح وردية الكاشير قبل البيع النقدي")
                 elif payment_method == "credit":
                     paid = Decimal("0")
                     due = total
@@ -408,14 +419,15 @@ class POSService:
                 # العميل الآجل
                 # ====================================================
                 if due > 0:
-                    current_balance = s.execute(
+                    current_balance_row = s.execute(
                         text("""
-                            SELECT COALESCE(current_balance,0)
+                            SELECT COALESCE(current_balance,0), COALESCE(credit_limit,0)
                             FROM customers
                             WHERE id=:id
                         """),
                         {"id": customer_id}
-                    ).scalar()
+                    ).fetchone()
+                    current_balance = current_balance_row[0] if current_balance_row else None
 
                     if current_balance is None:
                         raise ValueError(
@@ -425,6 +437,9 @@ class POSService:
                     new_balance = cls.money(
                         Decimal(str(current_balance)) + due
                     )
+                    credit_limit = cls.money(current_balance_row[1] if current_balance_row else 0)
+                    if credit_limit > 0 and new_balance > credit_limit:
+                        raise ValueError(f"تجاوز حد ائتمان العميل: الحد {credit_limit:.2f}، الرصيد بعد البيع {new_balance:.2f}")
 
                     s.execute(
                         text("""
