@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 )
 from app.services.sales_invoice_service import SalesInvoiceService
 from app.services.sales_return_service import SalesReturnService
+from app.ui.theme import APP_STYLE
 
 
 def money(value):
@@ -103,42 +104,8 @@ class SalesInvoiceWindow(QWidget):
         self.setLayoutDirection(Qt.RightToLeft)
         self.data = data
 
-        self.setStyleSheet("""
-            QWidget { font-size:14px; }
-            QFrame#InvoiceHeader, QFrame#MetricCard {
-                background:#0E1C2D;
-                border:1px solid #29435C;
-                border-radius:12px;
-            }
-            QTableWidget {
-                background:#0D1B2A;
-                color:#F4F7FB;
-                gridline-color:#29435C;
-                border:1px solid #29435C;
-                border-radius:10px;
-                selection-background-color:#244E72;
-                selection-color:#FFFFFF;
-            }
-            QTableWidget::item { padding:8px; }
-            QHeaderView::section {
-                background:#13263D;
-                color:#FFFFFF;
-                padding:9px;
-                border:0;
-                border-bottom:1px solid #29435C;
-                font-weight:700;
-            }
-            QLineEdit {
-                background:#0E1C2D;
-                color:#FFFFFF;
-                border:1px solid #29445F;
-                border-radius:8px;
-                padding:10px;
-            }
-            QPushButton { padding:9px 14px; min-height:36px; }
-        """)
-
-        root = QVBoxLayout(self)
+        self.setStyleSheet(APP_STYLE)
+      root = QVBoxLayout(self)
         root.setContentsMargins(16, 16, 16, 16)
         root.setSpacing(10)
 
