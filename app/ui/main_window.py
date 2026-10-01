@@ -28,6 +28,7 @@ from app.ui.sales_returns_window import SalesReturnsWindow
 from app.ui.treasury_accounts_window import TreasuryAccountsWindow
 from app.ui.smart_operations_window import SmartOperationsWindow
 from app.database.connection import get_session
+from app.database.schema_bootstrap import ensure_reference_schema
 from app.services.treasury_schema_service import TreasurySchemaService
 from app.services.reference_compatibility_service import ReferenceCompatibilityService
 from app.ui.theme import APP_STYLE
