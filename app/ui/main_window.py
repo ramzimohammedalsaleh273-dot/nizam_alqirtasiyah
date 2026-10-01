@@ -169,6 +169,7 @@ class MainWindow(QMainWindow):
         nl.setSpacing(0)
         self._nav_buttons = {}
         for label, handler in [
+            ("ملف", self.open_enterprise_tools),
             ("الرئيسية", self.show_dashboard),
             ("المبيعات", self.open_sales),
             ("المشتريات", self.open_purchases),
@@ -178,7 +179,8 @@ class MainWindow(QMainWindow):
             ("المالية", self.open_treasury),
             ("المحاسبة", self.open_accounting),
             ("التقارير", self.open_reports),
-            ("الإعدادات", lambda: self.open_window("settings", SettingsWindow)),
+            ("التحليلات", lambda: self.open_window("analytics", AnalyticsWindow)),
+            ("الإعدادات", self.open_settings),
             ("أدوات", self.open_enterprise_tools),
         ]:
             b = QPushButton(label)
@@ -272,7 +274,6 @@ class MainWindow(QMainWindow):
                 ("سجل التدقيق", lambda: self.open_data("audit_logs", "سجل التدقيق", editable=False)),
                 ("النسخ الاحتياطي والاستعادة", self.open_backup),
                 ("المزامنة", lambda: self.open_data("sync_queue", "طابور المزامنة", editable=False)),
-                ("النسخ الاحتياطي", self.open_backup),
                 ("الإعدادات", self.open_settings),
                 ("صحة النظام", self.open_health),
             ]),
