@@ -58,10 +58,10 @@ class PurchaseService:
                         oldq=Decimal(str(stock.quantity or 0));oldc=Decimal(str(stock.average_cost or 0));newq=oldq+q;avg=((oldq*oldc)+(q*cost))/newq if newq else cost
                         s.execute(text("UPDATE stock_balances SET quantity=:q,average_cost=:avg,last_movement_at=CURRENT_TIMESTAMP WHERE id=:id"),{"q":float(newq),"avg":float(avg),"id":stock.id})
                     else:
-                        sc=cls._columns(s,"stock");f=["product_id","warehouse_id","quantity"];v=[":p",":w",":q"];d={"p":pid,"w":warehouse_id,"q":float(q)}
-                        if "available_quantity" in sc:f.append("available_quantity");v.append(":q")
-                        if "average_cost" in sc:f.append("average_cost");v.append(":c");d["c"]=float(cost)
-                        s.execute(text(f"INSERT INTO stock({','.join(f)}) VALUES({','.join(v)})"),d)
+                        f=["product_id","warehouse_id","quantity","reserved_quantity","average_cost","last_movement_at"]
+                        v=[":p",":w",":q","0",":c","CURRENT_TIMESTAMP"]
+                        d={"p":pid,"w":warehouse_id,"q":float(q),"c":float(cost)}
+                        s.execute(text(f"INSERT INTO stock_balances({','.join(f)}) VALUES({','.join(v)})"),d)
                     mc=cls._columns(s,"stock_movements")
                     if {"product_id","warehouse_id","quantity"}.issubset(mc):
                         f=["product_id","warehouse_id","quantity"];v=[":p",":w",":q"];d={"p":pid,"w":warehouse_id,"q":float(q)}
