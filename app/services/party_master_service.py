@@ -9,12 +9,14 @@ class PartyMasterService:
 
     OPTIONAL_FIELDS = {
         "customers": {
+            "mobile": "TEXT",
             "payment_terms": "TEXT",
             "currency_code": "VARCHAR(10) DEFAULT 'SAR'",
             "notes": "TEXT",
             "accounting_account_id": "INTEGER",
         },
         "suppliers": {
+            "mobile": "TEXT",
             "payment_terms": "TEXT",
             "currency_code": "VARCHAR(10) DEFAULT 'SAR'",
             "notes": "TEXT",
@@ -76,6 +78,7 @@ class PartyMasterService:
                 code_field: details["code"],
                 "name": details["name"],
                 "phone": details.get("phone"),
+                "mobile": details.get("mobile"),
                 "email": details.get("email"),
                 "tax_number": details.get("tax_number"),
                 "credit_limit": float(details.get("credit_limit") or 0),
