@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QLineEdit, QDialogButtonBox, QScrollArea, QSizePolicy,
     QTableWidget, QTableWidgetItem, QAbstractItemView
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QKeySequence, QShortcut
 from sqlalchemy import text
 from app.core.config import APP_NAME, APP_VERSION
@@ -308,6 +308,9 @@ class MainWindow(QMainWindow):
         shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
         shortcut.activated.connect(self.open_universal_search)
         self._global_search_shortcut = shortcut
+        self._clock = QTimer(self)
+        self._clock.timeout.connect(self._set_datetime)
+        self._clock.start(1000)
         self._set_datetime()
         self.show_dashboard()
 
