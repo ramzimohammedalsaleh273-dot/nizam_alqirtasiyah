@@ -55,9 +55,9 @@ class InventoryWindow(QWidget):
         bar.addWidget(refresh_button)
         layout.addLayout(bar)
 
-        self.table = QTableWidget(0, 9)
+        self.table = QTableWidget(0, 10)
         self.table.setHorizontalHeaderLabels([
-            "المعرف", "رمز الصنف", "اسم المنتج", "تكلفة",
+            "المعرف", "الباركود", "رمز الصنف", "اسم المنتج", "تكلفة",
             "سعر البيع", "سعر الجملة", "سعر المدارس",
             "الكمية", "المتاح"
         ])
@@ -126,7 +126,7 @@ class InventoryWindow(QWidget):
                 from app.database.connection import get_session
                 from sqlalchemy import text
                 with get_session() as s:
-                    current=s.execute(text("SELECT COALESCE(quantity,0) FROM stock WHERE product_id=:p AND warehouse_id=:w"), {"p":product_id,"w":int(warehouse.currentData() or 1)}).scalar()
+                    current=s.execute(text("SELECT COALESCE(quantity,0) FROM stock_balances WHERE product_id=:p AND warehouse_id=:w"), {"p":product_id,"w":int(warehouse.currentData() or 1)}).scalar()
                     quantity.setValue(float(current or 0))
             except Exception:
                 quantity.setValue(0)
@@ -171,6 +171,7 @@ class InventoryWindow(QWidget):
 
                 values = [
                     item.get("id", ""),
+                    item.get("barcode", "") or "",
                     item.get("sku", "") or "",
                     item.get("name_ar", "") or "",
                     item.get("cost_price", 0),
