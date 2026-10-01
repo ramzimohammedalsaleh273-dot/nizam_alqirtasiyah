@@ -11227,6 +11227,324 @@
         }
       ],
       "foreign_keys": []
+    },
+    "stock": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "primary_key": true
+        },
+        {
+          "name": "product_id",
+          "type": "INTEGER",
+          "not_null": true
+        },
+        {
+          "name": "warehouse_id",
+          "type": "INTEGER",
+          "not_null": true
+        },
+        {
+          "name": "quantity",
+          "type": "NUMERIC",
+          "not_null": true,
+          "default": "0"
+        },
+        {
+          "name": "reserved_quantity",
+          "type": "NUMERIC",
+          "not_null": true,
+          "default": "0"
+        },
+        {
+          "name": "average_cost",
+          "type": "NUMERIC",
+          "not_null": true,
+          "default": "0"
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "not_null": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column": "product_id",
+          "table": "products",
+          "references": "id"
+        },
+        {
+          "column": "warehouse_id",
+          "table": "warehouses",
+          "references": "id"
+        }
+      ]
+    },
+    "inventory_transfers": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "primary_key": true
+        },
+        {
+          "name": "product_id",
+          "type": "INTEGER",
+          "not_null": true
+        },
+        {
+          "name": "from_warehouse_id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "to_warehouse_id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "quantity",
+          "type": "NUMERIC",
+          "not_null": true
+        },
+        {
+          "name": "status",
+          "type": "TEXT",
+          "not_null": true,
+          "default": "'DRAFT'"
+        },
+        {
+          "name": "reference_number",
+          "type": "TEXT"
+        },
+        {
+          "name": "notes",
+          "type": "TEXT"
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "not_null": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column": "product_id",
+          "table": "products",
+          "references": "id"
+        },
+        {
+          "column": "from_warehouse_id",
+          "table": "warehouses",
+          "references": "id"
+        },
+        {
+          "column": "to_warehouse_id",
+          "table": "warehouses",
+          "references": "id"
+        }
+      ]
+    },
+    "reorder_rules": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "primary_key": true
+        },
+        {
+          "name": "product_id",
+          "type": "INTEGER",
+          "not_null": true
+        },
+        {
+          "name": "warehouse_id",
+          "type": "INTEGER",
+          "not_null": true
+        },
+        {
+          "name": "reorder_point",
+          "type": "NUMERIC",
+          "not_null": true,
+          "default": "0"
+        },
+        {
+          "name": "reorder_quantity",
+          "type": "NUMERIC",
+          "not_null": true,
+          "default": "0"
+        },
+        {
+          "name": "max_stock",
+          "type": "NUMERIC",
+          "not_null": true,
+          "default": "0"
+        },
+        {
+          "name": "is_active",
+          "type": "INTEGER",
+          "not_null": true,
+          "default": "1"
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "not_null": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column": "product_id",
+          "table": "products",
+          "references": "id"
+        },
+        {
+          "column": "warehouse_id",
+          "table": "warehouses",
+          "references": "id"
+        }
+      ]
+    },
+    "expense_claims": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "primary_key": true
+        },
+        {
+          "name": "employee_id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "category",
+          "type": "TEXT",
+          "not_null": true
+        },
+        {
+          "name": "amount",
+          "type": "NUMERIC",
+          "not_null": true,
+          "default": "0"
+        },
+        {
+          "name": "description",
+          "type": "TEXT"
+        },
+        {
+          "name": "status",
+          "type": "TEXT",
+          "not_null": true,
+          "default": "'DRAFT'"
+        },
+        {
+          "name": "approved_by",
+          "type": "INTEGER"
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "not_null": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column": "employee_id",
+          "table": "employees",
+          "references": "id"
+        },
+        {
+          "column": "approved_by",
+          "table": "users",
+          "references": "id"
+        }
+      ]
+    },
+    "budgets": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "primary_key": true
+        },
+        {
+          "name": "name",
+          "type": "TEXT",
+          "not_null": true
+        },
+        {
+          "name": "fiscal_period_id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "account_id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "amount",
+          "type": "NUMERIC",
+          "not_null": true,
+          "default": "0"
+        },
+        {
+          "name": "status",
+          "type": "TEXT",
+          "not_null": true,
+          "default": "'DRAFT'"
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "not_null": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column": "fiscal_period_id",
+          "table": "fiscal_periods",
+          "references": "id"
+        },
+        {
+          "column": "account_id",
+          "table": "accounts",
+          "references": "id"
+        }
+      ]
+    },
+    "system_health_checks": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "primary_key": true
+        },
+        {
+          "name": "check_name",
+          "type": "TEXT",
+          "not_null": true
+        },
+        {
+          "name": "status",
+          "type": "TEXT",
+          "not_null": true
+        },
+        {
+          "name": "details",
+          "type": "TEXT"
+        },
+        {
+          "name": "checked_at",
+          "type": "TEXT",
+          "not_null": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      ],
+      "foreign_keys": []
     }
   }
 }
