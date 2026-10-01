@@ -35,6 +35,7 @@ from app.ui.access_data_window import AccessDataWindow
 from app.ui.expense_window import ExpenseWindow
 from app.ui.analytics_window import AnalyticsWindow
 from app.ui.permissions_window import PermissionsWindow
+from app.ui.settings_window import SettingsWindow
 
 
 class LoginDialog(QDialog):
@@ -176,7 +177,7 @@ class MainWindow(QMainWindow):
             ("المالية", self.open_treasury),
             ("المحاسبة", self.open_accounting),
             ("التقارير", self.open_reports),
-            ("الإعدادات", self.open_settings),
+            ("الإعدادات", lambda: self.open_window("settings", SettingsWindow)),
             ("أدوات", self.open_enterprise_tools),
         ]:
             b = QPushButton(label)
