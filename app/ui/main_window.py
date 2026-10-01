@@ -32,6 +32,7 @@ from app.services.treasury_schema_service import TreasurySchemaService
 from app.services.reference_compatibility_service import ReferenceCompatibilityService
 from app.ui.theme import APP_STYLE
 from app.ui.access_data_window import AccessDataWindow
+from app.ui.expense_window import ExpenseWindow
 
 
 class LoginDialog(QDialog):
@@ -243,7 +244,7 @@ class MainWindow(QMainWindow):
                 ("دليل الحسابات", lambda: self.open_data("accounts", "دليل الحسابات")),
                 ("الصناديق", lambda: self.open_data("cash_registers", "الصناديق")),
                 ("الضرائب", lambda: self.open_data("tax_rates", "الضرائب")),
-                ("المصروفات", lambda: self.open_data("expenses", "المصروفات")),
+                ("المصروفات", lambda: self.open_window("expenses", ExpenseWindow)),
                 ("الفترات المالية", lambda: self.open_data("fiscal_periods", "الفترات المالية")),
             ]),
             ("الإدارة والرقابة", [
