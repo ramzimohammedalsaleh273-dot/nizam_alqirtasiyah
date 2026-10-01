@@ -14,6 +14,7 @@ from app.services.pos_service import POSService
 from app.services.tax_service import TaxService
 from app.services.pos_hold_service import POSHoldService
 from app.services.pos_search_service import POSProductSearch
+from app.services.cashier_session_service import CashierSessionService
 from app.ui.theme import APP_STYLE
 
 
@@ -145,6 +146,19 @@ class POSWindow(QWidget):
         title_row.addStretch()
         root.addLayout(title_row)
 
+        session_row = QHBoxLayout()
+        self.session_label = QLabel("الوردية: غير مفتوحة")
+        self.session_label.setObjectName("SectionSubTitle")
+        session_row.addWidget(self.session_label)
+        session_row.addStretch()
+        open_session = QPushButton("فتح الوردية")
+        close_session = QPushButton("إغلاق الوردية")
+        open_session.clicked.connect(self.open_cashier_session)
+        close_session.clicked.connect(self.close_cashier_session)
+        session_row.addWidget(open_session)
+        session_row.addWidget(close_session)
+        root.addLayout(session_row)
+
         info_row = QHBoxLayout()
         for caption, value in [
             ("رقم الفاتورة", "سيُنشأ عند الحفظ"),
@@ -271,17 +285,18 @@ class POSWindow(QWidget):
         root.addLayout(bottom)
 
         self._ensure_blank_row()
+        self.refresh_session_state()
         self._focus_product_cell(0)
         self._shortcuts = []
         for key, slot in [
             ("F1", lambda: self.search.setFocus()),
-            ("F2", self.clear_cart),
-            ("F3", lambda: self.search.selectAll()),
+            ("F2", lambda: self.search.selectAll()),
+            ("F3", lambda: self.header_customer.setFocus()),
             ("F4", self.hold_sale),
-            ("F5", self.resume_sale),
-            ("F6", self.complete_sale),
+            ("F5", self.complete_sale),
+            ("F6", self.discount_selected),
             ("F7", self.remove_selected),
-            ("F8", self.discount_selected),
+            ("F8", self.open_cashier_session),
             ("F9", self.complete_sale),
             ("Esc", lambda: self.search.clearFocus()),
         ]:
@@ -521,6 +536,9 @@ class POSWindow(QWidget):
                 payment_method=payments[0]["method"],
                 payments=payments,
                 customer_id=dialog.customer_id_value(),
+                warehouse_id=int(self.user.get("warehouse_id") or 1),
+                branch_id=int(self.user.get("branch_id") or 1),
+                cashier_id=int(self.user["id"]),
             )
             QMessageBox.information(self, "تمت العملية",
                                     f"تم إنشاء الفاتورة\n{result['invoice_number']}\nالإجمالي: {result['total']:.2f}")
@@ -529,6 +547,70 @@ class POSWindow(QWidget):
             self._focus_product_cell(0)
         except Exception as exc:
             QMessageBox.critical(self, "فشل البيع", str(exc))
+
+    def refresh_session_state(self):
+        cashier_id = self.user.get("id")
+        if not cashier_id:
+            self.session_label.setText("الوردية: غير محددة")
+            return None
+        sid = CashierSessionService.active_for(int(cashier_id))
+        self.session_label.setText(
+            f"الوردية: مفتوحة (رقم {sid})" if sid else "الوردية: غير مفتوحة"
+        )
+        return sid
+
+    def open_cashier_session(self):
+        cashier_id = self.user.get("id")
+        if not cashier_id:
+            QMessageBox.warning(self, "الوردية", "لا يوجد مستخدم مسجل للجلسة الحالية.")
+            return
+        if self.refresh_session_state():
+            QMessageBox.information(self, "الوردية", "الوردية مفتوحة بالفعل.")
+            return
+        amount, ok = QInputDialog.getDouble(
+            self, "فتح الوردية", "الرصيد الافتتاحي:", 0.0, 0.0, 999999999.0, 2
+        )
+        if not ok:
+            return
+        try:
+            sid = CashierSessionService.open(
+                cashier_id=int(cashier_id),
+                opening_amount=amount,
+                opened_by=int(cashier_id),
+            )
+            self.refresh_session_state()
+            QMessageBox.information(self, "الوردية", f"تم فتح الوردية رقم {sid}.")
+        except Exception as exc:
+            QMessageBox.critical(self, "فشل فتح الوردية", str(exc))
+
+    def close_cashier_session(self):
+        cashier_id = self.user.get("id")
+        if not cashier_id:
+            return
+        sid = self.refresh_session_state()
+        if not sid:
+            QMessageBox.information(self, "الوردية", "لا توجد وردية مفتوحة.")
+            return
+        try:
+            expected = CashierSessionService.expected(sid)
+            actual, ok = QInputDialog.getDouble(
+                self, "إغلاق الوردية",
+                f"الرصيد المتوقع: {expected:.2f}\\nالنقد الفعلي:",
+                expected, 0.0, 999999999.0, 2
+            )
+            if not ok:
+                return
+            result = CashierSessionService.close(
+                sid, actual_amount=actual, closed_by=int(cashier_id)
+            )
+            self.refresh_session_state()
+            QMessageBox.information(
+                self, "إغلاق الوردية",
+                f"تم إغلاق الوردية.\\nالمتوقع: {result['expected']:.2f}\\n"
+                f"الفعلي: {result['actual']:.2f}\\nالفرق: {result['difference']:.2f}"
+            )
+        except Exception as exc:
+            QMessageBox.critical(self, "فشل إغلاق الوردية", str(exc))
 
     def hold_sale(self):
         if not self.cart:
