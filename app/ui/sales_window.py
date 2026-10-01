@@ -37,6 +37,7 @@ class SalesWindow(QWidget):
         self.search = QLineEdit()
         self.search.setPlaceholderText("رقم الفاتورة...")
         self.search.returnPressed.connect(self.open_by_number)
+        self.search.textChanged.connect(lambda _: self._live_filter())
 
         search_button = QPushButton("فتح الفاتورة")
         search_button.clicked.connect(self.open_by_number)
@@ -77,6 +78,23 @@ class SalesWindow(QWidget):
         layout.addWidget(self.status)
 
         self.load()
+
+    def _live_filter(self):
+        term = self.search.text().strip()
+        if term:
+            rows = [r for r in SalesService.list_sales() if term.lower() in str(r.get("invoice_number") or "").lower()]
+            self._render_rows(rows)
+        else:
+            self.load()
+
+    def _render_rows(self, rows):
+        self.table.setRowCount(0)
+        for row_data in rows:
+            row = self.table.rowCount(); self.table.insertRow(row)
+            values=[row_data["id"],row_data["invoice_number"],f'{float(row_data["subtotal"] or 0):,.2f}',f'{float(row_data["discount_amount"] or 0):,.2f}',f'{float(row_data["tax_amount"] or 0):,.2f}',f'{float(row_data["total_amount"] or 0):,.2f}',f'{float(row_data["paid_amount"] or 0):,.2f}',f'{float(row_data["due_amount"] or 0):,.2f}']
+            for column,value in enumerate(values):
+                item=QTableWidgetItem(str(value)); item.setTextAlignment(Qt.AlignCenter); self.table.setItem(row,column,item)
+        self.status.setText(f"تم تحميل {len(rows)} فاتورة.")
 
     def load(self):
         try:
