@@ -558,6 +558,7 @@ except Exception as e:
     print("حدث خطأ، وتم إلغاء العملية بالكامل.")
     print("الخطأ:",repr(e))
     print("القاعدة الأصلية لم تُترك في حالة جزئية.")
+    raise
 
 finally:
     con.close()
