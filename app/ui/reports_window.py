@@ -84,7 +84,12 @@ class ReportsWindow(QWidget):
             if k=="purchases_unpaid":extra+=" AND COALESCE(pi.due_amount,0)>0"
             return ["الفواتير","قبل الضريبة","الضريبة","الإجمالي","المدفوع","المتبقي"],self._run(s,"SELECT COUNT(*),SUM(pi.subtotal),SUM(pi.tax_amount),SUM(pi.total_amount),SUM(pi.paid_amount),SUM(pi.due_amount) FROM purchase_invoices pi WHERE "+dp+extra,p)
         if k=="purchases_supplier":return ["المورد","الفواتير","المشتريات"],self._run(s,"SELECT COALESCE(sp.name,'غير محدد'),COUNT(pi.id),SUM(pi.total_amount) FROM purchase_invoices pi LEFT JOIN suppliers sp ON sp.id=pi.supplier_id WHERE "+dp+" GROUP BY sp.id,sp.name ORDER BY 3 DESC",p)
-        if k=="purchases_product":return ["الصنف","الكمية","التكلفة"],self._run(s,"SELECT p.name_ar,SUM(pii.quantity),SUM(pii.quantity*pii.unit_cost) FROM purchase_invoice_items pii JOIN purchase_invoices pi ON pi.id=pii.purchase_invoice_id JOIN products p ON p.id=pii.product_id WHERE "+dp+" GROUP BY p.id,p.name_ar ORDER BY 3 DESC",p)
+        if k=="purchases_product":
+            item_cols={r[1] for r in s.execute(text("PRAGMA table_info(purchase_invoice_items)")).fetchall()}
+            fk="invoice_id" if "invoice_id" in item_cols else ("purchase_invoice_id" if "purchase_invoice_id" in item_cols else None)
+            if not fk:
+                return ["الحالة"],[("بنية بنود المشتريات لا تحتوي مفتاح الفاتورة المتوقع",)]
+            return ["الصنف","الكمية","التكلفة"],self._run(s,f"SELECT p.name_ar,SUM(pii.quantity),SUM(pii.quantity*pii.unit_cost) FROM purchase_invoice_items pii JOIN purchase_invoices pi ON pi.id=pii.{fk} JOIN products p ON p.id=pii.product_id WHERE "+dp+" GROUP BY p.id,p.name_ar ORDER BY 3 DESC",p)
         if k=="supplier_balance":return ["المورد","رقم المورد","الرصيد","حد الائتمان"],self._run(s,"SELECT name,supplier_code,current_balance,credit_limit FROM suppliers ORDER BY name",p)
         if k=="stock":return ["الصنف","المستودع","الكمية","المتاح","متوسط التكلفة","القيمة"],self._run(s,"SELECT p.name_ar,w.name,sb.quantity,sb.quantity-sb.reserved_quantity,sb.average_cost,(sb.quantity-sb.reserved_quantity)*sb.average_cost FROM stock_balances sb JOIN products p ON p.id=sb.product_id JOIN warehouses w ON w.id=sb.warehouse_id WHERE (:product='' OR sb.product_id=CAST(:product AS INTEGER)) ORDER BY p.name_ar",p)
         if k=="stock_value":return ["قيمة المخزون"],self._run(s,"SELECT COALESCE(SUM((quantity-reserved_quantity)*average_cost),0) FROM stock_balances",p)
