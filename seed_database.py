@@ -269,7 +269,7 @@ try:
             }
         ]
         for rec in user_records:
-            seed_by_columns("users", rec)
+            seed_by_columns("users", [rec])
 
     # =========================================================
     # المنتجات
