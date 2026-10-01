@@ -83,7 +83,7 @@ class ReportsWindow(QWidget):
             elif k=="cash":
                 headers=["التاريخ","المستند","الحركة","المبلغ"]; rows=s.execute(text("SELECT created_at,document_number,movement_type,amount FROM treasury_movements WHERE date(created_at) BETWEEN :f AND :t ORDER BY id DESC"),p).all()
             elif k=="bank":
-                headers=["التاريخ","الحساب","النوع","المبلغ","المرجع"]; rows=s.execute(text("SELECT bt.created_at,ba.account_name,bt.transaction_type,bt.amount,bt.reference_number FROM bank_transactions bt JOIN bank_accounts ba ON ba.id=bt.bank_account_id WHERE date(bt.created_at) BETWEEN :f AND :t ORDER BY bt.id DESC"),p).all()
+                headers=["التاريخ","الحساب","النوع","المبلغ","المرجع"]; rows=s.execute(text("SELECT bt.transaction_date,ba.account_name,bt.transaction_type,bt.amount,bt.reference_type FROM bank_transactions bt JOIN bank_accounts ba ON ba.id=bt.bank_account_id WHERE date(bt.transaction_date) BETWEEN :f AND :t ORDER BY bt.id DESC"),p).all()
             elif k=="tax":
                 headers=["الفواتير","الضريبة"]; rows=[s.execute(text("SELECT COUNT(*),COALESCE(SUM(tax_amount),0) FROM sales WHERE status='POSTED' AND date(created_at) BETWEEN :f AND :t"),p).one()]
             elif k=="expenses":
