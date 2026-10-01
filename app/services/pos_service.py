@@ -89,9 +89,9 @@ class POSService:
                         text("""
                             SELECT
                                 COALESCE(quantity,0),
-                                COALESCE(available_quantity,0),
+                                COALESCE(quantity-reserved_quantity,0),
                                 COALESCE(average_cost,0)
-                            FROM stock
+                            FROM stock_balances
                             WHERE product_id=:product
                               AND warehouse_id=:warehouse
                             LIMIT 1
@@ -326,14 +326,13 @@ class POSService:
 
                     s.execute(
                         text("""
-                            UPDATE stock
+                            UPDATE stock_balances
                             SET
                                 quantity=quantity-:quantity,
-                                available_quantity=available_quantity-:quantity,
-                                updated_at=CURRENT_TIMESTAMP
+                                last_movement_at=CURRENT_TIMESTAMP
                             WHERE product_id=:product
                               AND warehouse_id=:warehouse
-                              AND available_quantity>=:quantity
+                              AND (quantity-reserved_quantity)>=:quantity
                         """),
                         {
                             "quantity": float(item["quantity"]),
