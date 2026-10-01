@@ -11,10 +11,12 @@ class InventoryService:
             SELECT
                 p.id,p.sku,p.name_ar,p.cost_price,p.sale_price,
                 p.wholesale_price,p.school_price,p.corporate_price,
+                COALESCE(pb.barcode,'') AS barcode,
                 COALESCE(st.quantity,0) AS quantity,
-                COALESCE(st.available_quantity,0) AS available_quantity
+                COALESCE(st.quantity-st.reserved_quantity,0) AS available_quantity
             FROM products p
-            LEFT JOIN stock st ON st.product_id=p.id AND st.warehouse_id=:warehouse_id
+            LEFT JOIN stock_balances st ON st.product_id=p.id AND st.warehouse_id=:warehouse_id
+            LEFT JOIN product_barcodes pb ON pb.product_id=p.id AND pb.is_primary=1
             WHERE p.is_active=1
             """
             params={"warehouse_id": warehouse_id}
@@ -46,7 +48,7 @@ class InventoryService:
                 SELECT
                     p.*,
                     COALESCE(st.quantity,0) quantity,
-                    COALESCE(st.available_quantity,0) available_quantity,
+                    COALESCE(st.quantity-st.reserved_quantity,0) available_quantity,
                     COALESCE(st.average_cost,0) average_cost
                 FROM products p
                 LEFT JOIN stock st ON st.product_id=p.id AND st.warehouse_id=:warehouse_id
@@ -59,8 +61,8 @@ class InventoryService:
     def available_quantity(product_id,warehouse_id=1):
         with get_session() as s:
             return float(s.execute(text("""
-                SELECT COALESCE(available_quantity,0)
-                FROM stock
+                SELECT COALESCE(quantity-reserved_quantity,0)
+                FROM stock_balances
                 WHERE product_id=:p AND warehouse_id=:w
             """),{"p":product_id,"w":warehouse_id}).scalar() or 0)
 
@@ -69,7 +71,7 @@ class InventoryService:
         with get_session() as s:
             rows=s.execute(text("""
                 SELECT p.id,p.sku,p.name_ar,p.reorder_point,p.min_stock,
-                       COALESCE(st.available_quantity,0) AS available_quantity
+                       COALESCE(st.quantity-st.reserved_quantity,0) AS available_quantity
                 FROM products p
                 LEFT JOIN stock st ON st.product_id=p.id
                 WHERE p.is_active=1
