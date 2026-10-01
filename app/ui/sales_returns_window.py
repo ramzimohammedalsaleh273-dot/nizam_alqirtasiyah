@@ -1,3 +1,4 @@
+from app.ui.theme import APP_STYLE
 from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QTableWidget,QTableWidgetItem,QPushButton,QMessageBox,QInputDialog
 from sqlalchemy import text
 from app.database.connection import get_session
@@ -8,6 +9,7 @@ class SalesReturnsWindow(QWidget):
     """واجهة تشغيلية لمرتجعات المبيعات."""
     def __init__(self,parent=None):
         super().__init__(parent)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("مرتجعات المبيعات")
         self.setMinimumSize(1100,650)
         root=QVBoxLayout(self)
@@ -53,3 +55,5 @@ class SalesReturnsWindow(QWidget):
             QMessageBox.information(self,"تم",f"تم ترحيل المرتجع {result['return_number']} بإجمالي {result['total']:.2f}.")
         except Exception as e:
             QMessageBox.critical(self,"فشل المرتجع",str(e))
+
+# UI reference theme is applied by the main application shell.
