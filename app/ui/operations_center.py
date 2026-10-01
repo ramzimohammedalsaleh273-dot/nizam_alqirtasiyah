@@ -1,3 +1,4 @@
+from app.ui.theme import APP_STYLE
 
 from pathlib import Path
 import sqlite3
@@ -12,6 +13,7 @@ from PySide6.QtWidgets import (
 class OperationsCenter(QWidget):
     def __init__(self,parent=None):
         super().__init__(parent)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("مركز عمليات نظام القرطاسية")
         self.resize(1250,750)
         self.setLayoutDirection(Qt.RightToLeft)
