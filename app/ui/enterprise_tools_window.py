@@ -1,10 +1,12 @@
+from app.ui.theme import APP_STYLE
 from PySide6.QtWidgets import QWidget,QVBoxLayout,QPushButton,QTableWidget,QTableWidgetItem,QMessageBox,QLabel
 from app.services.system_validation_service import SystemValidationService
 from app.services.accounting_reports_service import AccountingReportsService
 
 class EnterpriseToolsWindow(QWidget):
     def __init__(self,parent=None):
-        super().__init__(parent);self.setWindowTitle("مركز التشغيل والفحص المتقدم");self.resize(1100,650)
+        super().__init__(parent)
+        self.setStyleSheet(APP_STYLE);self.setWindowTitle("مركز التشغيل والفحص المتقدم");self.resize(1100,650)
         l=QVBoxLayout(self);l.addWidget(QLabel("مركز التشغيل والفحص المتقدم"))
         for name,fn in [("فحص النظام الكامل",self.health),("ميزان المراجعة",lambda:self.report("ميزان المراجعة",AccountingReportsService.trial_balance())),("قائمة الدخل",lambda:self.report("قائمة الدخل",AccountingReportsService.income_statement())),("الميزانية",lambda:self.report("الميزانية",AccountingReportsService.balance_sheet()))]:
             b=QPushButton(name);b.clicked.connect(fn);l.addWidget(b)
