@@ -253,7 +253,7 @@ class StocktakeWindow(QWidget):
                     SET status='completed',completed_at=CURRENT_TIMESTAMP,notes=:notes
                     WHERE id=:id
                 """), {"notes": self.notes.toPlainText().strip() or None, "id": self.stocktake_id})
-                AuditService.log(s, "STOCKTAKE_APPROVED", "stocktake", self.stocktake_id, user_id=uid)
+                AuditService.log(s, "STOCKTAKE_APPROVED", "stocktake", self.stocktake_id, username=self.user.get("username") or str(uid))
                 s.commit()
             self.status.setText("تم اعتماد الجرد وتسوية الأرصدة وحفظ سجل التدقيق.")
             self.load_current()
