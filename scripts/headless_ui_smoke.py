@@ -15,6 +15,7 @@ from app.ui.sales_invoice_window import SalesInvoiceWindow
 from app.ui.purchase_workflow_window import PurchaseWorkflowWindow
 from app.ui.treasury_operations_window import TreasuryOperationsWindow
 from app.ui.stocktake_window import StocktakeWindow
+from app.ui.purchase_invoice_window import PurchaseInvoiceWindow
 
 app=QApplication.instance() or QApplication([])
 
@@ -29,6 +30,7 @@ objects=[
     PurchaseWorkflowWindow(),
     TreasuryOperationsWindow(),
     StocktakeWindow(),
+    PurchaseInvoiceWindow(),
 ]
 for obj in objects:
     obj.close()
