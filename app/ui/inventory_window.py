@@ -187,8 +187,8 @@ class InventoryWindow(QWidget):
         if row<0:
             QMessageBox.warning(self,"تنبيه","اختر صنفًا أولاً"); return
         product_id=int(self.table.item(row,0).text())
-        sku=QLineEdit(self.table.item(row,1).text())
-        name=QLineEdit(self.table.item(row,2).text())
+        sku=QLineEdit(self.table.item(row,2).text())
+        name=QLineEdit(self.table.item(row,3).text())
         cost=QDoubleSpinBox(); sale=QDoubleSpinBox(); quantity=QDoubleSpinBox(); warehouse=QComboBox()
         cost.setMaximum(999999999); sale.setMaximum(999999999); cost.setDecimals(2); sale.setDecimals(2)
         try:
@@ -199,7 +199,7 @@ class InventoryWindow(QWidget):
                     warehouse.addItem(str(r["name"]), int(r["id"]))
         except Exception:
             warehouse.addItem("المستودع الافتراضي",1)
-        cost.setValue(float(self.table.item(row,3).text() or 0)); sale.setValue(float(self.table.item(row,4).text() or 0))
+        cost.setValue(float(self.table.item(row,4).text() or 0)); sale.setValue(float(self.table.item(row,5).text() or 0))
         quantity.setValue(0)
         def load_selected_warehouse_quantity():
             try:
