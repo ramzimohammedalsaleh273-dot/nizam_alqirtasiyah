@@ -174,17 +174,27 @@ class StocktakeWindow(QWidget):
                     system = Decimal(self.table.item(row, 4).text() or "0")
                     counted = Decimal(str(self.table.cellWidget(row, 5).value()))
                     diff = counted - system
-                    s.execute(text("""
-                        INSERT INTO stocktake_items(stocktake_id,product_id,system_quantity,counted_quantity,difference)
-                        VALUES(:stocktake,:product,:system,:counted,:difference)
-                        ON CONFLICT(stocktake_id,product_id) DO UPDATE SET
-                          system_quantity=excluded.system_quantity,
-                          counted_quantity=excluded.counted_quantity,
-                          difference=excluded.difference
-                    """), {
+                    existing = s.execute(text("""
+                        SELECT id FROM stocktake_items
+                        WHERE stocktake_id=:stocktake AND product_id=:product
+                        LIMIT 1
+                    """), {"stocktake": self.stocktake_id, "product": product_id}).scalar()
+                    params = {
                         "stocktake": self.stocktake_id, "product": product_id,
                         "system": float(system), "counted": float(counted), "difference": float(diff)
-                    })
+                    }
+                    if existing:
+                        s.execute(text("""
+                            UPDATE stocktake_items
+                            SET system_quantity=:system,counted_quantity=:counted,difference=:difference
+                            WHERE id=:id
+                        """), {**params, "id": int(existing)})
+                    else:
+                        s.execute(text("""
+                            INSERT INTO stocktake_items
+                            (stocktake_id,product_id,system_quantity,counted_quantity,difference)
+                            VALUES(:stocktake,:product,:system,:counted,:difference)
+                        """), params)
                 s.execute(text("""
                     UPDATE stocktakes SET status='review', notes=:notes WHERE id=:id
                 """), {"notes": self.notes.toPlainText().strip() or None, "id": self.stocktake_id})
