@@ -26,6 +26,7 @@ from app.ui.treasury_accounts_window import TreasuryAccountsWindow
 from app.ui.smart_operations_window import SmartOperationsWindow
 from app.database.connection import get_session
 from app.services.treasury_schema_service import TreasurySchemaService
+from app.ui.theme import APP_STYLE
 
 
 class LoginDialog(QDialog):
@@ -109,104 +110,108 @@ class MainWindow(QMainWindow):
             session.commit()
 
     def build_ui(self):
-        self.setStyleSheet("""
-            QMainWindow, QWidget#Root { background:#07111F; }
-            QLabel { color:#F4F7FB; }
-            QFrame#Sidebar {
-                background:#0B1728;
-                border:1px solid #1A3049;
-                border-radius:16px;
-            }
-            QFrame#BrandCard {
-                background:#10243A;
-                border:1px solid #234361;
-                border-radius:14px;
-            }
-            QFrame#Section {
-                background:#0E1C2D;
-                border:1px solid #1A3049;
-                border-radius:12px;
-            }
-            QFrame#Card {
-                background:#101F33;
-                border:1px solid #1E3856;
-                border-radius:14px;
-            }
-            QFrame#StatusCard {
-                background:#0E1C2D;
-                border:1px solid #244566;
-                border-radius:12px;
-            }
-            QPushButton {
-                background:#13263D;
-                color:#F4F7FB;
-                border:1px solid #244566;
-                border-radius:9px;
-                padding:9px 12px;
-                min-height:20px;
-            }
-            QPushButton:hover { background:#183452; }
-            QPushButton:pressed { background:#0F2034; }
-            QScrollArea { border:none; background:transparent; }
-            QLineEdit {
-                background:#0E1C2D;
-                color:#F4F7FB;
-                border:1px solid #28445F;
-                border-radius:9px;
-                padding:10px;
-            }
-        """)
+        self.setStyleSheet(APP_STYLE)
 
         root = QWidget()
         root.setObjectName("Root")
-        main = QHBoxLayout(root)
-        main.setContentsMargins(14, 14, 14, 14)
-        main.setSpacing(14)
+        main = QVBoxLayout(root)
+        main.setContentsMargins(0, 0, 0, 0)
+        main.setSpacing(0)
+
+        top = QFrame()
+        top.setObjectName("TopBar")
+        tl = QHBoxLayout(top)
+        tl.setContentsMargins(18, 10, 18, 10)
+        tl.setSpacing(14)
+
+        title = QLabel("نظام القرطاسية")
+        title.setObjectName("TopTitle")
+        tl.addWidget(title)
+
+        badge = QFrame()
+        badge.setObjectName("Badge")
+        bl = QHBoxLayout(badge)
+        bl.setContentsMargins(10, 4, 10, 4)
+        btxt = QLabel("● يعمل محليًا")
+        btxt.setStyleSheet("color:#f8fafc;font-size:12px;")
+        bl.addWidget(btxt)
+        tl.addWidget(badge)
+        tl.addStretch()
+
+        self.user_meta = QLabel("المستخدم: —")
+        self.user_meta.setObjectName("TopMeta")
+        self.branch_meta = QLabel("الفرع: —")
+        self.branch_meta.setObjectName("TopMeta")
+        self.datetime_meta = QLabel()
+        self.datetime_meta.setObjectName("TopMeta")
+        self.db_meta = QLabel("قاعدة البيانات: —")
+        self.db_meta.setObjectName("TopMeta")
+        for w in (self.user_meta, self.branch_meta, self.datetime_meta, self.db_meta):
+            tl.addWidget(w)
+        main.addWidget(top)
+
+        nav = QFrame()
+        nav.setObjectName("NavBar")
+        nl = QHBoxLayout(nav)
+        nl.setContentsMargins(10, 0, 10, 0)
+        nl.setSpacing(0)
+        self._nav_buttons = {}
+        for label, handler in [
+            ("الرئيسية", self.show_dashboard),
+            ("المبيعات", self.open_sales),
+            ("المشتريات", self.open_purchases),
+            ("المخزون", self.open_inventory),
+            ("العملاء", self.open_parties),
+            ("الموردون", self.open_parties),
+            ("المالية", self.open_treasury),
+            ("المحاسبة", self.open_accounting),
+            ("التقارير", self.open_reports),
+            ("الإعدادات", self.open_settings),
+            ("أدوات", self.open_enterprise_tools),
+        ]:
+            b = QPushButton(label)
+            b.setObjectName("NavButton")
+            b.setCheckable(True)
+            b.clicked.connect(handler)
+            nl.addWidget(b)
+            self._nav_buttons[label] = b
+        main.addWidget(nav)
+
+        work = QHBoxLayout()
+        work.setContentsMargins(10, 10, 10, 10)
+        work.setSpacing(10)
 
         sidebar = QFrame()
-        sidebar.setObjectName("Sidebar")
-        sidebar.setFixedWidth(270)
-        side_outer = QVBoxLayout(sidebar)
-        side_outer.setContentsMargins(10, 10, 10, 10)
+        sidebar.setObjectName("SideBar")
+        sidebar.setFixedWidth(255)
+        so = QVBoxLayout(sidebar)
+        so.setContentsMargins(8, 8, 8, 8)
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        sc = QWidget()
+        sl = QVBoxLayout(sc)
+        sl.setContentsMargins(2, 2, 2, 2)
+        sl.setSpacing(8)
 
-        side_content = QWidget()
-        side_layout = QVBoxLayout(side_content)
-        side_layout.setContentsMargins(4, 4, 4, 4)
-        side_layout.setSpacing(8)
-
-        brand = QFrame()
-        brand.setObjectName("BrandCard")
-        brand_layout = QVBoxLayout(brand)
-
-        logo = QLabel("نظام القرطاسية")
-        logo.setAlignment(Qt.AlignCenter)
-        logo.setStyleSheet("font-size:21px;font-weight:700;padding:7px;")
-        brand_layout.addWidget(logo)
-
-        version = QLabel(f"الإصدار {APP_VERSION}")
-        version.setAlignment(Qt.AlignCenter)
-        version.setStyleSheet("color:#9FB2C8;font-size:12px;")
-        brand_layout.addWidget(version)
-        side_layout.addWidget(brand)
-
-        search_button = QPushButton("⌕  البحث العام 360°")
-        search_button.setMinimumHeight(42)
-        search_button.clicked.connect(self.open_universal_search)
-        side_layout.addWidget(search_button)
-
-        quick_button = QPushButton("⚡  مركز التشغيل الذكي")
-        quick_button.setMinimumHeight(42)
-        quick_button.clicked.connect(self.open_smart_operations)
-        side_layout.addWidget(quick_button)
+        quick = QFrame()
+        quick.setObjectName("SideSection")
+        ql = QVBoxLayout(quick)
+        ql.setContentsMargins(6, 6, 6, 6)
+        for label, handler in [
+            ("⌕  البحث العام", self.open_universal_search),
+            ("▣  نقطة البيع", self.open_pos),
+        ]:
+            b = QPushButton(label)
+            b.setObjectName("SideButton")
+            b.clicked.connect(handler)
+            ql.addWidget(b)
+        sl.addWidget(quick)
 
         groups = [
-            ("التشغيل اليومي", [
+            ("التشغيل", [
                 ("لوحة التحكم", self.show_dashboard),
-                ("نقطة البيع", self.open_pos),
                 ("المبيعات والفواتير", self.open_sales),
                 ("مرتجعات المبيعات", self.open_sales_returns),
             ]),
@@ -217,62 +222,67 @@ class MainWindow(QMainWindow):
             ]),
             ("المخزون والأطراف", [
                 ("المنتجات والمخزون", self.open_inventory),
-                ("العملاء والموردون", self.open_parties),
+                ("العملاء", self.open_parties),
+                ("الموردون", self.open_parties),
             ]),
             ("المالية", [
-                ("الخزينة والبنوك", self.open_treasury),
-                ("حسابات الخزينة والتحويلات", self.open_treasury_accounts),
+                ("الخزينة", self.open_treasury),
+                ("البنوك والحسابات", self.open_treasury_accounts),
                 ("المحاسبة العامة", self.open_accounting),
-                ("التقارير والتحليلات", self.open_reports),
             ]),
             ("الإدارة والرقابة", [
                 ("الموظفون", self.open_employees),
-                ("الإعدادات", self.open_settings),
-                ("مركز التشغيل والفحص", self.open_enterprise_tools),
-                ("صحة النظام", self.open_health),
+                ("التقارير والتحليلات", self.open_reports),
+                ("التنبيهات", self.open_smart_operations),
+                ("المستندات", self.open_enterprise_tools),
                 ("النسخ الاحتياطي", self.open_backup),
+                ("الإعدادات", self.open_settings),
+                ("صحة النظام", self.open_health),
             ]),
         ]
-
-        for section_name, actions in groups:
-            section = QFrame()
-            section.setObjectName("Section")
-            section_layout = QVBoxLayout(section)
-            section_layout.setContentsMargins(8, 8, 8, 8)
-            section_layout.setSpacing(5)
-
-            header = QLabel(section_name)
-            header.setStyleSheet(
-                "color:#8FA8C0;font-size:12px;font-weight:700;padding:3px 6px;"
-            )
-            section_layout.addWidget(header)
-
+        for name, actions in groups:
+            sec = QFrame()
+            sec.setObjectName("SideSection")
+            vl = QVBoxLayout(sec)
+            vl.setContentsMargins(6, 6, 6, 6)
+            head = QLabel(name)
+            head.setObjectName("SideSectionTitle")
+            vl.addWidget(head)
             for label, handler in actions:
-                button = QPushButton(label)
-                button.setMinimumHeight(38)
-                button.clicked.connect(handler)
-                section_layout.addWidget(button)
-
-            side_layout.addWidget(section)
-
-        side_layout.addStretch()
-        scroll.setWidget(side_content)
-        side_outer.addWidget(scroll)
-        main.addWidget(sidebar)
+                b = QPushButton(label)
+                b.setObjectName("SideButton")
+                b.clicked.connect(handler)
+                vl.addWidget(b)
+            sl.addWidget(sec)
+        sl.addStretch()
+        scroll.setWidget(sc)
+        so.addWidget(scroll)
+        work.addWidget(sidebar)
 
         self.content = QFrame()
-        self.content.setObjectName("Content")
+        self.content.setObjectName("Card")
         self.content_layout = QVBoxLayout(self.content)
-        self.content_layout.setContentsMargins(4, 4, 4, 4)
-        main.addWidget(self.content, 1)
+        self.content_layout.setContentsMargins(14, 14, 14, 14)
+        self.content_layout.setSpacing(10)
+        work.addWidget(self.content, 1)
+        main.addLayout(work, 1)
 
+        self.status_bar = self.statusBar()
+        self.status_bar.showMessage("جاهز")
         self.setCentralWidget(root)
 
         shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
         shortcut.activated.connect(self.open_universal_search)
         self._global_search_shortcut = shortcut
-
+        self._set_datetime()
         self.show_dashboard()
+
+    def _set_datetime(self):
+        self.datetime_meta.setText(datetime.now().strftime("%Y-%m-%d  %H:%M"))
+
+    def _set_active_nav(self, label):
+        for name, button in self._nav_buttons.items():
+            button.setChecked(name == label)
 
     def clear_content(self):
         while self.content_layout.count():
@@ -281,129 +291,172 @@ class MainWindow(QMainWindow):
             if widget is not None:
                 widget.deleteLater()
 
-    def _add_summary_card(self, layout, row, column, title, value):
-        card = QFrame()
-        card.setObjectName("Card")
-        card.setMinimumHeight(112)
-        card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+    @staticmethod
+    def _make_table(headers, rows, minimum_height=190):
+        table = QTableWidget(0, len(headers))
+        table.setHorizontalHeaderLabels(headers)
+        table.setMinimumHeight(minimum_height)
+        table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        table.setSelectionMode(QAbstractItemView.SingleSelection)
+        table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        table.setAlternatingRowColors(True)
+        table.horizontalHeader().setStretchLastSection(True)
+        for values in rows:
+            r = table.rowCount()
+            table.insertRow(r)
+            for col, value in enumerate(values):
+                table.setItem(r, col, QTableWidgetItem("" if value is None else str(value)))
+        return table
 
-        card_layout = QVBoxLayout(card)
-        card_layout.setContentsMargins(14, 12, 14, 12)
-        card_layout.setSpacing(5)
+    @staticmethod
+    def _preview_table(session, table_name, preferred_columns, limit=8):
+        try:
+            columns = [row[1] for row in session.execute(text(f'PRAGMA table_info("{table_name}")')).all()]
+            selected = [x for x in preferred_columns if x in columns]
+            if not selected:
+                return []
+            fields = ", ".join(f'"{x}"' for x in selected)
+            rows = session.execute(
+                text(f'SELECT {fields} FROM "{table_name}" ORDER BY rowid DESC LIMIT :limit'),
+                {"limit": limit},
+            ).all()
+            return [tuple(row) for row in rows]
+        except Exception:
+            return []
 
+    def _dashboard_section(self, title, headers, rows):
+        frame = QFrame()
+        frame.setObjectName("Card")
+        layout = QVBoxLayout(frame)
         label = QLabel(title)
-        label.setAlignment(Qt.AlignCenter)
-        label.setStyleSheet("color:#9FB2C8;font-size:13px;")
-
-        number = QLabel(f"{value:,}" if isinstance(value, int) else str(value))
-        number.setAlignment(Qt.AlignCenter)
-        number.setStyleSheet("font-size:25px;font-weight:700;padding:3px;")
-
-        card_layout.addWidget(label)
-        card_layout.addWidget(number)
-        layout.addWidget(card, row, column)
-
-    def _add_financial_card(self, layout, row, column, title, value):
-        card = QFrame()
-        card.setObjectName("StatusCard")
-        card.setMinimumHeight(86)
-        card_layout = QVBoxLayout(card)
-        card_layout.setContentsMargins(12, 10, 12, 10)
-
-        label = QLabel(title)
-        label.setStyleSheet("color:#9FB2C8;font-size:12px;")
-        value_label = QLabel(f"{float(value or 0):,.2f}")
-        value_label.setStyleSheet("font-size:18px;font-weight:700;")
-
-        card_layout.addWidget(label)
-        card_layout.addWidget(value_label)
-        layout.addWidget(card, row, column)
+        label.setStyleSheet("font-size:16px;font-weight:700;color:#0f172a;")
+        layout.addWidget(label)
+        layout.addWidget(self._make_table(headers, rows))
+        return frame
 
     def show_dashboard(self):
         self.clear_content()
+        self._set_active_nav("الرئيسية")
 
-        header = QHBoxLayout()
-        title_box = QVBoxLayout()
-
+        head = QHBoxLayout()
+        box = QVBoxLayout()
         title = QLabel("لوحة التحكم")
-        title.setStyleSheet("font-size:30px;font-weight:700;")
-        subtitle = QLabel("ملخص تشغيلي سريع — التفاصيل الكاملة داخل كل وحدة")
-        subtitle.setStyleSheet("color:#9FB2C8;font-size:13px;")
-        title_box.addWidget(title)
-        title_box.addWidget(subtitle)
-
-        header.addLayout(title_box)
-        header.addStretch()
-
-        refresh = QPushButton("تحديث اللوحة")
-        refresh.setMinimumHeight(40)
+        title.setObjectName("SectionTitle")
+        sub = QLabel("بيانات تشغيلية وجداول فعلية — بدون تكديس بطاقات كبيرة.")
+        sub.setObjectName("SectionSubTitle")
+        box.addWidget(title)
+        box.addWidget(sub)
+        head.addLayout(box)
+        head.addStretch()
+        refresh = QPushButton("تحديث")
+        refresh.setObjectName("Primary")
         refresh.clicked.connect(self.show_dashboard)
-        header.addWidget(refresh)
-        self.content_layout.addLayout(header)
+        head.addWidget(refresh)
+        self.content_layout.addLayout(head)
 
         try:
             health = get_health()
             summary = get_system_summary()
             financial = get_financial_summary()
-
-            status = QFrame()
-            status.setObjectName("StatusCard")
-            status_layout = QHBoxLayout(status)
-            status_layout.setContentsMargins(14, 10, 14, 10)
-
-            status_text = QLabel(
-                "● قاعدة البيانات سليمة"
-                if health["healthy"]
-                else "● توجد مشكلة تحتاج إلى مراجعة"
+            self.db_meta.setText(
+                "قاعدة البيانات: سليمة" if health["healthy"] else "قاعدة البيانات: تحتاج مراجعة"
             )
-            status_text.setStyleSheet("font-size:15px;font-weight:700;")
-            status_layout.addWidget(status_text)
 
-            hint = QLabel("اللوحة تعرض المؤشرات فقط؛ لا يتم حشر تفاصيل السجلات هنا.")
-            hint.setStyleSheet("color:#9FB2C8;")
-            status_layout.addStretch()
-            status_layout.addWidget(hint)
-            self.content_layout.addWidget(status)
-
-            cards = QGridLayout()
-            cards.setHorizontalSpacing(12)
-            cards.setVerticalSpacing(12)
-            cards.setColumnStretch(0, 1)
-            cards.setColumnStretch(1, 1)
-            cards.setColumnStretch(2, 1)
-            cards.setColumnStretch(3, 1)
-
+            info = QFrame()
+            info.setObjectName("Card")
+            il = QHBoxLayout(info)
+            il.setContentsMargins(12, 8, 12, 8)
             data = [
+                ("المستخدم", getattr(self, "current_user", {}).get("username", "—")),
+                ("الفرع", getattr(self, "current_user", {}).get("branch_name", "—")),
+                ("التاريخ", datetime.now().strftime("%Y-%m-%d")),
+                ("الوقت", datetime.now().strftime("%H:%M")),
+                ("الحالة", "سليم" if health["healthy"] else "مراجعة"),
+            ]
+            for name, value in data:
+                b = QVBoxLayout()
+                a = QLabel(name)
+                a.setStyleSheet("color:#64748b;font-size:11px;")
+                v = QLabel(str(value))
+                v.setStyleSheet("font-weight:700;color:#0f172a;")
+                b.addWidget(a)
+                b.addWidget(v)
+                il.addLayout(b)
+            self.content_layout.addWidget(info)
+
+            metrics = QFrame()
+            metrics.setObjectName("Card")
+            ml = QHBoxLayout(metrics)
+            for name, value in [
                 ("المنتجات", summary["products"]),
                 ("العملاء", summary["customers"]),
                 ("الموردون", summary["suppliers"]),
-                ("فواتير المبيعات", summary["sales"]),
-                ("فواتير المشتريات", summary["purchase_invoices"]),
-                ("أرصدة المخزون", summary["stock"]),
+                ("المبيعات", summary["sales"]),
+                ("المشتريات", summary["purchase_invoices"]),
                 ("أصناف منخفضة", summary["low_stock"]),
-            ]
-            for index, (name, value) in enumerate(data):
-                row, column = divmod(index, 4)
-                self._add_summary_card(cards, row, column, name, value)
+                ("قيمة المخزون", f'{financial["inventory"]:,.2f}'),
+            ]:
+                b = QVBoxLayout()
+                a = QLabel(name)
+                a.setStyleSheet("color:#64748b;font-size:11px;")
+                v = QLabel(f"{value:,}" if isinstance(value, int) else str(value))
+                v.setStyleSheet("font-size:17px;font-weight:700;color:#0f172a;")
+                b.addWidget(a)
+                b.addWidget(v)
+                ml.addLayout(b)
+            self.content_layout.addWidget(metrics)
 
-            self.content_layout.addLayout(cards)
+            with get_session() as session:
+                sales = self._preview_table(
+                    session, "sales",
+                    ["invoice_number", "invoice_date", "customer_id", "total", "payment_method", "status"],
+                )
+                purchases = self._preview_table(
+                    session, "purchase_invoices",
+                    ["invoice_number", "invoice_date", "supplier_id", "total", "status"],
+                )
+                alerts = self._preview_table(
+                    session, "notifications",
+                    ["type", "title", "message", "created_at", "status"],
+                )
+                low = session.execute(text("""
+                    SELECT p.barcode, p.name_ar,
+                           COALESCE(st.available_quantity,0),
+                           COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)
+                    FROM products p
+                    LEFT JOIN stock st ON st.product_id=p.id
+                    WHERE p.is_active=1
+                      AND COALESCE(st.available_quantity,0)
+                          <= COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)
+                    ORDER BY COALESCE(st.available_quantity,0), p.name_ar
+                    LIMIT 8
+                """)).all()
 
-            financial_title = QLabel("الملخص المالي")
-            financial_title.setStyleSheet("font-size:18px;font-weight:700;padding-top:8px;")
-            self.content_layout.addWidget(financial_title)
+            top = QHBoxLayout()
+            top.addWidget(self._dashboard_section(
+                "آخر المبيعات",
+                ["رقم الفاتورة", "التاريخ", "العميل", "الإجمالي", "طريقة الدفع", "الحالة"],
+                sales,
+            ), 1)
+            top.addWidget(self._dashboard_section(
+                "آخر المشتريات",
+                ["رقم الفاتورة", "التاريخ", "المورد", "الإجمالي", "الحالة"],
+                purchases,
+            ), 1)
+            self.content_layout.addLayout(top)
 
-            financial_grid = QGridLayout()
-            financial_grid.setHorizontalSpacing(12)
-            financial_grid.setVerticalSpacing(10)
-            for column in range(4):
-                financial_grid.setColumnStretch(column, 1)
-
-            self._add_financial_card(financial_grid, 0, 0, "النقدية", financial["cash"])
-            self._add_financial_card(financial_grid, 0, 1, "البنوك", financial["banks"])
-            self._add_financial_card(financial_grid, 0, 2, "ذمم العملاء", financial["customers"])
-            self._add_financial_card(financial_grid, 0, 3, "قيمة المخزون", financial["inventory"])
-
-            self.content_layout.addLayout(financial_grid)
+            bottom = QHBoxLayout()
+            bottom.addWidget(self._dashboard_section(
+                "التنبيهات",
+                ["النوع", "العنوان", "التفاصيل", "التاريخ", "الحالة"],
+                alerts,
+            ), 1)
+            bottom.addWidget(self._dashboard_section(
+                "الأصناف منخفضة المخزون",
+                ["الباركود", "الصنف", "الرصيد الحالي", "الحد الأدنى"],
+                low,
+            ), 1)
+            self.content_layout.addLayout(bottom)
 
         except Exception as exc:
             QMessageBox.critical(self, "خطأ في لوحة التحكم", str(exc))
