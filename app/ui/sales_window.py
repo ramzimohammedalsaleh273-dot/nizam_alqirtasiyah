@@ -15,6 +15,7 @@ class SalesWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setStyleSheet(APP_STYLE)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("المبيعات والفواتير")
         self.setMinimumSize(1250, 720)
         self.setLayoutDirection(Qt.RightToLeft)
