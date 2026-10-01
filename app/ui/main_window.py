@@ -2,7 +2,7 @@ from datetime import datetime
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QPushButton, QFrame, QMessageBox, QDialog,
-    QLineEdit, QDialogButtonBox, QScrollArea, QSizePolicy,
+    QLineEdit, QDialogButtonBox, QScrollArea, QSizePolicy, QComboBox,
     QTableWidget, QTableWidgetItem, QAbstractItemView
 )
 from PySide6.QtCore import Qt, QTimer
@@ -48,7 +48,7 @@ class LoginDialog(QDialog):
         self.security = SecurityService()
         self.setWindowTitle("تسجيل الدخول — نظام القرطاسية")
         self.setStyleSheet(APP_STYLE)
-        self.setFixedSize(440, 310)
+        self.setFixedSize(440, 380)
         self.setLayoutDirection(Qt.RightToLeft)
 
         layout = QVBoxLayout(self)
@@ -76,6 +76,16 @@ class LoginDialog(QDialog):
         self.password.setMinimumHeight(42)
         layout.addWidget(self.password)
 
+        self.branch = QComboBox()
+        self.branch.addItem("الفرع الافتراضي", None)
+        try:
+            with get_session() as s:
+                for row in s.execute(text("SELECT id,name FROM branches WHERE COALESCE(is_active,1)=1 ORDER BY id")).all():
+                    self.branch.addItem(str(row[1]), int(row[0]))
+        except Exception:
+            pass
+        layout.addWidget(self.branch)
+
         self.message = QLabel("")
         self.message.setAlignment(Qt.AlignCenter)
         self.message.setWordWrap(True)
@@ -100,6 +110,12 @@ class LoginDialog(QDialog):
         if not user:
             self.message.setText("اسم المستخدم أو كلمة المرور غير صحيحة.")
             return
+        if self.branch.currentData() is not None:
+            user = dict(user)
+            user["branch_id"] = self.branch.currentData()
+            with get_session() as s:
+                branch_name = s.execute(text("SELECT name FROM branches WHERE id=:id"), {"id": self.branch.currentData()}).scalar()
+            user["branch_name"] = branch_name or "—"
         self.user = user
         self.accept()
 
