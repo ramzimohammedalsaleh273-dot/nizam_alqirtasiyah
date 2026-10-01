@@ -9,10 +9,13 @@ class SalesService:
         with get_session() as s:
             rows = s.execute(text("""
                 SELECT
-                    id, invoice_number, customer_id, subtotal,
-                    discount_amount, tax_amount, total_amount,
-                    paid_amount, due_amount, status, created_at
-                FROM sales
+                    s.id, s.invoice_number, s.customer_id, COALESCE(c.name,'نقدي') AS customer_name,
+                    COALESCE(u.username,'—') AS cashier_name, s.subtotal,
+                    s.discount_amount, s.tax_amount, s.total_amount,
+                    s.paid_amount, s.due_amount, s.status, s.created_at
+                FROM sales s
+                LEFT JOIN customers c ON c.id=s.customer_id
+                LEFT JOIN users u ON u.id=s.cashier_id
                 ORDER BY id DESC
                 LIMIT :limit
             """), {"limit": limit}).fetchall()
