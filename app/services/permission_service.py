@@ -110,8 +110,9 @@ class PermissionService:
         for code, name in cls.DEFAULTS:
             values = {"code": code, "name_ar": name, "name": name, "module": code.split(".", 1)[0]}
             fields = [k for k in ("code", "name", "name_ar", "module", "is_active") if k in permission_cols]
-            params = {k: values[k] for k in fields}
-            params["is_active"] = 1
+            params = {k: values[k] for k in fields if k != "is_active"}
+            if "is_active" in fields:
+                params["is_active"] = 1
             s.execute(
                 text(f"INSERT OR IGNORE INTO erp_permissions({",".join(fields)}) VALUES({",".join(":"+k for k in fields)})"),
                 params,
