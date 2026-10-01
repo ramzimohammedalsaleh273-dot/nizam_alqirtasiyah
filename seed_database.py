@@ -82,7 +82,7 @@ try:
     # بيانات الشركة / الفروع / المستودعات
     # =========================================================
     seed_by_columns("companies", [
-        {"name":"شركة نظام القرطاسية","tax_number":"0000000000","phone":"777000000","address":"اليمن","created_at":now},
+        {"name":"قرطاسية لؤلؤة الأربعين النموذجية","tax_number":"0000000000","phone":"777000000","address":"حي الصفا، شارع عبدالله بن سهل، جدة 23456","created_at":now},
     ])
 
     company_id = cur.execute(
@@ -91,7 +91,7 @@ try:
     company_id = company_id[0] if company_id else None
 
     seed_by_columns("branches", [
-        {"name":"الفرع الرئيسي","branch_code":"MAIN","company_id":company_id,"phone":"777000000","address":"اليمن","is_active":1,"created_at":now},
+        {"name":"الفرع الرئيسي","branch_code":"MAIN","company_id":company_id,"phone":"777000000","address":"حي الصفا، شارع عبدالله بن سهل، جدة 23456","is_active":1,"created_at":now},
     ])
 
     branch = cur.execute("SELECT id FROM branches ORDER BY id LIMIT 1").fetchone()
@@ -155,7 +155,7 @@ try:
         seed_by_columns("suppliers",[{
             "supplier_code":code,"code":code,"name":name,
             "supplier_type":"local","phone":phone,
-            "address":"اليمن","credit_limit":500000,
+            "address":"جدة","credit_limit":500000,
             "current_balance":0,"is_active":1,"created_at":now
         }])
 
@@ -189,7 +189,7 @@ try:
         seed_by_columns("customers",[{
             "customer_code":code,"code":code,"name":name,
             "customer_type":"individual","phone":phone,
-            "address":"اليمن","credit_limit":100000,
+            "address":"جدة","credit_limit":100000,
             "current_balance":0,"is_active":1,"created_at":now
         }])
 
@@ -309,9 +309,9 @@ try:
         ("system_name","نظام القرطاسية"),
         ("language","ar"),
         ("direction","rtl"),
-        ("currency","ريال يمني"),
-        ("currency_code","YER"),
-        ("country","اليمن"),
+        ("currency","ريال سعودي"),
+        ("currency_code","SAR"),
+        ("country","المملكة العربية السعودية"),
         ("timezone","Asia/Aden"),
         ("inventory_enabled","1"),
         ("accounting_enabled","1"),
