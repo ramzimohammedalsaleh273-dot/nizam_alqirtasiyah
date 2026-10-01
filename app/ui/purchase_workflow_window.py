@@ -8,7 +8,8 @@ from app.services.permission_service import PermissionService
 
 class PurchaseWorkflowWindow(QWidget):
     """واجهة تشغيلية لدورة طلبات وأوامر الشراء والاستلام."""
-    def __init__(self,parent=None):
+    def __init__(self,user=None,parent=None):
+        self.user = dict(user or {})
         super().__init__(parent)
         self.setStyleSheet(APP_STYLE)
         self.setStyleSheet(APP_STYLE)
@@ -29,6 +30,14 @@ class PurchaseWorkflowWindow(QWidget):
         self.table.setHorizontalHeaderLabels(["المعرف","النوع","الرقم","الحالة"])
         root.addWidget(self.table)
         self.load()
+
+    def _user_id(self):
+        uid = self.user.get("id") or self.user.get("user_id")
+        if uid is None:
+            uid = PermissionService.default_user_id()
+        if uid is None:
+            raise PermissionError("لا يوجد مستخدم فعّال لتنفيذ العملية")
+        return int(uid)
 
     def load(self):
         with get_session() as s:
@@ -52,7 +61,7 @@ class PurchaseWorkflowWindow(QWidget):
         qty,ok=QInputDialog.getDouble(self,"طلب شراء","الكمية:",1,0.01,999999,2)
         if not ok:return
         try:
-            PurchaseWorkflowService.create_request([{"product_id":product,"quantity":qty}], requester_id=PermissionService.default_user_id())
+            PurchaseWorkflowService.create_request([{"product_id":product,"quantity":qty}], requester_id=self._user_id())
             self.load(); QMessageBox.information(self,"تم","تم إنشاء طلب شراء فعلي وحفظه في قاعدة البيانات.")
         except Exception as e: QMessageBox.critical(self,"فشل",str(e))
 
@@ -61,7 +70,7 @@ class PurchaseWorkflowWindow(QWidget):
         if not row:return
         if row[1]!="طلب شراء": QMessageBox.warning(self,"تنبيه","اختر طلب شراء."); return
         try:
-            PurchaseWorkflowService.approve_request(int(row[0]), PermissionService.default_user_id())
+            PurchaseWorkflowService.approve_request(int(row[0]), self._user_id())
             self.load()
         except Exception as e: QMessageBox.critical(self,"فشل الاعتماد",str(e))
 
