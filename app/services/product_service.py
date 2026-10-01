@@ -50,13 +50,13 @@ class ProductService:
                 wh = s.execute(text("SELECT id FROM warehouses WHERE id=:id"), {"id": int(warehouse_id)}).scalar()
                 if wh is None:
                     raise ValueError("المستودع المحدد غير موجود")
-                stock = s.execute(text("SELECT id FROM stock WHERE product_id=:p AND warehouse_id=:w"),
+                stock = s.execute(text("SELECT id FROM stock_balances WHERE product_id=:p AND warehouse_id=:w"),
                                   {"p": product_id, "w": int(warehouse_id)}).scalar()
                 if stock:
-                    s.execute(text("UPDATE stock SET quantity=COALESCE(quantity,0)+:q, available_quantity=COALESCE(available_quantity,0)+:q, average_cost=:c, updated_at=CURRENT_TIMESTAMP WHERE id=:id"),
+                    s.execute(text("UPDATE stock_balances SET quantity=COALESCE(quantity,0)+:q, average_cost=:c, last_movement_at=CURRENT_TIMESTAMP WHERE id=:id"),
                               {"q": opening, "c": float(cost_price), "id": stock})
                 else:
-                    s.execute(text("INSERT INTO stock(product_id,warehouse_id,quantity,available_quantity,average_cost) VALUES(:p,:w,:q,:q,:c)"),
+                    s.execute(text("INSERT INTO stock_balances(product_id,warehouse_id,quantity,reserved_quantity,average_cost,last_movement_at) VALUES(:p,:w,:q,0,:c,CURRENT_TIMESTAMP)"),
                               {"p": product_id, "w": int(warehouse_id), "q": opening, "c": float(cost_price)})
                 if "stock_movements" in [r[0] for r in s.execute(text("SELECT name FROM sqlite_master WHERE type='table'")).fetchall()]:
                     cols={r[1] for r in s.execute(text("PRAGMA table_info(stock_movements)")).fetchall()}
