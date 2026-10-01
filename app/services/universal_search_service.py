@@ -113,6 +113,30 @@ class UniversalSearchService:
                          "name": f"فاتورة شراء {r.code}", "code": r.code or "",
                          "subtitle": f"الإجمالي: {float(r.total_amount or 0):.2f}"} for r in rows]
 
+            # مستندات الخزينة والمستندات العامة ضمن البحث الشامل.
+            for table, kind, label, code_col, name_col in [
+                ("cash_receipts", "receipt", "سند قبض", "receipt_number", "notes"),
+                ("cash_payments", "payment", "سند صرف", "payment_number", "notes"),
+                ("documents", "document", "مستند", "document_no", "title"),
+            ]:
+                if not cls._exists(s, table):
+                    continue
+                cols = cls._cols(s, table)
+                if code_col not in cols:
+                    continue
+                name_expr = name_col if name_col in cols else "''"
+                rows = s.execute(text(f"""
+                    SELECT id, {code_col} AS code, COALESCE({name_expr},'') AS name
+                    FROM {table}
+                    WHERE :term='' OR CAST({code_col} AS TEXT) LIKE :like
+                       OR COALESCE({name_expr},'') LIKE :like
+                       OR {cls.norm_sql("COALESCE("+name_expr+",'')")} LIKE :norm_like
+                    ORDER BY id DESC LIMIT :limit
+                """), {"term": term, "like": like, "norm_like": norm_like, "limit": limit}).fetchall()
+                out += [{"kind": kind, "kind_name": label, "id": r.id,
+                         "name": r.name or f"{label} {r.code}", "code": r.code or "",
+                         "subtitle": r.name or ""} for r in rows]
+
             return out[:limit]
 
     @classmethod
