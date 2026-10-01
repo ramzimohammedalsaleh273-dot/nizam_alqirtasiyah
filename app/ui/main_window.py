@@ -533,7 +533,19 @@ class MainWindow(QMainWindow):
 
         self.content_layout.addStretch()
 
+    def _close_other_windows(self, keep_key):
+        """يحافظ على نافذة تشغيل فرعية واحدة مفتوحة في كل مرة."""
+        for key, window in list(self._child_windows.items()):
+            if key == keep_key or window is None:
+                continue
+            try:
+                if window.isVisible():
+                    window.close()
+            except RuntimeError:
+                self._child_windows.pop(key, None)
+
     def open_window(self, key, window_class):
+        self._close_other_windows(key)
         window = self._child_windows.get(key)
         if window is None:
             try:
@@ -550,6 +562,7 @@ class MainWindow(QMainWindow):
 
     def open_data(self, table_name, title=None, columns=None, editable=True):
         key = "data:" + table_name
+        self._close_other_windows(key)
         window = self._child_windows.get(key)
         if window is None:
             window = AccessDataWindow(table_name, title, columns, editable=editable, parent=self)
