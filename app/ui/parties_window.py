@@ -16,6 +16,7 @@ class PartyDialog(QDialog):
     def __init__(self, supplier=False, groups=None, party=None, parent=None):
         super().__init__(parent)
         self.setStyleSheet(APP_STYLE)
+        self.setStyleSheet(APP_STYLE)
         self.supplier = supplier
         self.party = party or {}
         self.setWindowTitle(
