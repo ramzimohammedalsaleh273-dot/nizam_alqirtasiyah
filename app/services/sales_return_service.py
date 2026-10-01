@@ -4,6 +4,7 @@ from app.database.connection import get_session
 from app.services.accounting_service import AccountingService
 from app.services.audit_service import AuditService
 from app.services.document_number_service import DocumentNumberService
+from app.services.permission_service import PermissionService
 
 
 class SalesReturnService:
@@ -33,12 +34,15 @@ class SalesReturnService:
         """))
 
     @classmethod
-    def create_return(cls, sale_id, items, reason, refund_method=None):
+    def create_return(cls, sale_id, items, reason, refund_method=None, user_id=None):
         if not items or not str(reason or "").strip():
             raise ValueError("بنود المرتجع والسبب مطلوبان")
 
         with get_session() as s:
             try:
+                PermissionService.ensure_schema(s)
+                if user_id is None or not PermissionService.has_in_session(s, user_id, "sale.return.create"):
+                    raise PermissionError("لا توجد صلاحية لتنفيذ المرتجع")
                 cls._ensure_schema(s)
                 sale = s.execute(text("SELECT * FROM sales WHERE id=:id"), {"id": sale_id}).mappings().first()
                 if not sale:
