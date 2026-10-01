@@ -173,6 +173,9 @@ class TreasurySchemaService:
                 "SELECT 1 FROM treasury_accounts WHERE code=:code"
             ), {"code": code}).fetchone()
             if not exists:
+                table_exists = s.execute(text("SELECT 1 FROM sqlite_master WHERE type='table' AND name='accounts'")).scalar()
+                if not table_exists:
+                    continue
                 gl_exists = s.execute(text("""
                     SELECT 1 FROM accounts
                     WHERE account_code=:gl AND is_active=1 AND allow_posting=1
