@@ -61,7 +61,7 @@ class UniversalSearchService:
                     FROM {table}
                     WHERE (:term='' OR name LIKE :like OR {code} LIKE :like OR COALESCE(phone,'') LIKE :like OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(name,'أ','ا'),'إ','ا'),'آ','ا'),'ى','ي'),'ة','ه') LIKE :norm_like)
                     ORDER BY id DESC LIMIT :limit
-                """), {"term": term, "like": like, "limit": limit}).fetchall()
+                """), {"term": term, "like": like, "norm_like": norm_like, "limit": limit}).fetchall()
                 out += [{"kind": kind, "kind_name": label, "id": r.id,
                          "name": r.name, "code": r.code or "", "subtitle": r.phone or r.code or ""}
                         for r in rows]
