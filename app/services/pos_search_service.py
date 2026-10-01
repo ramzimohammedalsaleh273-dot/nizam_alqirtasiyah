@@ -23,10 +23,10 @@ class POSProductSearch:
                     p.name_en,
                     p.sale_price,
                     COALESCE(st.quantity,0) AS stock,
-                    COALESCE(st.available_quantity,0) AS available_quantity,
+                    COALESCE(st.quantity-st.reserved_quantity,0) AS available_quantity,
                     COALESCE(pb.barcode,'') AS barcode
                 FROM products p
-                LEFT JOIN stock st
+                LEFT JOIN stock_balances st
                     ON st.product_id=p.id AND st.warehouse_id=?
                 LEFT JOIN product_barcodes pb
                     ON pb.product_id=p.id AND pb.is_primary=1
