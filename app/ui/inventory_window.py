@@ -198,7 +198,7 @@ class InventoryWindow(QWidget):
                     warehouse.addItem(str(r["name"]), int(r["id"]))
         except Exception:
             warehouse.addItem("المستودع الافتراضي",1)
-        cost.setValue(float(self.table.item(row,4).text() or 0)); sale.setValue(float(self.table.item(row,5).text() or 0))
+        cost.setValue(float(self.table.item(row,6).text() or 0)); sale.setValue(float(self.table.item(row,7).text() or 0))
         quantity.setValue(0)
         def load_selected_warehouse_quantity():
             try:
