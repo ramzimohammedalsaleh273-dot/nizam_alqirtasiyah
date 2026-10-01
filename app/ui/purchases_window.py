@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QPushButton,QHBoxLayout,QLabel,QMessageBox,QLineEdit,QHeaderView,QAbstractItemView
 )
 from app.services.purchase_service import PurchaseService
+from app.ui.purchase_invoice_window import PurchaseInvoiceWindow
 
 class PurchasesWindow(QWidget):
 
@@ -82,24 +83,12 @@ class PurchasesWindow(QWidget):
 
         invoice_number=self.table.item(row,0).text()
         invoice=next((x for x in PurchaseService.list_purchases() if str(x.get("invoice_number"))==invoice_number),None)
-        invoice_id=int(invoice["id"]) if invoice else 0
-        invoice=PurchaseService.get_purchase(invoice_id)
-
         if not invoice:
+            QMessageBox.warning(self,"تنبيه","الفاتورة غير موجودة.")
             return
-
-        text=f"الفاتورة: {invoice['invoice_number']}\n"
-        text+=f"الإجمالي: {invoice['total_amount']}\n\n"
-
-        for item in invoice["items"]:
-            text+=(
-                f"{item['name_ar']} | "
-                f"الكمية: {item['quantity']} | "
-                f"التكلفة: {item['unit_cost']}\n"
-            )
-
-        QMessageBox.information(
-            self,"تفاصيل فاتورة الشراء",text
-        )
+        window=PurchaseInvoiceWindow(self, int(invoice["id"]))
+        window.show()
+        window.raise_()
+        window.activateWindow()
 
 # UI reference theme is applied by the main application shell.
