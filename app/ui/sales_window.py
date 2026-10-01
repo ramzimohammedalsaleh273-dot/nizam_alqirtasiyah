@@ -15,40 +15,11 @@ class SalesWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setStyleSheet(APP_STYLE)
-        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("المبيعات والفواتير")
         self.setMinimumSize(1250, 720)
         self.setLayoutDirection(Qt.RightToLeft)
 
-        self.setStyleSheet("""
-            QWidget { font-size:14px; }
-            QTableWidget {
-                background:#0D1B2A;
-                color:#F4F7FB;
-                gridline-color:#29435C;
-                border:1px solid #29435C;
-                border-radius:10px;
-                selection-background-color:#244E72;
-                selection-color:#FFFFFF;
-            }
-            QTableWidget::item { padding:8px; }
-            QHeaderView::section {
-                background:#13263D;
-                color:#FFFFFF;
-                padding:9px;
-                border:0;
-                border-bottom:1px solid #29435C;
-                font-weight:700;
-            }
-            QLineEdit {
-                background:#0E1C2D;
-                color:#FFFFFF;
-                border:1px solid #29445F;
-                border-radius:8px;
-                padding:10px;
-            }
-            QPushButton { padding:9px 14px; min-height:36px; }
-        """)
+        self.setStyleSheet(APP_STYLE)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
