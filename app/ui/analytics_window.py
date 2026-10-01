@@ -20,7 +20,7 @@ class AnalyticsWindow(QWidget):
             sales=s.execute(text("SELECT COUNT(*),COALESCE(SUM(total_amount),0),COALESCE(SUM(paid_amount),0) FROM sales WHERE status='POSTED' AND date(created_at) BETWEEN :f AND :t"),{"f":f,"t":t}).one()
             purchases=s.execute(text("SELECT COUNT(*),COALESCE(SUM(total_amount),0) FROM purchase_invoices WHERE date(invoice_date) BETWEEN :f AND :t"),{"f":f,"t":t}).one()
             top=s.execute(text("SELECT p.name_ar,COALESCE(SUM(si.quantity),0),COALESCE(SUM(si.line_total),0) FROM sale_items si JOIN sales s ON s.id=si.sale_id JOIN products p ON p.id=si.product_id WHERE s.status='POSTED' AND date(s.created_at) BETWEEN :f AND :t GROUP BY p.id,p.name_ar ORDER BY SUM(si.quantity) DESC LIMIT 5"),{"f":f,"t":t}).all()
-            stock=s.execute(text("SELECT COUNT(*),COALESCE(SUM(quantity*average_cost),0) FROM stock")).one()
+            stock=s.execute(text("SELECT COUNT(*),COALESCE(SUM(quantity*average_cost),0) FROM stock_balances")).one()
             customers=s.execute(text("SELECT COUNT(*),COALESCE(SUM(current_balance),0) FROM customers")).one()
         rows=[
             ("المبيعات",sales[0],sales[1],(float(sales[1])/(sales[0] or 1)),f"المدفوع: {float(sales[2]):,.2f}"),
