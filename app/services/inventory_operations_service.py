@@ -34,10 +34,26 @@ class InventoryOperationsService:
         if q<0: raise ValueError("الكمية لا يمكن أن تكون سالبة")
         with get_session() as s:
             try:
-                row=s.execute(text("SELECT quantity,available_quantity,average_cost FROM stock WHERE product_id=:p AND warehouse_id=:w"),{"p":product_id,"w":warehouse_id}).fetchone()
+                row=s.execute(text("""
+                    SELECT quantity,reserved_quantity,average_cost
+                    FROM stock_balances
+                    WHERE product_id=:p AND warehouse_id=:w
+                    LIMIT 1
+                """),{"p":product_id,"w":warehouse_id}).fetchone()
                 old=Decimal(str((row.quantity if row else 0) or 0));delta=q-old
-                if row:s.execute(text("UPDATE stock_balances SET quantity=:q,last_movement_at=CURRENT_TIMESTAMP WHERE product_id=:p AND warehouse_id=:w"),{"q":float(q),"p":product_id,"w":warehouse_id})
-                else:s.execute(text("INSERT INTO stock(product_id,warehouse_id,quantity,available_quantity,average_cost) VALUES(:p,:w,:q,:q,0)"),{"p":product_id,"w":warehouse_id,"q":float(q)})
+                if row:
+                    if q < Decimal(str(row.reserved_quantity or 0)):
+                        raise ValueError("لا يمكن أن يصبح المخزون أقل من الكمية المحجوزة")
+                    s.execute(text("""
+                        UPDATE stock_balances
+                        SET quantity=:q,last_movement_at=CURRENT_TIMESTAMP
+                        WHERE product_id=:p AND warehouse_id=:w
+                    """),{"q":float(q),"p":product_id,"w":warehouse_id})
+                else:
+                    s.execute(text("""
+                        INSERT INTO stock_balances(product_id,warehouse_id,quantity,reserved_quantity,average_cost,last_movement_at)
+                        VALUES(:p,:w,:q,0,0,CURRENT_TIMESTAMP)
+                    """),{"p":product_id,"w":warehouse_id,"q":float(q)})
                 cols=cls._cols(s,"stock_movements");f=["product_id","warehouse_id","quantity"];v=[":p",":w",":q"];d={"p":product_id,"w":warehouse_id,"q":float(delta)}
                 if "movement_type" in cols:f.append("movement_type");v.append("'ADJUSTMENT'")
                 if "notes" in cols:f.append("notes");v.append(":n");d["n"]=reason
