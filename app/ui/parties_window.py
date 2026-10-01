@@ -241,10 +241,10 @@ class PartiesWindow(QWidget):
 
     @staticmethod
     def _table():
-        table = QTableWidget(0, 9)
+        table = QTableWidget(0, 8)
         table.setHorizontalHeaderLabels([
-            "المعرف", "الكود", "الاسم", "النوع", "المجموعة",
-            "الهاتف", "البريد", "حد الائتمان", "الرصيد"
+            "رقم", "الكود", "الاسم", "النوع", "الهاتف",
+            "الجوال", "حد الائتمان", "الرصيد"
         ])
         table.setSelectionBehavior(QAbstractItemView.SelectRows)
         table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -265,9 +265,8 @@ class PartiesWindow(QWidget):
                 row_data.get("party_code"),
                 row_data.get("name"),
                 {"individual":"فرد","company":"شركة","school":"مدرسة","government":"جهة حكومية","local":"محلي","international":"دولي","manufacturer":"مصنّع","distributor":"موزع"}.get(str(row_data.get("party_type") or ""), row_data.get("party_type") or ""),
-                row_data.get("group_name") or "",
                 row_data.get("phone") or "",
-                row_data.get("email") or "",
+                row_data.get("mobile") or "",
                 f'{float(row_data.get("credit_limit") or 0):.2f}',
                 f'{float(row_data.get("current_balance") or 0):.2f}',
             ]
