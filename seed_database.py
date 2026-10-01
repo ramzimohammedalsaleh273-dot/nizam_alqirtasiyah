@@ -1,7 +1,7 @@
 ﻿import sqlite3, os, shutil, json, datetime, random
 
-DB = r"database\nizam_alqirtasiyah.db"
-BACKUP_DIR = r"database\backups"
+DB = os.path.join("database", "nizam_alqirtasiyah.db")
+BACKUP_DIR = os.path.join("database", "backups")
 os.makedirs(BACKUP_DIR, exist_ok=True)
 
 stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
