@@ -1,3 +1,4 @@
+from app.ui.theme import APP_STYLE
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
     QInputDialog, QMessageBox, QTableWidget, QTableWidgetItem
@@ -9,6 +10,7 @@ from app.services.permission_service import PermissionService
 class TreasuryAccountsWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("حسابات الخزينة والبنوك")
         self.setMinimumSize(1000, 650)
         layout = QVBoxLayout(self)
@@ -118,3 +120,5 @@ class TreasuryAccountsWindow(QWidget):
             QMessageBox.information(self, "كشف الحساب", "\n".join(lines))
         except Exception as exc:
             QMessageBox.critical(self, "فشل كشف الحساب", str(exc))
+
+# UI reference theme is applied by the main application shell.
