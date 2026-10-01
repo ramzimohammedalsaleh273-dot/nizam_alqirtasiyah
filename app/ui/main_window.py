@@ -45,6 +45,7 @@ class LoginDialog(QDialog):
         self.user = None
         self.security = SecurityService()
         self.setWindowTitle("تسجيل الدخول — نظام القرطاسية")
+        self.setStyleSheet(APP_STYLE)
         self.setFixedSize(440, 310)
         self.setLayoutDirection(Qt.RightToLeft)
 
@@ -579,6 +580,7 @@ def run():
 
     app = QApplication(sys.argv)
     app.setLayoutDirection(Qt.RightToLeft)
+    app.setStyleSheet(APP_STYLE)
 
     login = LoginDialog()
     if login.exec() != QDialog.Accepted:
