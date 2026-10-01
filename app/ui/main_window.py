@@ -29,6 +29,7 @@ from app.ui.treasury_accounts_window import TreasuryAccountsWindow
 from app.ui.smart_operations_window import SmartOperationsWindow
 from app.database.connection import get_session
 from app.services.treasury_schema_service import TreasurySchemaService
+from app.services.reference_compatibility_service import ReferenceCompatibilityService
 from app.ui.theme import APP_STYLE
 from app.ui.access_data_window import AccessDataWindow
 
@@ -111,6 +112,7 @@ class MainWindow(QMainWindow):
     def _bootstrap_operational_schema(self):
         with get_session() as session:
             TreasurySchemaService.ensure(session)
+            ReferenceCompatibilityService.ensure(session)
             session.commit()
 
     def build_ui(self):
@@ -241,6 +243,7 @@ class MainWindow(QMainWindow):
                 ("دليل الحسابات", lambda: self.open_data("accounts", "دليل الحسابات")),
                 ("الصناديق", lambda: self.open_data("cash_registers", "الصناديق")),
                 ("الضرائب", lambda: self.open_data("tax_rates", "الضرائب")),
+                ("المصروفات", lambda: self.open_data("expenses", "المصروفات")),
                 ("الفترات المالية", lambda: self.open_data("fiscal_periods", "الفترات المالية")),
             ]),
             ("الإدارة والرقابة", [
@@ -251,6 +254,8 @@ class MainWindow(QMainWindow):
                 ("الأدوار والصلاحيات", lambda: self.open_data("roles", "الأدوار")),
                 ("التقارير والتحليلات", self.open_reports),
                 ("التنبيهات", self.open_smart_operations),
+                ("الخدمات والطباعة", lambda: self.open_data("printing_services", "خدمات الطباعة")),
+                ("طلبات الطباعة", lambda: self.open_data("printing_orders", "طلبات الطباعة")),
                 ("المستندات", lambda: self.open_data("documents", "المستندات")),
                 ("سجل التدقيق", lambda: self.open_data("audit_logs", "سجل التدقيق", editable=False)),
                 ("المزامنة", lambda: self.open_data("sync_queue", "طابور المزامنة", editable=False)),
