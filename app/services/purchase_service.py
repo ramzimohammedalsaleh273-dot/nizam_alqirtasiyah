@@ -12,7 +12,12 @@ class PurchaseService:
     @staticmethod
     def list_purchases(limit=100):
         with get_session() as s:
-            return [dict(r._mapping) for r in s.execute(text("SELECT pi.* FROM purchase_invoices pi ORDER BY pi.id DESC LIMIT :limit"),{"limit":limit}).fetchall()]
+            return [dict(r._mapping) for r in s.execute(text("""
+                SELECT pi.*, COALESCE(s.name,'—') AS supplier_name
+                FROM purchase_invoices pi
+                LEFT JOIN suppliers s ON s.id=pi.supplier_id
+                ORDER BY pi.id DESC LIMIT :limit
+            """),{"limit":limit}).fetchall()]
     @classmethod
     def get_purchase(cls,invoice_id):
         with get_session() as s:
