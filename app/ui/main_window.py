@@ -134,6 +134,11 @@ class MainWindow(QMainWindow):
 
     def _bootstrap_operational_schema(self):
         with get_session() as session:
+            tables={row[0] for row in session.execute(text("SELECT name FROM sqlite_master WHERE type='table'")).all()}
+            # عند أول تشغيل على نسخة بلا قاعدة بيانات مكتملة لا نحاول تنفيذ خدمات
+            # تعتمد على الحسابات؛ القاعدة التشغيلية الموجودة تستمر كالمعتاد.
+            if "accounts" not in tables:
+                return
             TreasurySchemaService.ensure(session)
             ReferenceCompatibilityService.ensure(session)
             session.commit()
