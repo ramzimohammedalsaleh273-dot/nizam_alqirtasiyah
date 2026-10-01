@@ -10,10 +10,10 @@ class SettingsWindow(QWidget):
         root=QVBoxLayout(self); h=QHBoxLayout(); t=QLabel("إعدادات النظام"); t.setObjectName("SectionTitle"); h.addWidget(t); h.addStretch(); save=QPushButton("حفظ الإعدادات"); save.setObjectName("Success"); save.clicked.connect(self.save); h.addWidget(save); root.addLayout(h)
         self.tabs=QTabWidget(); root.addWidget(self.tabs,1); self.fields={}
         self._tab("المنشأة",[("company_name","اسم المنشأة"),("company_address","العنوان"),("company_phone","الهاتف"),("company_email","البريد"),("company_tax","الرقم الضريبي")])
-        self._tab("النظام",[("language","اللغة"),("direction","اتجاه RTL"),("base_currency","العملة"),("default_tax_rate","الضريبة"),("date_format","تنسيق التاريخ"),("time_format","تنسيق الوقت")])
-        self._tab("المبيعات",[("default_price","سعر البيع الافتراضي"),("credit_sales_enabled","السماح بالبيع الآجل"),("customer_credit_limit_enabled","تفعيل حد الائتمان")])
-        self._tab("المخزون",[("min_stock","الحد الأدنى"),("negative_stock_allowed","السماح بالمخزون السالب"),("stocktake_enabled","تفعيل الجرد")])
-        self._tab("الطباعة",[("printer_name","الطابعة"),("paper_size","مقاس الورق"),("invoice_template","قالب الفاتورة")])
+        self._tab("النظام",[("language","اللغة"),("direction","اتجاه RTL"),("base_currency","العملة"),("default_tax_rate","الضريبة"),("number_format","تنسيق الأرقام"),("date_format","تنسيق التاريخ"),("time_format","تنسيق الوقت")])
+        self._tab("المبيعات",[("default_price","سعر البيع الافتراضي"),("credit_sales_enabled","السماح بالبيع الآجل"),("customer_credit_limit_enabled","تفعيل حد الائتمان"),("price_override_requires_permission","تعديل السعر يتطلب صلاحية"),("discount_requires_permission","تعديل الخصم يتطلب صلاحية")])
+        self._tab("المخزون",[("min_stock","الحد الأدنى"),("negative_stock_allowed","السماح بالمخزون السالب"),("stocktake_enabled","تفعيل الجرد"),("units_enabled","تفعيل الوحدات")])
+        self._tab("الطباعة",[("printer_name","الطابعة"),("paper_size","مقاس الورق"),("invoice_template","قالب الفاتورة"),("invoice_customer_copy","نسخة العميل"),("company_logo_path","مسار الشعار")])
         self._tab("الأمان",[("session_minutes","مدة الجلسة بالدقائق"),("max_login_attempts","محاولات الدخول"),("password_policy","سياسة كلمة المرور")])
         self.load()
     def _tab(self,title,items):
