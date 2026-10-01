@@ -8,12 +8,25 @@ class POSProductSearch:
         self.db_path = db_path
         self.warehouse_id = int(warehouse_id)
 
+    @staticmethod
+    def normalize(value):
+        value = str(value or "").strip()
+        for a, b in (("أ", "ا"), ("إ", "ا"), ("آ", "ا"), ("ى", "ي"), ("ة", "ه")):
+            value = value.replace(a, b)
+        return value
+
+    @staticmethod
+    def normalized_sql(expr):
+        return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE("+expr+",'أ','ا'),'إ','ا'),'آ','ا'),'ى','ي'),'ة','ه')"
+
     def search(self, text):
         text = (text or "").strip()
+        normalized = self.normalize(text)
         con = sqlite3.connect(self.db_path)
         con.row_factory = sqlite3.Row
         try:
             like = f"%{text}%"
+            normalized_like = f"%{normalized}%"
             rows = con.execute(
                 """
                 SELECT
@@ -40,6 +53,9 @@ class POSProductSearch:
                     OR p.name_en LIKE ?
                     OR p.sku LIKE ?
                     OR pb.barcode LIKE ?
+                    OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(p.name_ar,'أ','ا'),'إ','ا'),'آ','ا'),'ى','ي'),'ة','ه') LIKE ?
+                    OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(p.name_en,'أ','ا'),'إ','ا'),'آ','ا'),'ى','ي'),'ة','ه') LIKE ?
+                    OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(p.sku,'أ','ا'),'إ','ا'),'آ','ا'),'ى','ي'),'ة','ه') LIKE ?
                   )
                 ORDER BY
                     CASE
@@ -55,7 +71,7 @@ class POSProductSearch:
                 (
                     self.warehouse_id,
                     text, text, text, text,
-                    like, like, like, like,
+                    like, like, like, like, normalized_like, normalized_like, normalized_like,
                     text, text, text, text, text, text, text, text,
                 ),
             ).fetchall()
