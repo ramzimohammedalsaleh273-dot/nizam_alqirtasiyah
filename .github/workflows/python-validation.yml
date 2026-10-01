@@ -22,13 +22,13 @@ jobs:
         run: python scripts/reference_spec_audit.py
       - name: Install Qt runtime libraries
         run: sudo apt-get update -qq && sudo apt-get install -y libegl1 libxkbcommon-x11-0
-      - name: Headless UI smoke test
-        env:
-          QT_QPA_PLATFORM: offscreen
-        run: python scripts/headless_ui_smoke.py
       - name: Prepare test database
         run: |
           python -c "from app.database.connection import get_session; from app.database.schema_bootstrap import ensure_reference_schema; s=get_session(); ensure_reference_schema(s); s.commit(); s.close()"
           python seed_database.py
+      - name: Headless UI smoke test
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python scripts/headless_ui_smoke.py
       - name: Test suite
         run: pytest -q
