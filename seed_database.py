@@ -262,7 +262,7 @@ try:
     for code,name,cat,cost,sale in products:
         seed_by_columns("products",[{
             "product_code":code,"sku":code,"code":code,
-            "name":name,"product_name":name,
+            "name_ar":name,"name":name,"product_name":name,
             "category_name":cat,"unit":"قطعة",
             "cost_price":cost,"purchase_price":cost,
             "sale_price":sale,"selling_price":sale,
@@ -272,8 +272,36 @@ try:
         }])
 
     # =========================================================
+    # الحسابات المحاسبية الأساسية
+    # =========================================================
+    account_seed = [
+        ("1100","الصندوق","ASSET"),("1200","البنوك","ASSET"),("1300","العملاء","ASSET"),
+        ("1400","المخزون","ASSET"),("1500","ضريبة مدخلات","ASSET"),("2100","الموردون","LIABILITY"),
+        ("2200","ضريبة مخرجات","LIABILITY"),("4100","مبيعات القرطاسية","REVENUE"),
+        ("5100","تكلفة البضاعة المباعة","EXPENSE"),
+    ]
+    for code,name,kind in account_seed:
+        seed_by_columns("accounts",[{
+            "account_code":code,"account_name":name,"account_type":kind,
+            "is_active":1,"allow_posting":1,"opening_balance":0,"created_at":now
+        }])
+
+    # =========================================================
     # مخزون أساسي للمنتجات الموجودة
     # =========================================================
+    if "stock_balances" in tables() and warehouse_id:
+        for p in cur.execute("SELECT id,cost_price FROM products ORDER BY id LIMIT 100").fetchall():
+            seed_by_columns("stock_balances",[{
+                "product_id":p[0],"warehouse_id":warehouse_id,"quantity":50,
+                "reserved_quantity":0,"average_cost":p[1] or 0,"last_movement_at":now
+            }])
+
+    if "product_barcodes" in tables():
+        for p in cur.execute("SELECT id,sku FROM products ORDER BY id LIMIT 100").fetchall():
+            seed_by_columns("product_barcodes",[{
+                "product_id":p[0],"barcode":"628000"+f"{p[0]:06d}","is_primary":1
+            }])
+
     if "stock" in tables():
         pc = cols("stock")
         ptab = "products"
@@ -288,6 +316,65 @@ try:
             if "min_stock" in pc: data["min_stock"]=5
             if "max_stock" in pc: data["max_stock"]=100
             if data: insert_safe("stock",data)
+
+    # رفع بيانات الاختبار إلى حجم عملي مفيد دون تكرار السجلات الموجودة.
+    for i in range(21, 29):
+        seed_by_columns("customers",[{
+            "customer_code":f"CUS-{i:03d}","name":f"عميل تجريبي {i}",
+            "customer_type":"individual","phone":f"7772{i:05d}",
+            "address":"جدة","credit_limit":100000,"current_balance":0,"is_active":1,"created_at":now
+        }])
+    for i in range(11, 19):
+        seed_by_columns("suppliers",[{
+            "supplier_code":f"SUP-{i:03d}","name":f"مورد تجريبي {i}",
+            "supplier_type":"local","phone":f"7771{i:05d}",
+            "address":"جدة","credit_limit":500000,"current_balance":0,"is_active":1,"created_at":now
+        }])
+
+    # =========================================================
+    # معاملات تشغيلية تجريبية مترابطة للمراجعة والاختبار
+    # =========================================================
+    if branch_id and warehouse_id:
+        product_rows = cur.execute("SELECT id,cost_price,sale_price FROM products ORDER BY id LIMIT 8").fetchall()
+        customer_rows = cur.execute("SELECT id FROM customers ORDER BY id LIMIT 4").fetchall()
+        supplier_rows = cur.execute("SELECT id FROM suppliers ORDER BY id LIMIT 6").fetchall()
+        if product_rows and customer_rows and supplier_rows:
+            for n in range(1,5):
+                exists = cur.execute("SELECT id FROM sales WHERE invoice_number=?", (f"DEMO-SAL-{n:04d}",)).fetchone()
+                if not exists:
+                    pid,cost,sale = product_rows[(n-1)%len(product_rows)]
+                    subtotal=float(sale or 0)*2
+                    tax=round(subtotal*0.15,2)
+                    total=round(subtotal+tax,2)
+                    cur.execute("""INSERT INTO sales
+                        (invoice_number,branch_id,warehouse_id,customer_id,cashier_id,status,subtotal,discount_amount,tax_amount,total_amount,paid_amount,due_amount,notes,created_at)
+                        VALUES(?,?,?,?,NULL,'POSTED',?,0,?,?,?,0,?,?)""",
+                        (f"DEMO-SAL-{n:04d}",branch_id,warehouse_id,customer_rows[n-1][0],subtotal,tax,total,total,
+                         "بيانات تشغيل تجريبية",now))
+                    sid=cur.lastrowid
+                    cur.execute("""INSERT INTO sale_items
+                        (sale_id,product_id,quantity,unit_price,discount_amount,tax_amount,line_total)
+                        VALUES(?,?,?,?,0,?,?)""",
+                        (sid,pid,2,float(sale or 0),tax,total))
+                    cur.execute("""INSERT INTO sale_payments
+                        (sale_id,payment_method,amount,reference_number,notes)
+                        VALUES(?,?,?,?,?)""",(sid,"cash",total,f"DEMO-PAY-{n:04d}","دفع تجريبي"))
+            for n in range(1,7):
+                exists = cur.execute("SELECT id FROM purchase_invoices WHERE invoice_number=?", (f"DEMO-PUR-{n:04d}",)).fetchone()
+                if not exists:
+                    pid,cost,sale = product_rows[(n-1)%len(product_rows)]
+                    subtotal=float(cost or 0)*5
+                    tax=round(subtotal*0.15,2)
+                    total=round(subtotal+tax,2)
+                    cur.execute("""INSERT INTO purchase_invoices
+                        (invoice_number,supplier_id,subtotal,tax_amount,total_amount,paid_amount,due_amount,status,invoice_date)
+                        VALUES(?,?,?,?,?,?,?,'POSTED',CURRENT_DATE)""",
+                        (f"DEMO-PUR-{n:04d}",supplier_rows[n-1][0],subtotal,tax,total,total,0))
+                    iid=cur.lastrowid
+                    cur.execute("""INSERT INTO purchase_invoice_items
+                        (invoice_id,product_id,quantity,unit_cost,tax_amount,line_total)
+                        VALUES(?,?,?,?,?,?)""",
+                        (iid,pid,5,float(cost or 0),tax,total))
 
     # =========================================================
     # الضرائب
