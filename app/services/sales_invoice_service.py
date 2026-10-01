@@ -36,7 +36,7 @@ class SalesInvoiceService:
         returns = []
         if cls._exists(s, "sale_returns"):
             returns = s.execute(text("""
-                SELECT id,return_number,subtotal,tax_amount,total_amount,reason,status,created_at
+                SELECT id,return_number,total_amount,reason,status,created_at
                 FROM sale_returns WHERE sale_id=:id ORDER BY id
             """), {"id": sale_id}).mappings().all()
         return_items = []
