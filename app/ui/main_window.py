@@ -30,6 +30,7 @@ from app.ui.smart_operations_window import SmartOperationsWindow
 from app.database.connection import get_session
 from app.services.treasury_schema_service import TreasurySchemaService
 from app.ui.theme import APP_STYLE
+from app.ui.access_data_window import AccessDataWindow
 
 
 class LoginDialog(QDialog):
@@ -164,8 +165,8 @@ class MainWindow(QMainWindow):
             ("المبيعات", self.open_sales),
             ("المشتريات", self.open_purchases),
             ("المخزون", self.open_inventory),
-            ("العملاء", self.open_parties),
-            ("الموردون", self.open_parties),
+            ("العملاء", lambda: self.open_data("customers", "العملاء")),
+            ("الموردون", lambda: self.open_data("suppliers", "الموردون")),
             ("المالية", self.open_treasury),
             ("المحاسبة", self.open_accounting),
             ("التقارير", self.open_reports),
@@ -224,20 +225,32 @@ class MainWindow(QMainWindow):
                 ("مرتجعات المشتريات", self.open_purchase_returns),
             ]),
             ("المخزون والأطراف", [
-                ("المنتجات والمخزون", self.open_inventory),
-                ("العملاء", self.open_parties),
-                ("الموردون", self.open_parties),
+                ("المنتجات", lambda: self.open_data("products", "المنتجات")),
+                ("التصنيفات", lambda: self.open_data("product_categories", "التصنيفات")),
+                ("الوحدات", lambda: self.open_data("units", "الوحدات")),
+                ("المستودعات", lambda: self.open_data("warehouses", "المستودعات")),
+                ("المخزون وحركاته", self.open_inventory),
+                ("الجرد", lambda: self.open_data("stocktakes", "الجرد")),
+                ("العملاء", lambda: self.open_data("customers", "العملاء")),
+                ("الموردون", lambda: self.open_data("suppliers", "الموردون")),
             ]),
             ("المالية", [
                 ("الخزينة", self.open_treasury),
                 ("البنوك والحسابات", self.open_treasury_accounts),
                 ("المحاسبة العامة", self.open_accounting),
+                ("دليل الحسابات", lambda: self.open_data("accounts", "دليل الحسابات")),
+                ("الصناديق", lambda: self.open_data("cash_registers", "الصناديق")),
+                ("الضرائب", lambda: self.open_data("tax_rates", "الضرائب")),
             ]),
             ("الإدارة والرقابة", [
-                ("الموظفون", self.open_employees),
+                ("الموظفون", lambda: self.open_data("employees", "الموظفون")),
+                ("المستخدمون", lambda: self.open_data("users", "المستخدمون")),
+                ("الأدوار والصلاحيات", lambda: self.open_data("roles", "الأدوار")),
                 ("التقارير والتحليلات", self.open_reports),
                 ("التنبيهات", self.open_smart_operations),
-                ("المستندات", self.open_enterprise_tools),
+                ("المستندات", lambda: self.open_data("documents", "المستندات")),
+                ("سجل التدقيق", lambda: self.open_data("audit_logs", "سجل التدقيق", editable=False)),
+                ("المزامنة", lambda: self.open_data("sync_queue", "طابور المزامنة", editable=False)),
                 ("النسخ الاحتياطي", self.open_backup),
                 ("الإعدادات", self.open_settings),
                 ("صحة النظام", self.open_health),
@@ -470,6 +483,16 @@ class MainWindow(QMainWindow):
         window = self._child_windows.get(key)
         if window is None:
             window = window_class()
+            self._child_windows[key] = window
+        window.show()
+        window.raise_()
+        window.activateWindow()
+
+    def open_data(self, table_name, title=None, columns=None, editable=True):
+        key = "data:" + table_name
+        window = self._child_windows.get(key)
+        if window is None:
+            window = AccessDataWindow(table_name, title, columns, editable=editable)
             self._child_windows[key] = window
         window.show()
         window.raise_()
