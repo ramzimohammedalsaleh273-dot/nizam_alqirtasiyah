@@ -51,7 +51,7 @@ class InventoryService:
                     COALESCE(st.quantity-st.reserved_quantity,0) available_quantity,
                     COALESCE(st.average_cost,0) average_cost
                 FROM products p
-                LEFT JOIN stock st ON st.product_id=p.id AND st.warehouse_id=:warehouse_id
+                LEFT JOIN stock_balances st ON st.product_id=p.id AND st.warehouse_id=:warehouse_id
                 WHERE p.id=:id
             """),{"id":product_id,"warehouse_id":warehouse_id}).fetchone()
 
@@ -73,9 +73,9 @@ class InventoryService:
                 SELECT p.id,p.sku,p.name_ar,p.reorder_point,p.min_stock,
                        COALESCE(st.quantity-st.reserved_quantity,0) AS available_quantity
                 FROM products p
-                LEFT JOIN stock st ON st.product_id=p.id
+                LEFT JOIN stock_balances st ON st.product_id=p.id
                 WHERE p.is_active=1
-                  AND COALESCE(st.available_quantity,0) <= COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)
+                  AND COALESCE(st.quantity-st.reserved_quantity,0) <= COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)
                 ORDER BY available_quantity ASC,p.id
                 LIMIT :limit
             """),{"limit":limit}).fetchall()
