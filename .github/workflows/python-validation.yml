@@ -30,5 +30,9 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: python scripts/headless_ui_smoke.py
+      - name: Enterprise acceptance
+        run: python scripts/run_enterprise_acceptance.py
+      - name: Operational acceptance
+        run: python scripts/run_acceptance_check.py
       - name: Test suite
         run: pytest -q
