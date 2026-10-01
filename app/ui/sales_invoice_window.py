@@ -151,11 +151,17 @@ class SalesInvoiceWindow(QWidget):
         self.payments = self._table(["طريقة الدفع", "المبلغ", "التاريخ"])
         self.returns = self._table(["رقم المرتجع", "المبلغ", "السبب", "الحالة", "التاريخ"])
         self.history = self._table(["التاريخ", "الإجراء"])
+        self.tax = self._table(["الضريبة", "القيمة"])
+        self.accounting = self._table(["رقم القيد", "التاريخ", "الحساب", "مدين", "دائن", "الحالة"])
+        self.documents = self._table(["رقم المستند", "العنوان", "النوع", "الملف", "التاريخ"])
 
         self.tabs.addTab(self.items, "الأصناف")
-        self.tabs.addTab(self.payments, "المدفوعات")
+        self.tabs.addTab(self.payments, "الدفع")
+        self.tabs.addTab(self.tax, "الضريبة")
+        self.tabs.addTab(self.accounting, "المحاسبة")
+        self.tabs.addTab(self.documents, "المستندات")
         self.tabs.addTab(self.returns, "المرتجعات")
-        self.tabs.addTab(self.history, "السجل والتدقيق")
+        self.tabs.addTab(self.history, "سجل التعديلات")
         root.addWidget(self.tabs, 1)
 
         totals_title = QLabel("ملخص الفاتورة")
@@ -315,6 +321,32 @@ class SalesInvoiceWindow(QWidget):
                     x.get("created_at"),
                 )
                 for x in self.data["payments"]
+            ],
+        )
+
+        self._fill(
+            self.tax,
+            [("قبل الضريبة", money(sale.get("subtotal"))),
+             ("الخصم", money(sale.get("discount_amount"))),
+             ("الضريبة", money(sale.get("tax_amount"))),
+             ("الإجمالي شامل الضريبة", money(sale.get("total_amount")))],
+        )
+
+        self._fill(
+            self.accounting,
+            [
+                (x.get("entry_number"), x.get("entry_date"), x.get("account_name"),
+                 money(x.get("debit")), money(x.get("credit")), self.status_ar(x.get("status")))
+                for x in self.data.get("journal", [])
+            ],
+        )
+
+        self._fill(
+            self.documents,
+            [
+                (x.get("document_no"), x.get("title"), x.get("document_type"),
+                 x.get("file_name") or x.get("file_path"), x.get("created_at"))
+                for x in self.data.get("documents", [])
             ],
         )
 
