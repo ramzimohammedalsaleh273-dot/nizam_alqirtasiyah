@@ -4,6 +4,7 @@ from app.database.connection import get_session
 from app.services.accounting_service import AccountingService
 from app.services.audit_service import AuditService
 from app.services.document_number_service import DocumentNumberService
+from app.services.permission_service import PermissionService
 
 
 class PurchaseReturnService:
@@ -33,7 +34,7 @@ class PurchaseReturnService:
 
     @classmethod
     def create_return(cls, purchase_id, items, reason="إرجاع مشتريات",
-                      refund_method="credit", warehouse_id=None):
+                      refund_method="credit", warehouse_id=None, user_id=None):
         if not items:
             raise ValueError("لا توجد أصناف للإرجاع")
         if refund_method not in {"credit","cash","bank","bank_transfer","card"}:
@@ -41,6 +42,9 @@ class PurchaseReturnService:
 
         with get_session() as s:
             try:
+                PermissionService.ensure_schema(s)
+                if user_id is None or not PermissionService.has_in_session(s, user_id, "purchase.return.create"):
+                    raise PermissionError("لا توجد صلاحية لتنفيذ المرتجع")
                 cls._ensure_schema(s)
                 invoice=s.execute(text("SELECT * FROM purchase_invoices WHERE id=:id LIMIT 1"),{"id":purchase_id}).mappings().first()
                 if not invoice: raise ValueError("فاتورة الشراء غير موجودة")
