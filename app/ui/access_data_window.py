@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Any
 from PySide6.QtCore import Qt
 from PySide6.QtPrintSupport import QPrinter, QPrintDialog
-from PySide6.QtGui import QTextDocument
+from PySide6.QtGui import QTextDocument, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QLineEdit,QPushButton,QLabel,
     QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QMessageBox,
@@ -102,6 +102,15 @@ class AccessDataWindow(QWidget):
         for cap,fn,obj in [("جديد",self.add,"Success"),("فتح",self.edit,"Primary"),("تعديل",self.edit,"Primary"),("حذف",self.delete,"Danger"),("تصفية",self.advanced_search,"Secondary"),("تحديث",self.load,"Secondary"),("نسخ",self.copy_selection,"Secondary"),("Excel",self.export_excel,"Secondary"),("طباعة",self.print_table,"Secondary")]:
             b=QPushButton(cap); b.setObjectName(obj); b.clicked.connect(fn); a.addWidget(b)
         a.addStretch(); root.addLayout(a)
+        self._shortcuts = []
+        for key, slot in [
+            ("Ctrl+N", self.add), ("Ctrl+S", self.edit), ("Ctrl+F", self.focus_search),
+            ("Ctrl+P", self.print_table), ("Ctrl+E", self.export_excel),
+            ("F5", self.load), ("Esc", self.clear_search),
+        ]:
+            shortcut = QShortcut(QKeySequence(key), self)
+            shortcut.activated.connect(slot)
+            self._shortcuts.append(shortcut)
         self.table=QTableWidget(0,0); self.table.setSortingEnabled(True); self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.ExtendedSelection); self.table.setEditTriggers(QAbstractItemView.NoEditTriggers); self.table.setAlternatingRowColors(True)
         self.table.setContextMenuPolicy(Qt.CustomContextMenu); self.table.customContextMenuRequested.connect(self.menu); self.table.cellDoubleClicked.connect(lambda *_:self.edit()); self.table.itemSelectionChanged.connect(self._selection_changed)
