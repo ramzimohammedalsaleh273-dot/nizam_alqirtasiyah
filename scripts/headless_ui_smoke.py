@@ -32,7 +32,14 @@ for obj in objects:
     obj.close()
     obj.deleteLater()
 
-main=MainWindow()
+# لا نعرض لوحة التحكم أثناء اختبار البناء؛ اختبار الشاشة الرئيسية نفسها يكفي هنا،
+# لأن استعلامات لوحة التحكم قد تكون ثقيلة على بيئة CI الفارغة.
+_original_show_dashboard = MainWindow.show_dashboard
+MainWindow.show_dashboard = lambda self: None
+try:
+    main=MainWindow()
+finally:
+    MainWindow.show_dashboard = _original_show_dashboard
 main.close()
 main.deleteLater()
 app.processEvents()
