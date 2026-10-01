@@ -12,9 +12,9 @@ from app.services.purchase_return_service import PurchaseReturnService
 class PurchaseReturnsWindow(QWidget):
     """واجهة تشغيلية لمرتجعات المشتريات مع عرض الكميات القابلة للإرجاع."""
 
-    def __init__(self, parent=None):
+    def __init__(self, user=None, parent=None):
         super().__init__(parent)
-        self.setStyleSheet(APP_STYLE)
+        self.user = dict(user or {})
         self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("مرتجعات المشتريات")
         self.setMinimumSize(1150, 680)
@@ -40,36 +40,25 @@ class PurchaseReturnsWindow(QWidget):
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         root.addWidget(self.table)
-
-        self.status = QTableWidgetItem
         self.load()
 
     def _columns(self, session, table):
-        return {r[1] for r in session.connection().exec_driver_sql(
-            f"PRAGMA table_info({table})"
-        ).fetchall()}
+        return {r[1] for r in session.connection().exec_driver_sql(f"PRAGMA table_info({table})").fetchall()}
 
     def _ensure_return_tables(self, session):
         session.execute(text("""
             CREATE TABLE IF NOT EXISTS purchase_returns (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                return_number VARCHAR(100) NOT NULL UNIQUE,
-                supplier_id INTEGER NOT NULL,
-                invoice_id INTEGER NULL,
-                reason TEXT NULL,
-                total_amount NUMERIC NOT NULL DEFAULT 0,
-                status VARCHAR(50) NOT NULL DEFAULT 'completed',
+                id INTEGER PRIMARY KEY AUTOINCREMENT, return_number VARCHAR(100) NOT NULL UNIQUE,
+                supplier_id INTEGER NOT NULL, invoice_id INTEGER NULL, reason TEXT NULL,
+                total_amount NUMERIC NOT NULL DEFAULT 0, status VARCHAR(50) NOT NULL DEFAULT 'completed',
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         """))
         session.execute(text("""
             CREATE TABLE IF NOT EXISTS purchase_return_items (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                return_id INTEGER NOT NULL,
-                product_id INTEGER NOT NULL,
-                quantity NUMERIC NOT NULL,
-                unit_cost NUMERIC NOT NULL DEFAULT 0,
-                line_total NUMERIC NOT NULL DEFAULT 0
+                id INTEGER PRIMARY KEY AUTOINCREMENT, return_id INTEGER NOT NULL,
+                product_id INTEGER NOT NULL, quantity NUMERIC NOT NULL,
+                unit_cost NUMERIC NOT NULL DEFAULT 0, line_total NUMERIC NOT NULL DEFAULT 0
             )
         """))
         session.commit()
@@ -82,64 +71,42 @@ class PurchaseReturnsWindow(QWidget):
                 iic = self._columns(s, "purchase_invoice_items")
                 if "id" not in pic or "id" not in iic:
                     raise ValueError("بنية فواتير المشتريات غير صالحة")
-                fk = "invoice_id" if "invoice_id" in iic else (
-                    "purchase_invoice_id" if "purchase_invoice_id" in iic else None
-                )
+                fk = "invoice_id" if "invoice_id" in iic else ("purchase_invoice_id" if "purchase_invoice_id" in iic else None)
                 if not fk:
                     raise ValueError("جدول بنود المشتريات لا يحتوي مفتاح الفاتورة")
-
-                date_expr = "pi.created_at" if "created_at" in pic else (
-                    "pi.invoice_date" if "invoice_date" in pic else "CURRENT_TIMESTAMP"
-                )
+                date_expr = "pi.created_at" if "created_at" in pic else ("pi.invoice_date" if "invoice_date" in pic else "CURRENT_TIMESTAMP")
                 supplier_join = "LEFT JOIN suppliers s ON s.id=pi.supplier_id" if "supplier_id" in pic else ""
                 supplier_expr = "COALESCE(s.name, pi.supplier_id, '')" if "supplier_id" in pic else "''"
-
                 rows = s.execute(text(f"""
-                    SELECT pi.id,
-                           COALESCE(pi.invoice_number, pi.id) AS invoice_number,
-                           {supplier_expr} AS supplier_name,
-                           {date_expr} AS invoice_date,
-                           pii.product_id,
-                           COALESCE(p.name_ar, pii.product_id) AS product_name,
+                    SELECT pi.id, COALESCE(pi.invoice_number, pi.id) AS invoice_number,
+                           {supplier_expr} AS supplier_name, {date_expr} AS invoice_date,
+                           pii.product_id, COALESCE(p.name_ar, pii.product_id) AS product_name,
                            pii.quantity,
-                           COALESCE((
-                               SELECT SUM(pri.quantity)
-                               FROM purchase_return_items pri
-                               JOIN purchase_returns pr ON pr.id=pri.return_id
-                               WHERE pr.invoice_id=pi.id
-                                 AND pri.product_id=pii.product_id
-                                 AND pr.status <> 'VOID'
-                           ),0) AS returned_quantity,
+                           COALESCE((SELECT SUM(pri.quantity) FROM purchase_return_items pri
+                                     JOIN purchase_returns pr ON pr.id=pri.return_id
+                                     WHERE pr.invoice_id=pi.id AND pri.product_id=pii.product_id
+                                     AND pr.status <> 'VOID'),0) AS returned_quantity,
                            pii.unit_cost
                     FROM purchase_invoices pi
                     JOIN purchase_invoice_items pii ON pii.{fk}=pi.id
-                    LEFT JOIN products p ON p.id=pii.product_id
-                    {supplier_join}
-                    ORDER BY pi.id DESC, pii.id DESC
-                    LIMIT 500
+                    LEFT JOIN products p ON p.id=pii.product_id {supplier_join}
+                    ORDER BY pi.id DESC, pii.id DESC LIMIT 500
                 """)).fetchall()
-
             self.table.setRowCount(0)
             visible = 0
             for row in rows:
-                original = float(row.quantity or 0)
-                returned = float(row.returned_quantity or 0)
+                original, returned = float(row.quantity or 0), float(row.returned_quantity or 0)
                 available = max(0.0, original - returned)
                 if available <= 0:
                     continue
-                values = [
-                    row.id, row.invoice_number, row.supplier_name, row.invoice_date,
-                    row.product_name, original, returned, available, row.unit_cost
-                ]
-                r = self.table.rowCount()
-                self.table.insertRow(r)
+                values = [row.id, row.invoice_number, row.supplier_name, row.invoice_date,
+                          row.product_name, original, returned, available, row.unit_cost]
+                r = self.table.rowCount(); self.table.insertRow(r)
                 for c, value in enumerate(values):
                     item = QTableWidgetItem("" if value is None else str(value))
-                    if c == 4:
-                        item.setData(32, int(row.product_id))
+                    if c == 4: item.setData(32, int(row.product_id))
                     self.table.setItem(r, c, item)
                 visible += 1
-
             self.setWindowTitle(f"مرتجعات المشتريات — {visible} بند قابل للإرجاع")
         except Exception as exc:
             self.table.setRowCount(0)
@@ -150,44 +117,27 @@ class PurchaseReturnsWindow(QWidget):
         if row < 0:
             QMessageBox.warning(self, "تنبيه", "اختر بند مشتريات أولاً.")
             return
-
         purchase_id = int(self.table.item(row, 0).text())
-        # اسم المنتج ظاهر في العمود 4، والمعرف الحقيقي محفوظ في UserRole.
-        product_id = 0
-        product_id_item = self.table.item(row, 4)
-        if product_id_item is not None:
-            product_id = int(product_id_item.data(32) or 0)
+        product_item = self.table.item(row, 4)
+        product_id = int(product_item.data(32) or 0) if product_item else 0
         if not product_id:
             QMessageBox.critical(self, "خطأ", "تعذر تحديد الصنف المحدد.")
             return
-
         available = float(self.table.item(row, 7).text())
-        qty, ok = QInputDialog.getDouble(
-            self, "مرتجع مشتريات", "كمية الإرجاع:", min(available, 1.0),
-            0.01, available, 2
-        )
+        qty, ok = QInputDialog.getDouble(self, "مرتجع مشتريات", "كمية الإرجاع:", min(available, 1.0), 0.01, available, 2)
         if not ok:
             return
-
-        method, ok = QInputDialog.getItem(
-            self, "طريقة التسوية", "طريقة التسوية:",
-            ["credit", "cash", "bank_transfer", "card"], 0, False
-        )
+        method, ok = QInputDialog.getItem(self, "طريقة التسوية", "طريقة التسوية:",
+                                          ["credit", "cash", "bank_transfer", "card"], 0, False)
         if not ok:
             return
-
         try:
             result = PurchaseReturnService.create_return(
-                purchase_id=purchase_id,
-                items=[{"product_id": product_id, "quantity": qty}],
-                refund_method=method,
-                user_id=self.user.get("id"),
+                purchase_id=purchase_id, items=[{"product_id": product_id, "quantity": qty}],
+                refund_method=method, user_id=self.user.get("id"),
             )
             self.load()
-            QMessageBox.information(
-                self, "تم",
-                f"تم ترحيل المرتجع {result['return_number']} بإجمالي {result['total']:.2f}."
-            )
+            QMessageBox.information(self, "تم", f"تم ترحيل المرتجع {result['return_number']} بإجمالي {result['total']:.2f}.")
         except Exception as exc:
             QMessageBox.critical(self, "فشل المرتجع", str(exc))
 
