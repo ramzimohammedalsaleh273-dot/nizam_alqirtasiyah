@@ -160,6 +160,11 @@ class PartiesWindow(QWidget):
         bar.addStretch()
         layout.addLayout(bar)
 
+        search_row=QHBoxLayout()
+        search_row.addWidget(QLabel("بحث لحظي:"))
+        self.search=QLineEdit(); self.search.setPlaceholderText("رقم العميل أو الاسم أو الهاتف أو البريد…"); self.search.textChanged.connect(lambda _: self.load())
+        search_row.addWidget(self.search,1); layout.addLayout(search_row)
+
         self.tabs = QTabWidget()
         self.customers = self._table()
         self.suppliers = self._table()
@@ -208,8 +213,16 @@ class PartiesWindow(QWidget):
 
     def load(self):
         try:
-            self._populate(self.customers, PartyService.customers())
-            self._populate(self.suppliers, PartyService.suppliers())
+            term=self.search.text().strip().lower()
+            customers=PartyService.customers()
+            suppliers=PartyService.suppliers()
+            if term:
+                def match(row):
+                    return any(term in str(row.get(k) or "").lower() for k in ("id","party_code","name","phone","email","tax_number","address","current_balance"))
+                customers=[r for r in customers if match(r)]
+                suppliers=[r for r in suppliers if match(r)]
+            self._populate(self.customers, customers)
+            self._populate(self.suppliers, suppliers)
         except Exception as exc:
             QMessageBox.critical(self, "فشل تحميل الأطراف", str(exc))
 
