@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QTabWidget, QTableWidget, QTableWidgetItem,
     QLabel, QPushButton, QHBoxLayout, QMessageBox, QDialog, QFormLayout,
     QLineEdit, QDoubleSpinBox, QComboBox, QCheckBox, QTextEdit,
-    QDialogButtonBox, QAbstractItemView
+    QDialogButtonBox, QAbstractItemView, QTabWidget, QHeaderView
 )
 from app.services.party_service import PartyService
 from app.services.party_master_service import PartyMasterService
@@ -128,6 +128,66 @@ class PartyDialog(QDialog):
         }
 
 
+
+class PartyCardDialog(QDialog):
+    """بطاقة العميل/المورد المرجعية مع البيانات والفواتير والمرتجعات والدفعات وكشف الحساب والمستندات والملاحظات."""
+    def __init__(self, party_id, supplier=False, parent=None):
+        super().__init__(parent)
+        self.party_id=int(party_id); self.supplier=supplier
+        self.setWindowTitle("بطاقة المورد" if supplier else "بطاقة العميل")
+        self.setMinimumSize(1180,760); self.setLayoutDirection(Qt.RightToLeft); self.setStyleSheet(APP_STYLE)
+        root=QVBoxLayout(self); self.title=QLabel("بطاقة الطرف"); self.title.setObjectName("SectionTitle"); root.addWidget(self.title)
+        self.meta=QLabel(""); root.addWidget(self.meta)
+        self.tabs=QTabWidget(); root.addWidget(self.tabs,1)
+        self._build()
+
+    def _safe(self, sql, params):
+        try:
+            from sqlalchemy import text
+            from app.database.connection import get_session
+            with get_session() as s:
+                return s.execute(text(sql),params).mappings().all()
+        except Exception:
+            return []
+
+    def _table(self, headers, rows):
+        t=QTableWidget(0,len(headers)); t.setHorizontalHeaderLabels(headers); t.setSelectionBehavior(QAbstractItemView.SelectRows); t.setEditTriggers(QAbstractItemView.NoEditTriggers); t.setAlternatingRowColors(True); t.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents); t.horizontalHeader().setStretchLastSection(True)
+        for row in rows:
+            r=t.rowCount(); t.insertRow(r)
+            for col,v in enumerate(row): t.setItem(r,col,QTableWidgetItem("" if v is None else str(v)))
+        return t
+
+    def _add(self,title,headers,rows): self.tabs.addTab(self._table(headers,rows),title)
+
+    def _build(self):
+        table="suppliers" if self.supplier else "customers"
+        with get_session() as s:
+            p=s.execute(text(f'SELECT * FROM "{table}" WHERE id=:id'),{"id":self.party_id}).mappings().first()
+        if not p:
+            self.title.setText("السجل غير موجود"); return
+        name=p.get("name") or "—"; code=p.get("supplier_code") or p.get("customer_code") or p.get("party_code") or p.get("code") or "—"
+        self.title.setText(f"بطاقة {'المورد' if self.supplier else 'العميل'}: {name}")
+        self.meta.setText(f"الكود: {code}   |   الهاتف: {p.get('phone') or p.get('mobile') or '—'}   |   الرصيد: {p.get('current_balance') or 0}")
+        self._add("البيانات",["الحقل","القيمة"],[(k,v) for k,v in p.items() if k not in {"id","created_at","updated_at","notes"}])
+        if self.supplier:
+            inv=self._safe("SELECT invoice_date,invoice_number,total_amount,paid_amount,due_amount,status FROM purchase_invoices WHERE supplier_id=:id ORDER BY id DESC LIMIT 500",{"id":self.party_id})
+            ret=self._safe("SELECT created_at,return_number,total_amount,status,reason FROM purchase_returns WHERE supplier_id=:id ORDER BY id DESC LIMIT 500",{"id":self.party_id})
+            pays=self._safe("SELECT payment_date,payment_number,amount,payment_method,reference_number,notes FROM cash_payments WHERE supplier_id=:id ORDER BY id DESC LIMIT 500",{"id":self.party_id})
+            tx=self._safe("SELECT created_at,transaction_type,amount,reference_type,reference_id,balance_after FROM supplier_transactions WHERE supplier_id=:id ORDER BY id DESC LIMIT 500",{"id":self.party_id})
+        else:
+            inv=self._safe("SELECT created_at,invoice_number,total_amount,paid_amount,due_amount,status FROM sales WHERE customer_id=:id ORDER BY id DESC LIMIT 500",{"id":self.party_id})
+            ret=self._safe("SELECT created_at,return_number,total_amount,status,reason FROM sale_returns WHERE customer_id=:id ORDER BY id DESC LIMIT 500",{"id":self.party_id})
+            pays=self._safe("SELECT payment_date,payment_number,amount,payment_method,reference_number,notes FROM customer_payments WHERE customer_id=:id ORDER BY id DESC LIMIT 500",{"id":self.party_id})
+            tx=self._safe("SELECT created_at,transaction_type,amount,reference_type,reference_id,balance_after FROM customer_transactions WHERE customer_id=:id ORDER BY id DESC LIMIT 500",{"id":self.party_id})
+        self._add("المشتريات" if self.supplier else "الفواتير",list(inv[0].keys()) if inv else ["لا توجد سجلات"],[tuple(x.values()) for x in inv] if inv else [])
+        self._add("المرتجعات",list(ret[0].keys()) if ret else ["لا توجد سجلات"],[tuple(x.values()) for x in ret] if ret else [])
+        self._add("الدفعات",list(pays[0].keys()) if pays else ["لا توجد سجلات"],[tuple(x.values()) for x in pays] if pays else [])
+        self._add("كشف الحساب",list(tx[0].keys()) if tx else ["لا توجد حركات"],[tuple(x.values()) for x in tx] if tx else [])
+        docs=self._safe("SELECT document_no,title,document_type,file_name,file_path,created_at FROM documents WHERE entity_type=:etype AND entity_id=:id ORDER BY id DESC",{"etype":"supplier" if self.supplier else "customer","id":self.party_id})
+        self._add("المستندات",list(docs[0].keys()) if docs else ["لا توجد مستندات"],[tuple(x.values()) for x in docs] if docs else [])
+        self._add("الملاحظات",["البيان","النص"],[("ملاحظات",p.get("notes"))])
+
+
 class PartiesWindow(QWidget):
 
     def __init__(self, parent=None):
@@ -144,6 +204,8 @@ class PartiesWindow(QWidget):
         bar = QHBoxLayout()
         self.add_customer_button = QPushButton("إضافة عميل")
         self.add_supplier_button = QPushButton("إضافة مورد")
+        self.open_button = QPushButton("فتح البطاقة")
+        self.open_button.clicked.connect(self.open_card)
         self.edit_button = QPushButton("تعديل المحدد")
         self.delete_button = QPushButton("تعطيل/حذف المحدد")
         self.refresh_button = QPushButton("تحديث")
@@ -154,6 +216,7 @@ class PartiesWindow(QWidget):
         self.refresh_button.clicked.connect(self.load)
         bar.addWidget(self.add_customer_button)
         bar.addWidget(self.add_supplier_button)
+        bar.addWidget(self.open_button)
         bar.addWidget(self.edit_button)
         bar.addWidget(self.delete_button)
         bar.addWidget(self.refresh_button)
@@ -173,7 +236,8 @@ class PartiesWindow(QWidget):
         layout.addWidget(self.tabs)
 
         self.customers.cellDoubleClicked.connect(lambda *_: self.edit_selected())
-        self.suppliers.cellDoubleClicked.connect(lambda *_: self.edit_selected())
+        self.suppliers.cellDoubleClicked.connect(lambda *_: self.open_card())
+        self.customers.cellDoubleClicked.connect(lambda *_: self.open_card())
         self.load()
 
     @staticmethod
@@ -225,6 +289,15 @@ class PartiesWindow(QWidget):
             self._populate(self.suppliers, suppliers)
         except Exception as exc:
             QMessageBox.critical(self, "فشل تحميل الأطراف", str(exc))
+
+    def open_card(self):
+        supplier, party = self._selected()
+        if party is None:
+            QMessageBox.information(self,"البطاقة","اختر عميلًا أو موردًا أولًا."); return
+        try:
+            PartyCardDialog(party["id"], supplier=supplier, parent=self).exec()
+        except Exception as exc:
+            QMessageBox.critical(self,"فشل فتح البطاقة",str(exc))
 
     def _selected(self):
         supplier = self.tabs.currentIndex() == 1
