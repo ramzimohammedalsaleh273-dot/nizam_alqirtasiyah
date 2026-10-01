@@ -2,6 +2,8 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 from PySide6.QtCore import Qt
+from PySide6.QtPrintSupport import QPrinter, QPrintDialog
+from PySide6.QtGui import QTextDocument
 from PySide6.QtWidgets import (
     QApplication,QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QLineEdit,QPushButton,QLabel,
     QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QMessageBox,QApplication,
@@ -315,7 +317,28 @@ class AccessDataWindow(QWidget):
             QMessageBox.critical(self,"تعذر التصدير",str(exc))
 
     def print_data(self):
-        QMessageBox.information(self,"الطباعة","استخدم زر التصدير إلى PDF لحفظ نسخة قابلة للطباعة من الجدول.")
+        try:
+            printer=QPrinter(QPrinter.HighResolution)
+            dialog=QPrintDialog(printer,self)
+            if dialog.exec()!=QPrintDialog.Accepted:
+                return
+            headers=[self.table.horizontalHeaderItem(i).text() for i in range(self.table.columnCount())]
+            html=["<html><meta charset='utf-8'><body dir='rtl'>",f"<h2>{self.title_text}</h2>","<table border='1' cellspacing='0' cellpadding='4' width='100%'><thead><tr>"]
+            html.extend(f"<th>{h}</th>" for h in headers)
+            html.append("</tr></thead><tbody>")
+            for r in range(self.table.rowCount()):
+                html.append("<tr>")
+                for col in range(self.table.columnCount()):
+                    v=self.table.item(r,col).text() if self.table.item(r,col) else ""
+                    html.append(f"<td>{v}</td>")
+                html.append("</tr>")
+            html.append("</tbody></table></body></html>")
+            doc=QTextDocument()
+            doc.setHtml("".join(html))
+            doc.print_(printer)
+            self.status.setText("تم إرسال الجدول إلى الطابعة.")
+        except Exception as exc:
+            QMessageBox.critical(self,"تعذر الطباعة",str(exc))
 
     def menu(self,pos):
         m=QMenu(self); m.addAction("فتح / تعديل",self.edit); m.addAction("نسخ المحدد",self.copy_selected); m.addAction("تحديث",self.load)
