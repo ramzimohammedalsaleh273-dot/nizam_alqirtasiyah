@@ -33,6 +33,7 @@ from app.services.reference_compatibility_service import ReferenceCompatibilityS
 from app.ui.theme import APP_STYLE
 from app.ui.access_data_window import AccessDataWindow
 from app.ui.expense_window import ExpenseWindow
+from app.ui.analytics_window import AnalyticsWindow
 
 
 class LoginDialog(QDialog):
@@ -253,7 +254,8 @@ class MainWindow(QMainWindow):
                 ("الموظفون", lambda: self.open_data("employees", "الموظفون")),
                 ("المستخدمون", lambda: self.open_data("users", "المستخدمون")),
                 ("الأدوار والصلاحيات", lambda: self.open_data("roles", "الأدوار")),
-                ("التقارير والتحليلات", self.open_reports),
+                ("التقارير", self.open_reports),
+                ("التحليلات", lambda: self.open_window("analytics", AnalyticsWindow)),
                 ("التنبيهات", self.open_smart_operations),
                 ("الخدمات والطباعة", lambda: self.open_data("printing_services", "خدمات الطباعة")),
                 ("طلبات الطباعة", lambda: self.open_data("printing_orders", "طلبات الطباعة")),
