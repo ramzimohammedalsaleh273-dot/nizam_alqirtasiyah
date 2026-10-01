@@ -91,14 +91,14 @@ try:
     company_id = company_id[0] if company_id else None
 
     seed_by_columns("branches", [
-        {"name":"الفرع الرئيسي","branch_code":"MAIN","company_id":company_id,"phone":"777000000","address":"حي الصفا، شارع عبدالله بن سهل، جدة 23456","is_active":1,"created_at":now},
+        {"name":"الفرع الرئيسي","branch_code":"MAIN","code":"MAIN","company_id":company_id,"phone":"777000000","address":"حي الصفا، شارع عبدالله بن سهل، جدة 23456","is_active":1,"created_at":now},
     ])
 
     branch = cur.execute("SELECT id FROM branches ORDER BY id LIMIT 1").fetchone()
     branch_id = branch[0] if branch else None
 
     seed_by_columns("warehouses", [
-        {"name":"المستودع الرئيسي","warehouse_code":"WH-001","branch_id":branch_id,"company_id":company_id,"is_active":1,"created_at":now},
+        {"name":"المستودع الرئيسي","warehouse_code":"WH-001","code":"WH-001","branch_id":branch_id,"company_id":company_id,"is_active":1,"created_at":now},
     ])
 
     warehouse = cur.execute("SELECT id FROM warehouses ORDER BY id LIMIT 1").fetchone()
