@@ -17,14 +17,14 @@ class AccountingReportsService:
         period_filter=" AND (:period_id IS NULL OR je.fiscal_period_id=:period_id)"
         date_filter=" AND (:as_of IS NULL OR date(je.entry_date)<=date(:as_of))"
         return cls._rows(f"""
-            SELECT a.id,a.account_code AS code,a.name_ar,a.account_type,a.parent_id,
+            SELECT a.id,a.account_code AS code,a.account_name,a.account_type,a.parent_id,
                    COALESCE(SUM(jl.debit),0) debit,COALESCE(SUM(jl.credit),0) credit,
                    COALESCE(SUM(jl.debit-jl.credit),0) balance
             FROM accounts a
             LEFT JOIN journal_entry_lines jl ON jl.account_id=a.id
             LEFT JOIN journal_entries je ON je.id=jl.journal_entry_id AND je.status='POSTED'{period_filter}{date_filter}
             WHERE a.is_active=1
-            GROUP BY a.id,a.account_code,a.name_ar,a.account_type,a.parent_id
+            GROUP BY a.id,a.account_code,a.account_name,a.account_type,a.parent_id
             ORDER BY a.account_code
         """,params)
 
@@ -34,7 +34,7 @@ class AccountingReportsService:
         return cls._rows("""
             SELECT je.id AS journal_entry_id,je.entry_number,je.entry_date,je.description,
                    je.source_type,je.source_id,je.fiscal_period_id,a.id AS account_id,
-                   a.account_code AS code,a.name_ar,jl.description AS line_description,
+                   a.account_code AS code,a.account_name,jl.description AS line_description,
                    jl.debit,jl.credit
             FROM journal_entry_lines jl
             JOIN journal_entries je ON je.id=jl.journal_entry_id
@@ -61,7 +61,7 @@ class AccountingReportsService:
     def income_statement(cls, start_date=None, end_date=None, period_id=None):
         p={"start_date":start_date,"end_date":end_date,"period_id":period_id}
         return cls._rows("""
-            SELECT a.id,a.account_code AS code,a.name_ar,a.account_type,
+            SELECT a.id,a.account_code AS code,a.account_name,a.account_type,
                    COALESCE(SUM(jl.credit-jl.debit),0) balance
             FROM accounts a JOIN journal_entry_lines jl ON jl.account_id=a.id
             JOIN journal_entries je ON je.id=jl.journal_entry_id
@@ -70,14 +70,14 @@ class AccountingReportsService:
               AND (:start_date IS NULL OR date(je.entry_date)>=date(:start_date))
               AND (:end_date IS NULL OR date(je.entry_date)<=date(:end_date))
               AND (:period_id IS NULL OR je.fiscal_period_id=:period_id)
-            GROUP BY a.id,a.account_code,a.name_ar,a.account_type ORDER BY a.account_code
+            GROUP BY a.id,a.account_code,a.account_name,a.account_type ORDER BY a.account_code
         """,p)
 
     @classmethod
     def balance_sheet(cls, as_of=None, period_id=None):
         p={"as_of":as_of,"period_id":period_id}
         return cls._rows("""
-            SELECT a.id,a.account_code AS code,a.name_ar,a.account_type,
+            SELECT a.id,a.account_code AS code,a.account_name,a.account_type,
                    COALESCE(SUM(jl.debit-jl.credit),0) balance
             FROM accounts a JOIN journal_entry_lines jl ON jl.account_id=a.id
             JOIN journal_entries je ON je.id=jl.journal_entry_id
@@ -85,7 +85,7 @@ class AccountingReportsService:
               AND (a.account_code LIKE '1%' OR a.account_code LIKE '2%' OR a.account_code LIKE '3%')
               AND (:as_of IS NULL OR date(je.entry_date)<=date(:as_of))
               AND (:period_id IS NULL OR je.fiscal_period_id=:period_id)
-            GROUP BY a.id,a.account_code,a.name_ar,a.account_type ORDER BY a.account_code
+            GROUP BY a.id,a.account_code,a.account_name,a.account_type ORDER BY a.account_code
         """,p)
 
     @classmethod
@@ -93,7 +93,7 @@ class AccountingReportsService:
         p={"start_date":start_date,"end_date":end_date,"period_id":period_id,"limit":max(1,min(int(limit),10000))}
         return cls._rows("""
             SELECT je.id,je.entry_number,je.entry_date,je.description,je.source_type,je.source_id,
-                   je.status,je.fiscal_period_id,a.account_code AS code,a.name_ar,
+                   je.status,je.fiscal_period_id,a.account_code AS code,a.account_name,
                    jl.debit,jl.credit,jl.description AS line_description
             FROM journal_entries je JOIN journal_entry_lines jl ON jl.journal_entry_id=je.id
             JOIN accounts a ON a.id=jl.account_id
@@ -107,7 +107,7 @@ class AccountingReportsService:
     @classmethod
     def cash_flow_summary(cls, start_date=None, end_date=None, period_id=None):
         rows=cls._rows("""
-            SELECT a.account_type,a.account_code AS code,a.name_ar,
+            SELECT a.account_type,a.account_code AS code,a.account_name,
                    COALESCE(SUM(jl.debit-jl.credit),0) balance
             FROM journal_entry_lines jl JOIN journal_entries je ON je.id=jl.journal_entry_id
             JOIN accounts a ON a.id=jl.account_id
@@ -115,7 +115,7 @@ class AccountingReportsService:
               AND (:start_date IS NULL OR date(je.entry_date)>=date(:start_date))
               AND (:end_date IS NULL OR date(je.entry_date)<=date(:end_date))
               AND (:period_id IS NULL OR je.fiscal_period_id=:period_id)
-            GROUP BY a.id,a.account_type,a.account_code,a.name_ar ORDER BY a.account_code
+            GROUP BY a.id,a.account_type,a.account_code,a.account_name ORDER BY a.account_code
         """,{"start_date":start_date,"end_date":end_date,"period_id":period_id})
         return rows
 
