@@ -37,6 +37,17 @@ FIELD_LABELS={
 }
 HIDDEN={"password_hash","session_token","token_hash","secret","private_key","xml_content"}
 READONLY={"id","created_at","updated_at","read_at","last_login_at"}
+
+# المستندات المالية والحركات المرحّلة لا تُحذف من شاشة البيانات العامة؛
+# تصحيحها يتم من خلال الإلغاء/المرتجع/العكس مع سجل التدقيق.
+PROTECTED_DELETE_TABLES={
+    "sales","sale_items","sale_payments","sale_returns","sale_return_items",
+    "purchase_orders","purchase_invoices","purchase_invoice_items",
+    "purchase_returns","purchase_return_items","stock_movements","stock_adjustments",
+    "cash_transactions","cash_sessions","bank_transactions","journal_entries",
+    "journal_entry_lines","tax_invoices","documents","audit_logs","audit_log",
+    "payroll_runs","payroll_items"
+}
 TITLES={
 "companies":"الشركات","branches":"الفروع","products":"المنتجات","product_categories":"التصنيفات","units":"الوحدات",
 "warehouses":"المستودعات","customers":"العملاء","suppliers":"الموردون","employees":"الموظفون","users":"المستخدمون",
@@ -293,6 +304,13 @@ class AccessDataWindow(QWidget):
         except Exception as e:QMessageBox.critical(self,"تعذر التعديل",str(e))
     def delete(self):
         if not self.editable:return
+        if self.table_name in PROTECTED_DELETE_TABLES:
+            return QMessageBox.warning(
+                self,
+                "الحذف غير مسموح",
+                "هذا السجل مرتبط بعملية مالية أو مخزنية أو تدقيقية. "
+                "استخدم الإلغاء أو المرتجع أو العكس المخصص للعملية حتى تبقى السجلات مترابطة."
+            )
         rid=self._id()
         if rid is None:return QMessageBox.warning(self,"حذف","حدد سجلًا أولاً.")
         if QMessageBox.question(self,"تأكيد الحذف","سيتم حذف السجل المحدد. هل تريد المتابعة؟")!=QMessageBox.Yes:return
