@@ -214,6 +214,45 @@ try:
         }])
 
     # =========================================================
+    # مستخدمو النظام (حساب إداري افتراضي للتشغيل والاختبارات)
+    # =========================================================
+    if "users" in tables():
+        employee_id = cur.execute(
+            "SELECT id FROM employees ORDER BY id LIMIT 1"
+        ).fetchone()
+        employee_id = employee_id[0] if employee_id else None
+        user_records = [
+            {
+                "username":"admin",
+                "login_name":"admin",
+                "name":"مدير النظام",
+                "full_name":"مدير النظام",
+                "display_name":"مدير النظام",
+                "employee_id":employee_id,
+                "branch_id":branch_id,
+                "is_active":1,
+                "status":"ACTIVE",
+                "created_at":now,
+                "updated_at":now
+            },
+            {
+                "username":"cashier",
+                "login_name":"cashier",
+                "name":"كاشير",
+                "full_name":"كاشير",
+                "display_name":"كاشير",
+                "employee_id":None,
+                "branch_id":branch_id,
+                "is_active":1,
+                "status":"ACTIVE",
+                "created_at":now,
+                "updated_at":now
+            }
+        ]
+        for rec in user_records:
+            seed_by_columns("users", rec)
+
+    # =========================================================
     # المنتجات
     # =========================================================
     products = [
