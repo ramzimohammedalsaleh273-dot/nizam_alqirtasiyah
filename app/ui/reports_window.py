@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QLabel,QPushButton
 from sqlalchemy import text
 from app.database.connection import get_session
 from app.services.report_export_service import ReportExportService
+from app.services.accounting_reports_service import AccountingReportsService
 from app.ui.theme import APP_STYLE
 
 REPORTS=[
@@ -103,13 +104,47 @@ class ReportsWindow(QWidget):
         if k=="customer_aging":return ["العميل","الرصيد","أيام الاستحقاق"],self._run(s,"SELECT name,current_balance,0 FROM customers WHERE COALESCE(current_balance,0)>0 ORDER BY current_balance DESC",p)
         if k=="journal":return ["التاريخ","رقم القيد","البيان","الحالة"],self._run(s,"SELECT entry_date,entry_number,description,status FROM journal_entries WHERE date(entry_date) BETWEEN :f AND :t ORDER BY id DESC",p)
         if k in {"ledger","trial"}:
-            h=["الحساب","رقم الحساب","مدين","دائن","الرصيد"] if k=="ledger" else ["الحساب","رقم الحساب","مدين","دائن"]
-            sql="SELECT a.account_name,a.account_code,COALESCE(SUM(jl.debit),0),COALESCE(SUM(jl.credit),0)"+(",COALESCE(SUM(jl.debit-jl.credit),0)" if k=="ledger" else "")+" FROM journal_entry_lines jl JOIN journal_entries je ON je.id=jl.journal_entry_id JOIN accounts a ON a.id=jl.account_id WHERE je.status='POSTED' AND date(je.entry_date) BETWEEN :f AND :t GROUP BY a.id,a.account_name,a.account_code ORDER BY a.account_code"
-            return h,self._run(s,sql,p)
-        if k in {"income","balance"}:
-            typ="REVENUE" if k=="income" else "ASSET"
-            return ["الحساب","الرصيد"],self._run(s,"SELECT a.account_name,SUM(jl.credit-jl.debit) FROM journal_entry_lines jl JOIN journal_entries je ON je.id=jl.journal_entry_id JOIN accounts a ON a.id=jl.account_id WHERE je.status='POSTED' AND a.account_type=:typ AND date(je.entry_date) BETWEEN :f AND :t GROUP BY a.id,a.account_name ORDER BY a.account_code",{**p,"typ":typ})
-        if k=="cashflow":return ["المصدر","القيمة"],self._run(s,"SELECT 'المبيعات النقدية',COALESCE(SUM(amount),0) FROM cash_transactions WHERE transaction_type='SALE' AND date(created_at) BETWEEN :f AND :t UNION ALL SELECT 'المصروفات',COALESCE(SUM(amount),0) FROM cash_transactions WHERE transaction_type IN ('EXPENSE','PAYMENT') AND date(created_at) BETWEEN :f AND :t",p)
+            rows = AccountingReportsService.general_ledger(
+                start_date=p.get("f"), end_date=p.get("t"), limit=5000
+            )
+            if k=="ledger":
+                return ["التاريخ","رقم القيد","الحساب","رقم الحساب","البيان","مدين","دائن"], [
+                    (x.get("entry_date"),x.get("entry_number"),x.get("name_ar"),x.get("code"),
+                     x.get("line_description") or x.get("description"),x.get("debit"),x.get("credit"))
+                    for x in rows
+                ]
+            totals={}
+            for x in rows:
+                key=(x.get("code"),x.get("name_ar"))
+                d=totals.setdefault(key,[0.0,0.0]); d[0]+=float(x.get("debit") or 0); d[1]+=float(x.get("credit") or 0)
+            return ["الحساب","رقم الحساب","مدين","دائن"], [
+                (name,code,round(v[0],2),round(v[1],2)) for (code,name),v in sorted(totals.items())
+            ]
+        if k=="income":
+            rows=AccountingReportsService.income_statement(p.get("f"),p.get("t"))
+            revenue=sum(float(x.get("balance") or 0) for x in rows if str(x.get("account_type") or "").upper() in {"REVENUE","INCOME"} or str(x.get("code") or "").startswith("4"))
+            expenses=sum(float(x.get("balance") or 0) for x in rows if str(x.get("account_type") or "").upper() in {"EXPENSE","COST"} or str(x.get("code") or "").startswith("5"))
+            return ["البند","القيمة"], [
+                ("الإيرادات",round(revenue,2)),
+                ("تكلفة المبيعات والمصروفات",round(expenses,2)),
+                ("صافي الربح/الخسارة",round(revenue-expenses,2)),
+            ]
+        if k=="balance":
+            rows=AccountingReportsService.balance_sheet(p.get("t"))
+            assets=sum(float(x.get("balance") or 0) for x in rows if str(x.get("account_type") or "").upper()=="ASSET" or str(x.get("code") or "").startswith("1"))
+            liabilities=sum(float(x.get("balance") or 0) for x in rows if str(x.get("account_type") or "").upper()=="LIABILITY" or str(x.get("code") or "").startswith("2"))
+            equity=sum(float(x.get("balance") or 0) for x in rows if str(x.get("account_type") or "").upper() in {"EQUITY","CAPITAL"} or str(x.get("code") or "").startswith("3"))
+            return ["البند","القيمة"], [
+                ("الأصول",round(assets,2)),
+                ("الخصوم",round(liabilities,2)),
+                ("حقوق الملكية",round(equity,2)),
+                ("الفرق",round(assets-liabilities-equity,2)),
+            ]
+        if k=="cashflow":
+            rows=AccountingReportsService.cash_flow_summary(p.get("f"),p.get("t"))
+            return ["الحساب","رقم الحساب","الحركة"], [
+                (x.get("name_ar"),x.get("code"),round(float(x.get("balance") or 0),2)) for x in rows
+            ]
         if k=="cash":return ["التاريخ","النوع","المبلغ","المرجع"],self._run(s,"SELECT created_at,transaction_type,amount,reference_type FROM cash_transactions WHERE date(created_at) BETWEEN :f AND :t ORDER BY id DESC",p)
         if k=="bank":return ["التاريخ","الحساب","النوع","المبلغ","المرجع"],self._run(s,"SELECT bt.transaction_date,ba.account_name,bt.transaction_type,bt.amount,bt.reference_type FROM bank_transactions bt JOIN bank_accounts ba ON ba.id=bt.bank_account_id WHERE date(bt.transaction_date) BETWEEN :f AND :t ORDER BY bt.id DESC",p)
         if k=="expenses":
