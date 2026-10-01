@@ -78,8 +78,9 @@ class ProductCardDialog(QDialog):
 class InventoryWindow(QWidget):
     """واجهة تشغيلية لعرض المخزون والبحث في الأصناف."""
 
-    def __init__(self, parent=None):
+    def __init__(self, user=None, parent=None):
         super().__init__(parent)
+        self.user = dict(user or {})
         self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("المنتجات والمخزون")
         self.setMinimumSize(1150, 650)
@@ -177,7 +178,7 @@ class InventoryWindow(QWidget):
         buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject); form.addRow(buttons)
         if dialog.exec()!=QDialog.Accepted: return
         try:
-            ProductService.create_product(sku.text(),name.text(),cost.value(),sale.value(),barcode.text() or None,opening.value(),warehouse.currentData() or 1)
+            ProductService.create_product(sku.text(),name.text(),cost.value(),sale.value(),barcode.text() or None,opening.value(),warehouse.currentData() or 1,user_id=self.user.get("id"))
             QMessageBox.information(self,"تم","تم إنشاء الصنف بنجاح"); self.load("")
         except Exception as exc: QMessageBox.critical(self,"فشل إنشاء الصنف",str(exc))
 
@@ -216,7 +217,7 @@ class InventoryWindow(QWidget):
         buttons=QDialogButtonBox(QDialogButtonBox.Ok|QDialogButtonBox.Cancel); buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject); form.addRow(buttons)
         if dialog.exec()!=QDialog.Accepted: return
         try:
-            ProductService.update_product(product_id,sku.text(),name.text(),cost.value(),sale.value())
+            ProductService.update_product(product_id,sku.text(),name.text(),cost.value(),sale.value(),user_id=self.user.get("id"))
             ProductService.adjust_quantity(product_id, warehouse.currentData() or 1, quantity.value())
             self.load(self.search.text().strip()); QMessageBox.information(self,"تم","تم تحديث الصنف بنجاح")
         except Exception as exc: QMessageBox.critical(self,"فشل التعديل",str(exc))
@@ -228,7 +229,7 @@ class InventoryWindow(QWidget):
         product_id=int(self.table.item(row,0).text())
         if QMessageBox.question(self,"تعطيل الصنف","سيتم إخفاؤه من التشغيل مع الاحتفاظ بتاريخه. هل تريد المتابعة؟",QMessageBox.Yes|QMessageBox.No)!=QMessageBox.Yes: return
         try:
-            ProductService.deactivate_product(product_id)
+            ProductService.deactivate_product(product_id,user_id=self.user.get("id"))
             self.load(self.search.text().strip())
         except Exception as exc:
             QMessageBox.critical(self,"فشل تعطيل الصنف",str(exc))
