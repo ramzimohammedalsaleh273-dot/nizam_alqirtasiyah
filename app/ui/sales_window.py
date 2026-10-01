@@ -12,8 +12,9 @@ from app.ui.theme import APP_STYLE
 class SalesWindow(QWidget):
     """سجل المبيعات بجدول واضح وبحث مباشر برقم الفاتورة."""
 
-    def __init__(self, parent=None):
+    def __init__(self, user=None, parent=None):
         super().__init__(parent)
+        self.user = dict(user or {})
         self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("المبيعات والفواتير")
         self.setMinimumSize(1250, 720)
@@ -139,7 +140,7 @@ class SalesWindow(QWidget):
             self.search.setFocus()
             return
 
-        window = SalesInvoiceWindow(self, data=data)
+        window = SalesInvoiceWindow(self.user, self, data=data)
         window.show()
         window.raise_()
         window.activateWindow()
@@ -157,7 +158,7 @@ class SalesWindow(QWidget):
             QMessageBox.warning(self, "غير موجود", "تعذر فتح الفاتورة المحددة.")
             return
         sale_id = int(data["sale"]["id"])
-        window = SalesInvoiceWindow(self, sale_id=sale_id)
+        window = SalesInvoiceWindow(self.user, self, sale_id=sale_id)
         window.show()
         window.raise_()
         window.activateWindow()
