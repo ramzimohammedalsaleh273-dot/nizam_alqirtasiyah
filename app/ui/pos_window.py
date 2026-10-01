@@ -12,6 +12,7 @@ from app.services.pos_service import POSService
 from app.services.tax_service import TaxService
 from app.services.pos_hold_service import POSHoldService
 from app.services.pos_search_service import POSProductSearch
+from app.ui.theme import APP_STYLE
 
 
 class PaymentDialog(QDialog):
@@ -123,25 +124,7 @@ class POSWindow(QWidget):
         self.setWindowTitle("نقطة البيع")
         self.setMinimumSize(1250, 780)
         self.setLayoutDirection(Qt.RightToLeft)
-        self.setStyleSheet("""
-            QWidget { font-size:14px; }
-            QTableWidget {
-                background:#0D1B2A; color:#F4F7FB;
-                gridline-color:#29435C; border:1px solid #29435C;
-                selection-background-color:#244E72; selection-color:#FFFFFF;
-            }
-            QTableWidget::item { padding:7px; }
-            QHeaderView::section {
-                background:#13263D; color:#FFFFFF; padding:10px;
-                border:0; border-bottom:1px solid #29435C; font-weight:700;
-            }
-            QLineEdit, QDoubleSpinBox {
-                background:#0E1C2D; color:#FFFFFF;
-                border:1px solid #29445F; border-radius:7px;
-                padding:8px; min-height:22px;
-            }
-            QPushButton { padding:8px 14px; min-height:36px; }
-        """)
+        self.setStyleSheet(APP_STYLE)
 
         root = QVBoxLayout(self)
         root.setContentsMargins(16, 16, 16, 16)
@@ -180,16 +163,20 @@ class POSWindow(QWidget):
         root.addWidget(self.suggestions)
 
         # الجدول الرئيسي: هو مكان إدخال الفاتورة نفسه.
-        self.table = QTableWidget(1, 7)
+        self.table = QTableWidget(1, 10)
         self.table.setHorizontalHeaderLabels([
-            "#", "الصنف / الكود / الباركود", "الكمية",
-            "سعر الوحدة", "الخصم", "الضريبة", "الإجمالي"
+            "م", "الباركود / الإدخال", "كود الصنف", "اسم الصنف", "الوحدة",
+            "الكمية", "السعر", "الخصم", "الضريبة", "الإجمالي"
         ])
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.Fixed)
         header.resizeSection(0, 55)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
-        for c, width in ((2, 95), (3, 125), (4, 105), (5, 110), (6, 135)):
+        header.setSectionResizeMode(1, QHeaderView.Fixed)
+        header.resizeSection(1, 180)
+        header.setSectionResizeMode(2, QHeaderView.Fixed)
+        header.resizeSection(2, 120)
+        header.setSectionResizeMode(3, QHeaderView.Stretch)
+        for c, width in ((4, 85), (5, 85), (6, 105), (7, 95), (8, 100), (9, 125)):
             header.setSectionResizeMode(c, QHeaderView.Fixed)
             header.resizeSection(c, width)
         self.table.verticalHeader().setVisible(False)
@@ -262,7 +249,7 @@ class POSWindow(QWidget):
             self.table.setItem(last, 1, QTableWidgetItem(""))
             self._loading_table = False
         self.table.setItem(last, 0, QTableWidgetItem(str(last + 1)))
-        for col in (2, 3, 4, 5, 6):
+        for col in range(2, 10):
             if self.table.item(last, col) is None:
                 self.table.setItem(last, col, QTableWidgetItem(""))
 
@@ -331,7 +318,7 @@ class POSWindow(QWidget):
             self._product_edit_timer.start(250)
             return
 
-        if col == 2 and row < len(self.cart):
+        if col == 5 and row < len(self.cart):
             try:
                 quantity = float(item.text().strip().replace(",", "."))
                 if quantity <= 0:
@@ -345,8 +332,8 @@ class POSWindow(QWidget):
     def _cell_double_clicked(self, row, col):
         if col == 1:
             self.table.editItem(self.table.item(row, 1))
-        elif col == 2 and row < len(self.cart):
-            self.table.editItem(self.table.item(row, 2))
+        elif col == 5 and row < len(self.cart):
+            self.table.editItem(self.table.item(row, 5))
 
     def _resolve_product_cell(self, row, value):
         if row >= self.table.rowCount():
@@ -386,6 +373,8 @@ class POSWindow(QWidget):
                 "product_id": product_id,
                 "sku": product.get("sku") or "",
                 "name": product.get("name_ar") or product.get("name_en") or "",
+                "barcode": product.get("barcode") or "",
+                "unit": product.get("unit_name") or product.get("unit") or "—",
                 "quantity": 1,
                 "unit_price": float(product.get("sale_price") or 0),
                 "discount": 0,
@@ -414,21 +403,23 @@ class POSWindow(QWidget):
             taxable += line
 
             values = [
-                str(row + 1), item["name"], f'{float(item["quantity"]):g}',
-                f'{item["unit_price"]:.2f}', f'{item["discount"]:.2f}',
-                f'{float(tax_data["tax"]):.2f}', f'{float(tax_data["total"]):.2f}'
+                str(row + 1), item.get("barcode") or item.get("sku") or "",
+                item.get("sku") or "", item["name"], item.get("unit") or "—",
+                f'{float(item["quantity"]):g}', f'{item["unit_price"]:.2f}',
+                f'{item["discount"]:.2f}', f'{float(tax_data["tax"]):.2f}',
+                f'{float(tax_data["total"]):.2f}'
             ]
             for col, value in enumerate(values):
                 cell = QTableWidgetItem(value)
                 cell.setTextAlignment(Qt.AlignCenter if col != 1 else Qt.AlignRight | Qt.AlignVCenter)
-                if col not in (1, 2):
+                if col not in (1, 5):
                     cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)
                 self.table.setItem(row, col, cell)
 
         blank = len(self.cart)
         self.table.setItem(blank, 0, QTableWidgetItem(str(blank + 1)))
         self.table.setItem(blank, 1, QTableWidgetItem(""))
-        for col in (2, 3, 4, 5, 6):
+        for col in range(2, 10):
             self.table.setItem(blank, col, QTableWidgetItem(""))
 
         self._loading_table = False
