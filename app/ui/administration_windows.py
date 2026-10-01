@@ -1,3 +1,4 @@
+from app.ui.theme import APP_STYLE
 from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QLabel,QPushButton,QTableWidget,QTableWidgetItem,QTabWidget,QMessageBox
 from sqlalchemy import text
 from app.database.connection import get_session
@@ -6,7 +7,8 @@ from app.database.connection import get_session
 class DataWindow(QWidget):
     """واجهة تشغيلية عامة للوحدات الإدارية والمالية تعتمد على الجداول الفعلية."""
     def __init__(self,title,sections,parent=None):
-        super().__init__(parent); self.title=title; self.sections=sections
+        super().__init__(parent)
+        self.setStyleSheet(APP_STYLE); self.title=title; self.sections=sections
         self.setWindowTitle(title); self.setMinimumSize(1100,650)
         root=QVBoxLayout(self); h=QHBoxLayout()
         label=QLabel(title); label.setStyleSheet("font-size:28px;font-weight:bold")
