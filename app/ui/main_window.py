@@ -240,9 +240,13 @@ class MainWindow(QMainWindow):
                 ("الوحدات", lambda: self.open_data("units", "الوحدات")),
                 ("المستودعات", lambda: self.open_data("warehouses", "المستودعات")),
                 ("المخزون وحركاته", self.open_inventory),
-                ("مواقع التخزين", lambda: self.open_data("warehouse_locations", "مواقع التخزين", editable=False)),
-                ("حركات المخزون", lambda: self.open_data("inventory_transactions", "حركات المخزون", editable=False)),
-                ("المرتجعات", lambda: self.open_data("returns", "المرتجعات", editable=False)),
+                ("مناطق التخزين", lambda: self.open_data("warehouse_zones", "مناطق التخزين")),
+                ("الممرات", lambda: self.open_data("warehouse_aisles", "الممرات")),
+                ("الأرفف", lambda: self.open_data("warehouse_shelves", "الأرفف")),
+                ("الخانات", lambda: self.open_data("warehouse_bins", "الخانات")),
+                ("حركات المخزون", lambda: self.open_data("stock_movements", "حركات المخزون", editable=False)),
+                ("مرتجعات المبيعات", self.open_sales_returns),
+                ("مرتجعات المشتريات", self.open_purchase_returns),
                 ("الجرد", lambda: self.open_data("stocktakes", "الجرد")),
                 ("العملاء", lambda: self.open_data("customers", "العملاء")),
                 ("الموردون", lambda: self.open_data("suppliers", "الموردون")),
@@ -254,6 +258,7 @@ class MainWindow(QMainWindow):
                 ("دليل الحسابات", lambda: self.open_data("accounts", "دليل الحسابات")),
                 ("الصناديق", lambda: self.open_data("cash_registers", "الصناديق")),
                 ("الضرائب", lambda: self.open_data("tax_rates", "الضرائب")),
+                ("الفواتير الضريبية", lambda: self.open_data("tax_invoices", "الفواتير الضريبية", editable=False)),
                 ("المصروفات", lambda: self.open_window("expenses", ExpenseWindow)),
                 ("الفترات المالية", lambda: self.open_data("fiscal_periods", "الفترات المالية")),
             ]),
@@ -261,8 +266,16 @@ class MainWindow(QMainWindow):
                 ("الشركات", lambda: self.open_data("companies", "الشركات")),
                 ("الفروع", lambda: self.open_data("branches", "الفروع")),
                 ("الموظفون", lambda: self.open_data("employees", "الموظفون")),
+                ("الأقسام", lambda: self.open_data("departments", "الأقسام")),
+                ("الوظائف", lambda: self.open_data("job_positions", "الوظائف")),
+                ("الحضور والانصراف", lambda: self.open_data("employee_attendance", "الحضور والانصراف")),
+                ("الإجازات", lambda: self.open_data("employee_leaves", "الإجازات")),
+                ("مسيرات الرواتب", lambda: self.open_data("payroll_runs", "مسيرات الرواتب")),
+                ("تفاصيل الرواتب", lambda: self.open_data("payroll_items", "تفاصيل الرواتب", editable=False)),
                 ("المستخدمون", lambda: self.open_data("users", "المستخدمون")),
+                ("جلسات الدخول", lambda: self.open_data("login_sessions", "جلسات الدخول", editable=False)),
                 ("الأدوار", lambda: self.open_data("roles", "الأدوار")),
+                ("الصلاحيات", lambda: self.open_data("permissions", "الصلاحيات", editable=False)),
                 ("مصفوفة الصلاحيات", lambda: self.open_window("permissions", PermissionsWindow)),
                 ("التقارير", self.open_reports),
                 ("التحليلات", lambda: self.open_window("analytics", AnalyticsWindow)),
@@ -274,6 +287,8 @@ class MainWindow(QMainWindow):
                 ("سجل التدقيق", lambda: self.open_data("audit_logs", "سجل التدقيق", editable=False)),
                 ("النسخ الاحتياطي والاستعادة", self.open_backup),
                 ("المزامنة", lambda: self.open_data("sync_queue", "طابور المزامنة", editable=False)),
+                ("تعارضات المزامنة", lambda: self.open_data("sync_conflicts", "تعارضات المزامنة", editable=False)),
+                ("أجهزة المزامنة", lambda: self.open_data("sync_devices", "أجهزة المزامنة", editable=False)),
                 ("الإعدادات", self.open_settings),
                 ("صحة النظام", self.open_health),
             ]),
@@ -461,11 +476,11 @@ class MainWindow(QMainWindow):
                     ["type", "title", "message", "created_at", "status"],
                 )
                 low = session.execute(text("""
-                    SELECT p.barcode, p.name_ar,
-                           COALESCE(st.available_quantity,0),
+                    SELECT p.sku, p.name_ar,
+                           COALESCE(st.quantity - st.reserved_quantity,0),
                            COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)
                     FROM products p
-                    LEFT JOIN stock st ON st.product_id=p.id
+                    LEFT JOIN stock_balances st ON st.product_id=p.id
                     WHERE p.is_active=1
                       AND COALESCE(st.available_quantity,0)
                           <= COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)
@@ -494,7 +509,7 @@ class MainWindow(QMainWindow):
             ), 1)
             bottom.addWidget(self._dashboard_section(
                 "الأصناف منخفضة المخزون",
-                ["الباركود", "الصنف", "الرصيد الحالي", "الحد الأدنى"],
+                ["رمز الصنف", "الصنف", "الرصيد الحالي", "الحد الأدنى"],
                 low,
             ), 1)
             self.content_layout.addLayout(bottom)
