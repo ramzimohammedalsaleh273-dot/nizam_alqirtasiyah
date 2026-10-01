@@ -34,6 +34,7 @@ from app.ui.theme import APP_STYLE
 from app.ui.access_data_window import AccessDataWindow
 from app.ui.expense_window import ExpenseWindow
 from app.ui.analytics_window import AnalyticsWindow
+from app.ui.permissions_window import PermissionsWindow
 
 
 class LoginDialog(QDialog):
@@ -253,7 +254,8 @@ class MainWindow(QMainWindow):
                 ("الفروع", lambda: self.open_data("branches", "الفروع")),
                 ("الموظفون", lambda: self.open_data("employees", "الموظفون")),
                 ("المستخدمون", lambda: self.open_data("users", "المستخدمون")),
-                ("الأدوار والصلاحيات", lambda: self.open_data("roles", "الأدوار")),
+                ("الأدوار", lambda: self.open_data("roles", "الأدوار")),
+                ("مصفوفة الصلاحيات", lambda: self.open_window("permissions", PermissionsWindow)),
                 ("التقارير", self.open_reports),
                 ("التحليلات", lambda: self.open_window("analytics", AnalyticsWindow)),
                 ("التنبيهات", self.open_smart_operations),
