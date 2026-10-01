@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QPushButton,QLabel,QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QInputDialog,QMessageBox,QTabWidget
+from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QPushButton,QLabel,QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QInputDialog,QMessageBox,QTabWidget,QDialog,QFormLayout,QDialogButtonBox
 from sqlalchemy import text
 from app.database.connection import get_session
 from app.services.party_payment_service import PartyPaymentService
@@ -8,11 +8,35 @@ from app.services.permission_service import PermissionService
 from app.services.treasury_operations_service import TreasuryOperationsService
 from app.ui.theme import APP_STYLE
 
+
+class CashSessionReportDialog(QDialog):
+    def __init__(self, session_id, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("تقرير إغلاق الصندوق")
+        self.setMinimumWidth(520); self.setLayoutDirection(Qt.RightToLeft); self.setStyleSheet(APP_STYLE)
+        form=QFormLayout(self)
+        with get_session() as s:
+            row=s.execute(text("SELECT * FROM cash_sessions WHERE id=:id"),{"id":session_id}).mappings().first()
+            if not row: raise ValueError("الوردية غير موجودة")
+            values={
+                "الرصيد الافتتاحي":row.get("opening_balance") or 0,
+                "نقدية المبيعات":s.execute(text("SELECT COALESCE(SUM(amount),0) FROM cash_transactions WHERE transaction_type IN ('SALE','SALES') AND reference_id=:id"),{"id":session_id}).scalar() or 0,
+                "قبض":s.execute(text("SELECT COALESCE(SUM(amount),0) FROM cash_transactions WHERE transaction_type IN ('RECEIPT','CUSTOMER_RECEIPT') AND reference_id=:id"),{"id":session_id}).scalar() or 0,
+                "صرف":s.execute(text("SELECT COALESCE(SUM(amount),0) FROM cash_transactions WHERE transaction_type IN ('EXPENSE','PAYMENT','SUPPLIER_PAYMENT') AND reference_id=:id"),{"id":session_id}).scalar() or 0,
+                "تحويل":s.execute(text("SELECT COALESCE(SUM(amount),0) FROM cash_transactions WHERE transaction_type='TRANSFER' AND reference_id=:id"),{"id":session_id}).scalar() or 0,
+                "الرصيد المتوقع":row.get("expected_balance") or 0,
+                "الرصيد الفعلي":row.get("actual_balance") or 0,
+                "الفرق":row.get("difference") or 0,
+            }
+        for k,v in values.items():
+            form.addRow(k+":",QLabel(f"{float(v):,.2f}"))
+        b=QDialogButtonBox(QDialogButtonBox.Close); b.rejected.connect(self.reject); b.accepted.connect(self.accept); form.addRow(b)
+
 class TreasuryOperationsWindow(QWidget):
     def __init__(self,parent=None):
         super().__init__(parent); self.setStyleSheet(APP_STYLE); self.setWindowTitle("الخزينة"); self.setMinimumSize(1150,700); self.setLayoutDirection(Qt.RightToLeft)
         root=QVBoxLayout(self); h=QHBoxLayout(); t=QLabel("الخزينة والصناديق"); t.setObjectName("SectionTitle"); h.addWidget(t); h.addStretch()
-        for cap,fn,obj in [("سند قبض",self.receive_customer,"Success"),("سند صرف",self.pay_supplier,"Danger"),("فتح وردية",self.open_cashier,"Primary"),("إغلاق وردية",self.close_cashier,"Warning"),("تحديث",self.load,"Secondary")]:
+        for cap,fn,obj in [("سند قبض",self.receive_customer,"Success"),("سند صرف",self.pay_supplier,"Danger"),("فتح وردية",self.open_cashier,"Primary"),("إغلاق وردية",self.close_cashier,"Warning"),("تقرير إغلاق",self.session_report,"Secondary"),("تحديث",self.load,"Secondary")]:
             b=QPushButton(cap); b.setObjectName(obj); b.clicked.connect(fn); h.addWidget(b)
         root.addLayout(h)
         self.tabs=QTabWidget(); root.addWidget(self.tabs,1)
@@ -40,6 +64,16 @@ class TreasuryOperationsWindow(QWidget):
                     r=w.rowCount(); w.insertRow(r)
                     for c,v in enumerate(row): w.setItem(r,c,QTableWidgetItem("" if v is None else str(v)))
         self.status.setText("تم تحديث الخزينة والورديات.")
+    def session_report(self):
+        row=self.tables["sessions"][0].currentRow()
+        if row<0:
+            QMessageBox.warning(self,"تقرير الإغلاق","حدد وردية من تبويب الورديات أولاً."); return
+        try:
+            session_id=int(self.tables["sessions"][0].item(row,0).text())
+            CashSessionReportDialog(session_id,self).exec()
+        except Exception as exc:
+            QMessageBox.critical(self,"تعذر التقرير",str(exc))
+
     def _amount(self,title):
         v,ok=QInputDialog.getDouble(self,title,"المبلغ:",0,0,999999999,2); return v if ok else None
     def receive_customer(self):
