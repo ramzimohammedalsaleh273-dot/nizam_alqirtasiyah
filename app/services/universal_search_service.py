@@ -3,7 +3,16 @@ from app.database.connection import get_session
 
 
 class UniversalSearchService:
-    """بحث موحد مع ملف تشغيلي كامل للمنتج/العميل/المورد."""
+    """بحث موحد مع تطبيع عربي للبحث دون تغيير البيانات الأصلية."""
+    @staticmethod
+    def normalize(value):
+        value = str(value or "")
+        for a,b in (("أ","ا"),("إ","ا"),("آ","ا"),("ى","ي"),("ة","ه")):
+            value=value.replace(a,b)
+        return value.strip()
+    @staticmethod
+    def norm_sql(expr):
+        return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE("+expr+",'أ','ا'),'إ','ا'),'آ','ا'),'ى','ي'),'ة','ه')"
 
     @staticmethod
     def _exists(s, table):
@@ -22,8 +31,9 @@ class UniversalSearchService:
 
     @classmethod
     def search(cls, term="", limit=80):
-        term = (term or "").strip()
+        term = cls.normalize(term)
         like = f"%{term}%"
+        norm_like = f"%{term}%"
         with get_session() as s:
             out = []
 
@@ -33,10 +43,10 @@ class UniversalSearchService:
                     FROM products
                     WHERE is_active=1
                       AND (:term='' OR name_ar LIKE :like OR name_en LIKE :like OR sku LIKE :like
-                           OR EXISTS (SELECT 1 FROM product_barcodes pb
+                           OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(name_ar,'أ','ا'),'إ','ا'),'آ','ا'),'ى','ي'),'ة','ه') LIKE :norm_like OR EXISTS (SELECT 1 FROM product_barcodes pb
                                       WHERE pb.product_id=products.id AND pb.barcode LIKE :like))
                     ORDER BY id DESC LIMIT :limit
-                """), {"term": term, "like": like, "limit": limit}).fetchall()
+                """), {"term": term, "like": like, "norm_like": norm_like, "limit": limit}).fetchall()
                 out += [{"kind": "product", "kind_name": "منتج", "id": r.id,
                          "name": r.name, "code": r.sku or "", "subtitle": r.sku or ""} for r in rows]
 
@@ -49,7 +59,7 @@ class UniversalSearchService:
                 rows = s.execute(text(f"""
                     SELECT id, name, {code} AS code, phone
                     FROM {table}
-                    WHERE (:term='' OR name LIKE :like OR {code} LIKE :like OR COALESCE(phone,'') LIKE :like)
+                    WHERE (:term='' OR name LIKE :like OR {code} LIKE :like OR COALESCE(phone,'') LIKE :like OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(name,'أ','ا'),'إ','ا'),'آ','ا'),'ى','ي'),'ة','ه') LIKE :norm_like)
                     ORDER BY id DESC LIMIT :limit
                 """), {"term": term, "like": like, "limit": limit}).fetchall()
                 out += [{"kind": kind, "kind_name": label, "id": r.id,
@@ -73,7 +83,8 @@ class UniversalSearchService:
                     SELECT id, {name_col} AS name, {code_expr} AS code
                     FROM {table}
                     WHERE (:term='' OR COALESCE({name_col},'') LIKE :like
-                           OR COALESCE({code_expr},'') LIKE :like)
+                           OR COALESCE({code_expr},'') LIKE :like
+                           OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE({name_col},''),'أ','ا'),'إ','ا'),'آ','ا'),'ى','ي'),'ة','ه') LIKE :norm_like)
                     ORDER BY id DESC LIMIT :limit
                 """), {"term": term, "like": like, "limit": limit}).fetchall()
                 out += [{"kind": kind, "kind_name": label, "id": r.id,
