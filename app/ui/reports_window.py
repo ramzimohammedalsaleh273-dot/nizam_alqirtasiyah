@@ -1,3 +1,4 @@
+from app.ui.theme import APP_STYLE
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox
@@ -12,6 +13,7 @@ class ReportsWindow(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("التقارير")
         self.setMinimumSize(1100, 650)
 
@@ -125,3 +127,5 @@ class ReportsWindow(QWidget):
                         f"{float(value):,.2f}" if isinstance(value, (int, float)) else str(value)
                     )
                 )
+
+# UI reference theme is applied by the main application shell.
