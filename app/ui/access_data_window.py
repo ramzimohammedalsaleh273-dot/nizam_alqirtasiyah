@@ -12,6 +12,8 @@ from PySide6.QtWidgets import (
 )
 from sqlalchemy import text
 from app.database.connection import get_session
+from app.services.permission_service import PermissionService
+from app.services.audit_service import AuditService
 from app.ui.theme import APP_STYLE
 from openpyxl import Workbook
 
@@ -97,7 +99,41 @@ class RecordDialog(QDialog):
         return out
 
 class AccessDataWindow(QWidget):
-    def __init__(self,table_name,title=None,columns=None,editable=True,parent=None):
+    TABLE_PERMISSIONS = {
+        "products": "inventory",
+        "product_categories": "inventory",
+        "units": "inventory",
+        "warehouses": "inventory",
+        "stock_movements": "inventory",
+        "stocktakes": "inventory.stocktake",
+        "customers": "customer",
+        "suppliers": "supplier",
+        "sales": "sale",
+        "sale_items": "sale",
+        "sale_payments": "sale",
+        "purchase_orders": "purchase.order",
+        "purchase_invoices": "purchase.invoice",
+        "purchase_invoice_items": "purchase.invoice",
+        "purchase_returns": "purchase.return",
+        "accounts": "accounting",
+        "journal_entries": "accounting",
+        "journal_entry_lines": "accounting",
+        "cash_registers": "treasury",
+        "bank_accounts": "treasury",
+        "treasury_accounts": "treasury",
+        "tax_rates": "tax",
+        "tax_invoices": "tax",
+        "employees": "employee",
+        "users": "user",
+        "roles": "user",
+        "permissions": "user",
+        "approval_requests": "approval",
+        "documents": "document",
+        "expenses": "expense",
+        "system_settings": "settings",
+    }
+
+    def __init__(self,table_name,title=None,columns=None,editable=True,user=None,parent=None):
         super().__init__(parent); self.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint); self.setAttribute(Qt.WA_DeleteOnClose, False); self.table_name=table_name; self.title_text=title or TITLES.get(table_name,table_name)
         self.requested_columns=columns; self.editable=editable; self.page_size=100; self.page=0; self.total=0; self.columns=[]
         self.setWindowTitle(self.title_text); self.setMinimumSize(1100,680); self.setLayoutDirection(Qt.RightToLeft); self.setStyleSheet(APP_STYLE)
@@ -275,8 +311,28 @@ class AccessDataWindow(QWidget):
         except Exception:return None
     def _record(self,rid):
         with get_session() as s:return s.execute(text(f'SELECT * FROM "{self.table_name}" WHERE id=:id'),{"id":rid}).mappings().first()
+    def _permission(self, action):
+        base = self.TABLE_PERMISSIONS.get(self.table_name)
+        if not base:
+            return True
+        uid = self.user.get("id")
+        if uid is None:
+            QMessageBox.warning(self, "الصلاحيات", "لا يوجد مستخدم مسجل الدخول لتنفيذ العملية.")
+            return False
+        try:
+            with get_session() as s:
+                PermissionService.ensure_schema(s)
+                if not PermissionService.has_in_session(s, uid, f"{base}.{action}"):
+                    QMessageBox.warning(self, "الصلاحيات", "ليس لديك صلاحية تنفيذ هذه العملية.")
+                    return False
+        except Exception as exc:
+            QMessageBox.critical(self, "الصلاحيات", str(exc))
+            return False
+        return True
+
     def add(self):
         if not self.editable:return
+        if not self._permission("create"): return
         d=RecordDialog(f"إضافة — {self.title_text}",self.columns,parent=self)
         if d.exec()!=QDialog.Accepted:return
         vals={k:v for k,v in d.values().items() if k not in READONLY and k in {x["name"] for x in self.columns}}
@@ -289,6 +345,7 @@ class AccessDataWindow(QWidget):
         except Exception as e:QMessageBox.critical(self,"تعذر الحفظ",str(e))
     def edit(self):
         if not self.editable:return
+        if not self._permission("edit"): return
         rid=self._id()
         if rid is None:return QMessageBox.warning(self,"تعديل","حدد سجلًا أولاً.")
         rec=self._record(rid)
@@ -304,6 +361,7 @@ class AccessDataWindow(QWidget):
         except Exception as e:QMessageBox.critical(self,"تعذر التعديل",str(e))
     def delete(self):
         if not self.editable:return
+        if not self._permission("delete"): return
         if self.table_name in PROTECTED_DELETE_TABLES:
             return QMessageBox.warning(
                 self,
