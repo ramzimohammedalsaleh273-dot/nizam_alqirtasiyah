@@ -270,6 +270,7 @@ class MainWindow(QMainWindow):
                 ("المستندات", lambda: self.open_window("documents", DocumentsWindow)),
                 ("طلبات الاعتماد", lambda: self.open_data("approval_requests", "طلبات الاعتماد")),
                 ("سجل التدقيق", lambda: self.open_data("audit_logs", "سجل التدقيق", editable=False)),
+                ("النسخ الاحتياطي والاستعادة", self.open_backup),
                 ("المزامنة", lambda: self.open_data("sync_queue", "طابور المزامنة", editable=False)),
                 ("النسخ الاحتياطي", self.open_backup),
                 ("الإعدادات", self.open_settings),
