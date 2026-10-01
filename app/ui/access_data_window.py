@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
     QApplication,QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QLineEdit,QPushButton,QLabel,
     QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QMessageBox,QApplication,
     QDialog,QDialogButtonBox,QTextEdit,QDoubleSpinBox,QSpinBox,QCheckBox,
-    QComboBox,QMenu,QFileDialog,QFileDialog,QInputDialog
+    QComboBox,QMenu,QFileDialog,QFileDialog,QFileDialog,QInputDialog
 )
 from sqlalchemy import text
 from app.database.connection import get_session
@@ -141,6 +141,17 @@ class AccessDataWindow(QWidget):
             if st: clauses.append(f'CAST("{st}" AS TEXT)=:fv'); p["fv"]=fv
         return (" WHERE "+" AND ".join(clauses)) if clauses else "",p
     def _changed(self,_): self.load(reset=True)
+
+    def focus_search(self):
+        self.search.setFocus()
+        self.search.selectAll()
+
+    def clear_search(self):
+        self.search.clear()
+        self.filter.setCurrentIndex(0)
+
+    def _selection_changed(self):
+        self.status.setText(f"السجلات: {self.total:,}    المحدد: {1 if self.table.currentRow()>=0 else 0}")
     def load(self,*_,reset=False):
         if reset:self.page=0
         if not self.columns:return
@@ -267,6 +278,45 @@ class AccessDataWindow(QWidget):
             with get_session() as s:s.execute(text(f'DELETE FROM "{self.table_name}" WHERE id=:id'),{"id":rid}); s.commit()
             self.load()
         except Exception as e:QMessageBox.critical(self,"تعذر الحذف",str(e))
+    def export_data(self):
+        path, _ = QFileDialog.getSaveFileName(self, "تصدير البيانات", f"{self.table_name}.xlsx", "Excel (*.xlsx);;CSV (*.csv);;PDF (*.pdf)")
+        if not path:
+            return
+        try:
+            headers=[self.table.horizontalHeaderItem(i).text() for i in range(self.table.columnCount())]
+            rows=[[self.table.item(r,c).text() if self.table.item(r,c) else "" for c in range(self.table.columnCount())] for r in range(self.table.rowCount())]
+            if path.lower().endswith(".csv"):
+                import csv
+                with open(path,"w",newline="",encoding="utf-8-sig") as fh:
+                    w=csv.writer(fh); w.writerow(headers); w.writerows(rows)
+            elif path.lower().endswith(".pdf"):
+                from reportlab.lib import colors
+                from reportlab.lib.pagesizes import landscape,A4
+                from reportlab.lib.styles import getSampleStyleSheet
+                from reportlab.platypus import SimpleDocTemplate,Table,TableStyle,Paragraph
+                from reportlab.pdfbase import pdfmetrics
+                from reportlab.pdfbase.ttfonts import TTFont
+                doc=SimpleDocTemplate(path,pagesize=landscape(A4),rightMargin=18,leftMargin=18,topMargin=18,bottomMargin=18)
+                styles=getSampleStyleSheet()
+                story=[Paragraph(self.title_text,styles["Title"])]
+                data=[headers]+rows
+                tbl=Table(data,repeatRows=1)
+                tbl.setStyle(TableStyle([("GRID",(0,0),(-1,-1),0.4,colors.grey),("BACKGROUND",(0,0),(-1,0),colors.lightgrey),("FONTSIZE",(0,0),(-1,-1),7),("ALIGN",(0,0),(-1,-1),"CENTER")]))
+                story.append(tbl); doc.build(story)
+            else:
+                from openpyxl import Workbook
+                wb=Workbook(); ws=wb.active; ws.title=self.title_text[:31] or "بيانات"
+                ws.append(headers)
+                for row in rows: ws.append(row)
+                ws.freeze_panes="A2"; ws.auto_filter.ref=ws.dimensions
+                wb.save(path)
+            self.status.setText(f"تم التصدير: {path}")
+        except Exception as exc:
+            QMessageBox.critical(self,"تعذر التصدير",str(exc))
+
+    def print_data(self):
+        QMessageBox.information(self,"الطباعة","استخدم زر التصدير إلى PDF لحفظ نسخة قابلة للطباعة من الجدول.")
+
     def menu(self,pos):
         m=QMenu(self); m.addAction("فتح / تعديل",self.edit); m.addAction("نسخ المحدد",self.copy_selected); m.addAction("تحديث",self.load)
         if self.editable:m.addSeparator();m.addAction("حذف",self.delete)
