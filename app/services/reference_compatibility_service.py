@@ -16,11 +16,26 @@ class ReferenceCompatibilityService:
 UNION ALL
 SELECT id,return_number,'PURCHASE' AS return_type,invoice_id AS source_id,supplier_id AS party_id,reason,total_amount,status,created_at FROM purchase_returns""",
         }
+        tables = {
+            row[0] for row in session.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            ).all()
+        }
+        dependencies = {
+            "categories":{"product_categories"},
+            "inventory_transactions":{"stock_movements"},
+            "warehouse_locations":{"product_locations"},
+            "cashboxes":{"cash_registers"},
+            "purchases":{"purchase_invoices"},
+            "purchase_items":{"purchase_invoice_items"},
+            "taxes":{"tax_rates"},
+            "returns":{"sale_returns","purchase_returns"},
+        }
         for name, query in views.items():
             exists = session.execute(text(
                 "SELECT type FROM sqlite_master WHERE name=:name"
             ), {"name": name}).scalar()
-            if exists is None:
+            if exists is None and dependencies.get(name, set()).issubset(tables):
                 session.execute(text(f'CREATE VIEW "{name}" AS {query}'))
 
         session.execute(text("""
