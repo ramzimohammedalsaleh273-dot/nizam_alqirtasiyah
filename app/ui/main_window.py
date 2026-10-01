@@ -135,10 +135,14 @@ class MainWindow(QMainWindow):
 
     def _bootstrap_operational_schema(self):
         with get_session() as session:
+            # طبّق أي جداول مرجعية جديدة على النسخة المحلية دون حذف أو إعادة إنشاء
+            # الجداول الموجودة. هذا يجعل تحديثات المخطط تصل تلقائيًا إلى نسخة المستخدم.
+            ensure_reference_schema(session)
             tables={row[0] for row in session.execute(text("SELECT name FROM sqlite_master WHERE type='table'")).all()}
             # عند أول تشغيل على نسخة بلا قاعدة بيانات مكتملة لا نحاول تنفيذ خدمات
             # تعتمد على الحسابات؛ القاعدة التشغيلية الموجودة تستمر كالمعتاد.
             if "accounts" not in tables:
+                session.commit()
                 return
             TreasurySchemaService.ensure(session)
             ReferenceCompatibilityService.ensure(session)
