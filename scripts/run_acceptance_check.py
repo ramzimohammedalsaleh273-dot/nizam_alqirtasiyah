@@ -1,3 +1,10 @@
+from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from app.services.system_validation_service import SystemValidationService
 from app.database.connection import get_session
 from sqlalchemy import text
