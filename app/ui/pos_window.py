@@ -1,6 +1,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 
 from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton,
     QTableWidget, QTableWidgetItem, QLabel, QMessageBox,
@@ -236,6 +237,22 @@ class POSWindow(QWidget):
 
         self._ensure_blank_row()
         self._focus_product_cell(0)
+        self._shortcuts = []
+        for key, slot in [
+            ("F1", lambda: self.search.setFocus()),
+            ("F2", self.clear_cart),
+            ("F3", lambda: self.search.selectAll()),
+            ("F4", self.hold_sale),
+            ("F5", self.resume_sale),
+            ("F6", self.complete_sale),
+            ("F7", self.remove_selected),
+            ("F8", self.discount_selected),
+            ("F9", self.complete_sale),
+            ("Esc", lambda: self.search.clearFocus()),
+        ]:
+            sc = QShortcut(QKeySequence(key), self)
+            sc.activated.connect(slot)
+            self._shortcuts.append(sc)
 
     def _product_cell(self, row):
         return self.table.item(row, 1)
