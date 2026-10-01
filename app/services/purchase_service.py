@@ -53,10 +53,10 @@ class PurchaseService:
                     f=[fk,"product_id","quantity","unit_cost"];v=[":invoice",":product",":quantity",":cost"];d={"invoice":iid,"product":pid,"quantity":float(q),"cost":float(cost)}
                     if "line_total" in ic:f.append("line_total");v.append(":line_total");d["line_total"]=float(line)
                     s.execute(text(f"INSERT INTO purchase_invoice_items({','.join(f)}) VALUES({','.join(v)})"),d)
-                    stock=s.execute(text("SELECT id,quantity,available_quantity,average_cost FROM stock WHERE product_id=:p AND warehouse_id=:w LIMIT 1"),{"p":pid,"w":warehouse_id}).fetchone()
+                    stock=s.execute(text("SELECT id,quantity,reserved_quantity,average_cost FROM stock_balances WHERE product_id=:p AND warehouse_id=:w LIMIT 1"),{"p":pid,"w":warehouse_id}).fetchone()
                     if stock:
                         oldq=Decimal(str(stock.quantity or 0));oldc=Decimal(str(stock.average_cost or 0));newq=oldq+q;avg=((oldq*oldc)+(q*cost))/newq if newq else cost
-                        s.execute(text("UPDATE stock SET quantity=:q,available_quantity=COALESCE(available_quantity,0)+:add,average_cost=:avg,updated_at=CURRENT_TIMESTAMP WHERE id=:id"),{"q":float(newq),"add":float(q),"avg":float(avg),"id":stock.id})
+                        s.execute(text("UPDATE stock_balances SET quantity=:q,average_cost=:avg,last_movement_at=CURRENT_TIMESTAMP WHERE id=:id"),{"q":float(newq),"avg":float(avg),"id":stock.id})
                     else:
                         sc=cls._columns(s,"stock");f=["product_id","warehouse_id","quantity"];v=[":p",":w",":q"];d={"p":pid,"w":warehouse_id,"q":float(q)}
                         if "available_quantity" in sc:f.append("available_quantity");v.append(":q")
