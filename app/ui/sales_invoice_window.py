@@ -105,7 +105,7 @@ class SalesInvoiceWindow(QWidget):
         self.data = data
 
         self.setStyleSheet(APP_STYLE)
-      root = QVBoxLayout(self)
+        root = QVBoxLayout(self)
         root.setContentsMargins(16, 16, 16, 16)
         root.setSpacing(10)
 
