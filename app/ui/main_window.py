@@ -122,7 +122,19 @@ class LoginDialog(QDialog):
         self.accept()
 
 
-class MainWindow(QMainWindow):\n    """الحاوية الرئيسية مع فرض الصلاحيات على مستوى فتح الوحدات."""\n\n    WINDOW_PERMISSIONS = {\n        "pos": "sale.view", "sales": "sale.view", "sales_returns": "sale.return.create",\n        "purchases": "purchase.view", "purchase_workflow": "purchase.view", "purchase_returns": "purchase.return.create",\n        "inventory": "inventory.view", "stocktake": "inventory.stocktake", "parties": "customer.view",\n        "reports": "report.view", "accounting": "accounting.view", "treasury": "treasury.view",\n        "treasury_accounts": "treasury.view", "expenses": "treasury.payment", "analytics": "report.view",\n        "documents": "document.view", "permissions": "permission.manage", "settings": "settings.view",\n        "backup": "backup.create", "smart_operations": "report.view",\n    }\n    def __init__(self):
+class MainWindow(QMainWindow):
+    """الحاوية الرئيسية مع فرض الصلاحيات على مستوى فتح الوحدات."""
+
+    WINDOW_PERMISSIONS = {
+        "pos": "sale.view", "sales": "sale.view", "sales_returns": "sale.return.create",
+        "purchases": "purchase.view", "purchase_workflow": "purchase.view", "purchase_returns": "purchase.return.create",
+        "inventory": "inventory.view", "stocktake": "inventory.stocktake", "parties": "customer.view",
+        "reports": "report.view", "accounting": "accounting.view", "treasury": "treasury.view",
+        "treasury_accounts": "treasury.view", "expenses": "treasury.payment", "analytics": "report.view",
+        "documents": "document.view", "permissions": "permission.manage", "settings": "settings.view",
+        "backup": "backup.create", "smart_operations": "report.view",
+    }
+    def __init__(self):
         super().__init__()
         self.setWindowTitle(f"{APP_NAME} - {APP_VERSION}")
         self.setMinimumSize(1180, 720)
@@ -561,7 +573,70 @@ class MainWindow(QMainWindow):\n    """الحاوية الرئيسية مع فر
         window.setLayoutDirection(Qt.RightToLeft)
         return window
 
-    def _allowed(self, permission_code):\n        uid = self.current_user.get("id")\n        if uid is None:\n            QMessageBox.warning(self, "الصلاحيات", "لا يوجد مستخدم مسجل الدخول.")\n            return False\n        try:\n            with get_session() as s:\n                PermissionService.ensure_schema(s)\n                if PermissionService.has_in_session(s, int(uid), permission_code):\n                    return True\n        except Exception as exc:\n            QMessageBox.critical(self, "الصلاحيات", f"تعذر التحقق من الصلاحية: {exc}")\n            return False\n        QMessageBox.warning(self, "الصلاحيات", "لا تمتلك الصلاحية لتنفيذ هذا الإجراء.")\n        return False\n\n    def open_window(self, key, window_class):\n        permission_code = self.WINDOW_PERMISSIONS.get(key)\n        if permission_code and not self._allowed(permission_code):\n            return\n        self._close_other_windows(key)\n        window = self._child_windows.get(key)\n        if window is None:\n            try:\n                window = window_class(user=self.current_user, parent=self)\n            except TypeError:\n                try:\n                    window = window_class(parent=self)\n                except TypeError:\n                    window = window_class()\n            self._prepare_child_window(window)\n            self._child_windows[key] = window\n        else:\n            self._prepare_child_window(window)\n        window.show()\n        window.raise_()\n        window.activateWindow()\n    def open_data(self, table_name, title=None, columns=None, editable=True):\n        table_permissions = {\n            "products": "inventory.view", "product_categories": "inventory.view", "units": "inventory.view",\n            "warehouses": "inventory.view", "stock_movements": "inventory.view", "stocktakes": "inventory.stocktake",\n            "customers": "customer.view", "suppliers": "supplier.view", "users": "user.view",\n            "roles": "permission.manage", "permissions": "permission.manage", "approval_requests": "approval.view",\n            "accounts": "accounting.view", "journal_entries": "accounting.view", "journal_entry_lines": "accounting.view",\n            "cash_registers": "treasury.view", "cash_transactions": "treasury.view", "cash_sessions": "treasury.view",\n            "bank_accounts": "treasury.view", "banks": "treasury.view", "tax_rates": "accounting.view",\n            "tax_invoices": "sale.view", "audit_logs": "audit.view", "audit_log": "audit.view",\n            "employees": "user.view", "employee_attendance": "user.view", "payroll_runs": "user.view",\n            "system_settings": "settings.view", "companies": "settings.view", "branches": "settings.view",\n        }\n        permission_code = table_permissions.get(table_name)\n        if permission_code and not self._allowed(permission_code):\n            return\n        key = "data:" + table_name\n        self._close_other_windows(key)\n        window = self._child_windows.get(key)\n        if window is None:\n            window = AccessDataWindow(table_name, title, columns, editable=editable, user=self.current_user, parent=self)\n            self._child_windows[key] = window\n        self._prepare_child_window(window)\n        window.show()\n        window.raise_()\n        window.activateWindow()\n    def open_universal_search(self):
+    def _allowed(self, permission_code):\n        uid = self.current_user.get("id")\n        if uid is None:\n            QMessageBox.warning(self, "الصلاحيات", "لا يوجد مستخدم مسجل الدخول.")\n            return False\n        try:\n            with get_session() as s:\n                PermissionService.ensure_schema(s)\n                if PermissionService.has_in_session(s, int(uid), permission_code):\n                    return True\n        except Exception as exc:\n            QMessageBox.critical(self, "الصلاحيات", f"تعذر التحقق من الصلاحية: {exc}")\n            return False\n        QMessageBox.warning(self, "الصلاحيات", "لا تمتلك الصلاحية لتنفيذ هذا الإجراء.")\n        return False\n\n    def _allowed(self, permission_code):
+        uid = self.current_user.get("id")
+        if uid is None:
+            QMessageBox.warning(self, "الصلاحيات", "لا يوجد مستخدم مسجل الدخول.")
+            return False
+        try:
+            with get_session() as s:
+                PermissionService.ensure_schema(s)
+                if PermissionService.has_in_session(s, int(uid), permission_code):
+                    return True
+        except Exception as exc:
+            QMessageBox.critical(self, "الصلاحيات", f"تعذر التحقق من الصلاحية: {exc}")
+            return False
+        QMessageBox.warning(self, "الصلاحيات", "لا تمتلك الصلاحية لتنفيذ هذا الإجراء.")
+        return False
+
+    def open_window(self, key, window_class):
+        permission_code = self.WINDOW_PERMISSIONS.get(key)
+        if permission_code and not self._allowed(permission_code):
+            return
+        self._close_other_windows(key)
+        window = self._child_windows.get(key)
+        if window is None:
+            try:
+                window = window_class(user=self.current_user, parent=self)
+            except TypeError:
+                try:
+                    window = window_class(parent=self)
+                except TypeError:
+                    window = window_class()
+            self._prepare_child_window(window)
+            self._child_windows[key] = window
+        else:
+            self._prepare_child_window(window)
+        window.show()
+        window.raise_()
+        window.activateWindow()
+    def open_data(self, table_name, title=None, columns=None, editable=True):
+        table_permissions = {
+            "products": "inventory.view", "product_categories": "inventory.view", "units": "inventory.view",
+            "warehouses": "inventory.view", "stock_movements": "inventory.view", "stocktakes": "inventory.stocktake",
+            "customers": "customer.view", "suppliers": "supplier.view", "users": "user.view",
+            "roles": "permission.manage", "permissions": "permission.manage", "approval_requests": "approval.view",
+            "accounts": "accounting.view", "journal_entries": "accounting.view", "journal_entry_lines": "accounting.view",
+            "cash_registers": "treasury.view", "cash_transactions": "treasury.view", "cash_sessions": "treasury.view",
+            "bank_accounts": "treasury.view", "banks": "treasury.view", "tax_rates": "accounting.view",
+            "tax_invoices": "sale.view", "audit_logs": "audit.view", "audit_log": "audit.view",
+            "employees": "user.view", "employee_attendance": "user.view", "payroll_runs": "user.view",
+            "system_settings": "settings.view", "companies": "settings.view", "branches": "settings.view",
+        }
+        permission_code = table_permissions.get(table_name)
+        if permission_code and not self._allowed(permission_code):
+            return
+        key = "data:" + table_name
+        self._close_other_windows(key)
+        window = self._child_windows.get(key)
+        if window is None:
+            window = AccessDataWindow(table_name, title, columns, editable=editable, user=self.current_user, parent=self)
+            self._child_windows[key] = window
+        self._prepare_child_window(window)
+        window.show()
+        window.raise_()
+        window.activateWindow()
+    def open_universal_search(self):
         self.open_window("universal_search", UniversalSearchWindow)
 
     def open_smart_operations(self):
