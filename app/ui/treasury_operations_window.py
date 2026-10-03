@@ -6,6 +6,7 @@ from app.services.party_payment_service import PartyPaymentService
 from app.services.cashier_session_service import CashierSessionService
 from app.services.permission_service import PermissionService
 from app.ui.theme import APP_STYLE
+from app.ui.i18n import field_label, display_value
 
 class CashSessionReportDialog(QDialog):
     def __init__(self, session_id, parent=None):
@@ -25,7 +26,7 @@ class TreasuryOperationsWindow(QWidget):
             b=QPushButton(cap); b.setObjectName(obj); b.clicked.connect(fn); h.addWidget(b)
         root.addLayout(h); self.tabs=QTabWidget(); root.addWidget(self.tabs,1); self.tables={}
         for key,caption,table,cols in [("receipts","سندات القبض","cash_receipts",["id","receipt_number","receipt_date","customer_id","amount","payment_method","reference_number","notes"]),("payments","سندات الصرف","cash_payments",["id","payment_number","payment_date","supplier_id","amount","payment_method","reference_number","notes"]),("sessions","الورديات","cash_sessions",["id","register_id","user_id","opened_at","opening_balance","expected_balance","actual_balance","difference","closed_at","status"]),("movements","حركات الخزينة","cash_transactions",["id","transaction_type","amount","reference_type","reference_id","notes","created_at"])]:
-            w=QTableWidget(0,len(cols)); w.setHorizontalHeaderLabels(cols); w.setSelectionBehavior(QAbstractItemView.SelectRows); w.setEditTriggers(QAbstractItemView.NoEditTriggers); w.setAlternatingRowColors(True); w.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents); self.tabs.addTab(w,caption); self.tables[key]=(w,table,cols)
+            w=QTableWidget(0,len(cols)); w.setHorizontalHeaderLabels([field_label(c) for c in cols]); w.setSelectionBehavior(QAbstractItemView.SelectRows); w.setEditTriggers(QAbstractItemView.NoEditTriggers); w.setAlternatingRowColors(True); w.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents); self.tabs.addTab(w,caption); self.tables[key]=(w,table,cols)
         self.status=QLabel("جاهز"); root.addWidget(self.status); self.load()
     def _user(self):
         uid=PermissionService.default_user_id()
@@ -39,7 +40,7 @@ class TreasuryOperationsWindow(QWidget):
                 rows=s.execute(text(f'SELECT {",".join(chr(34)+c+chr(34) for c in cols)} FROM "{table}" ORDER BY rowid DESC LIMIT 200')).all()
                 for row in rows:
                     r=w.rowCount(); w.insertRow(r)
-                    for c,v in enumerate(row): w.setItem(r,c,QTableWidgetItem("" if v is None else str(v)))
+                    for c,v in enumerate(row): w.setItem(r,c,QTableWidgetItem(display_value(v)))
         self.status.setText("تم تحديث الخزينة والورديات.")
     def session_report(self):
         row=self.tables["sessions"][0].currentRow()
@@ -53,7 +54,8 @@ class TreasuryOperationsWindow(QWidget):
         if not ok:return
         amount=self._amount("قبض من العميل")
         if amount is None:return
-        method,ok=QInputDialog.getItem(self,"طريقة القبض","الطريقة:",["cash","card","bank_transfer"],0,False)
+        method_label,ok=QInputDialog.getItem(self,"طريقة القبض","الطريقة:",["نقدي","بطاقة","تحويل بنكي"],0,False)
+        method={"نقدي":"cash","بطاقة":"card","تحويل بنكي":"bank_transfer"}.get(method_label, "cash")
         if not ok:return
         try: PartyPaymentService.receive_from_customer(cid,amount,method,cashier_id=self._user()); self.load(); QMessageBox.information(self,"تم","تم تسجيل سند القبض وربطه بالذمم والخزينة.")
         except Exception as e: QMessageBox.critical(self,"فشل القبض",str(e))
@@ -62,7 +64,8 @@ class TreasuryOperationsWindow(QWidget):
         if not ok:return
         amount=self._amount("دفع للمورد")
         if amount is None:return
-        method,ok=QInputDialog.getItem(self,"طريقة الدفع","الطريقة:",["cash","card","bank_transfer"],0,False)
+        method_label,ok=QInputDialog.getItem(self,"طريقة الدفع","الطريقة:",["نقدي","بطاقة","تحويل بنكي"],0,False)
+        method={"نقدي":"cash","بطاقة":"card","تحويل بنكي":"bank_transfer"}.get(method_label, "cash")
         if not ok:return
         try: PartyPaymentService.pay_supplier(sid,amount,method,cashier_id=self._user()); self.load(); QMessageBox.information(self,"تم","تم تسجيل سند الصرف وربطه بالذمم والخزينة.")
         except Exception as e: QMessageBox.critical(self,"فشل الصرف",str(e))
