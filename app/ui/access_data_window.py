@@ -100,7 +100,20 @@ class RecordDialog(QDialog):
         return out
 
 class AccessDataWindow(QWidget):
-    TABLE_PERMISSIONS = {\n        "products": "inventory", "product_categories": "inventory", "units": "inventory",\n        "warehouses": "inventory", "stock_movements": "inventory", "stocktakes": "inventory",\n        "customers": "customer", "suppliers": "supplier", "users": "user",\n        "documents": "document", "system_settings": "settings", "companies": "settings", "branches": "settings",\n        "employees": "user", "employee_attendance": "user", "payroll_runs": "user", "payroll_items": "user",\n        "roles": "permission", "permissions": "permission", "approval_requests": "approval",\n        "accounts": "accounting", "journal_entries": "accounting", "journal_entry_lines": "accounting",\n        "cash_registers": "treasury", "cash_transactions": "treasury", "cash_sessions": "treasury",\n        "bank_accounts": "treasury", "banks": "treasury", "tax_rates": "accounting",\n        "tax_invoices": "sale", "audit_logs": "audit", "audit_log": "audit",\n        "printing_services": "sale", "printing_orders": "sale",\n    }
+    TABLE_PERMISSIONS = {
+        "products": "inventory", "product_categories": "inventory", "units": "inventory",
+        "warehouses": "inventory", "stock_movements": "inventory", "stocktakes": "inventory",
+        "customers": "customer", "suppliers": "supplier", "users": "user",
+        "documents": "document", "system_settings": "settings", "companies": "settings", "branches": "settings",
+        "employees": "user", "employee_attendance": "user", "payroll_runs": "user", "payroll_items": "user",
+        "roles": "permission", "permissions": "permission", "approval_requests": "approval",
+        "accounts": "accounting", "journal_entries": "accounting", "journal_entry_lines": "accounting",
+        "cash_registers": "treasury", "cash_transactions": "treasury", "cash_sessions": "treasury",
+        "bank_accounts": "treasury", "banks": "treasury", "tax_rates": "accounting",
+        "tax_invoices": "sale", "audit_logs": "audit", "audit_log": "audit",
+        "printing_services": "sale", "printing_orders": "sale",
+    }
+
     def __init__(self,table_name,title=None,columns=None,editable=True,user=None,parent=None):
         super().__init__(parent); self.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint); self.setAttribute(Qt.WA_DeleteOnClose, False); self.table_name=table_name; self.title_text=title or TITLES.get(table_name,table_name)
         self.requested_columns=columns; self.editable=editable; self.page_size=100; self.page=0; self.total=0; self.columns=[]
