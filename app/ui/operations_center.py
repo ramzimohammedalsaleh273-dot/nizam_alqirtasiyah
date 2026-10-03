@@ -1,4 +1,5 @@
 from app.ui.theme import APP_STYLE
+from app.ui.i18n import display_value
 
 from pathlib import Path
 import sqlite3
@@ -34,7 +35,7 @@ class OperationsCenter(QWidget):
     def build_dashboard(self):
         w=QWidget(); l=QVBoxLayout(w); self.dashboard=QLabel(); self.dashboard.setStyleSheet("font-size:20px;padding:25px;line-height:2;"); l.addWidget(self.dashboard); b=QPushButton("تحديث لوحة التحكم"); b.clicked.connect(self.refresh_dashboard); l.addWidget(b); self.tabs.addTab(w,"لوحة التحكم")
     def build_products(self):
-        w=QWidget(); l=QVBoxLayout(w); self.product_search=QLineEdit(); self.product_search.setPlaceholderText("بحث بالاسم أو SKU..."); self.product_search.textChanged.connect(self.refresh_products); l.addWidget(self.product_search); self.products=QTableWidget(0,5); self.products.setHorizontalHeaderLabels(["الاسم","SKU","سعر البيع","التكلفة","نقطة إعادة الطلب"]); self.products.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch); l.addWidget(self.products); self.tabs.addTab(w,"المنتجات")
+        w=QWidget(); l=QVBoxLayout(w); self.product_search=QLineEdit(); self.product_search.setPlaceholderText("بحث بالاسم أو رمز الصنف (SKU)..."); self.product_search.textChanged.connect(self.refresh_products); l.addWidget(self.product_search); self.products=QTableWidget(0,5); self.products.setHorizontalHeaderLabels(["الاسم","رمز الصنف (SKU)","سعر البيع","التكلفة","نقطة إعادة الطلب"]); self.products.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch); l.addWidget(self.products); self.tabs.addTab(w,"المنتجات")
     def build_customers(self):
         w=QWidget(); l=QVBoxLayout(w); self.customers=QTableWidget(0,4); self.customers.setHorizontalHeaderLabels(["الاسم","الكود","الهاتف","الرصيد"]); self.customers.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch); l.addWidget(self.customers); self.tabs.addTab(w,"العملاء")
     def build_suppliers(self):
@@ -57,7 +58,7 @@ class OperationsCenter(QWidget):
         for row in rows:
             r=table.rowCount(); table.insertRow(r)
             for c,k in enumerate(keys):
-                v=row.get(k,""); table.setItem(r,c,QTableWidgetItem("" if v is None else str(v)))
+                v=row.get(k,""); table.setItem(r,c,QTableWidgetItem(display_value(v)))
     def refresh_products(self):
         q=self.product_search.text().strip(); rows=self.query("SELECT name_ar,sku,sale_price,cost_price,reorder_point FROM products WHERE is_active=1 AND (name_ar LIKE ? OR sku LIKE ?) ORDER BY id DESC",(f"%{q}%",f"%{q}%")); self.fill(self.products,rows,["name_ar","sku","sale_price","cost_price","reorder_point"])
     def refresh_customers(self):
