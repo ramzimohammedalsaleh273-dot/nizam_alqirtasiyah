@@ -290,8 +290,9 @@ class AccessDataWindow(QWidget):
         try:
             with get_session() as s:
                 PermissionService.ensure_schema(s)
-                if not PermissionService.has_in_session(s, uid, f"{base}.{action}"):
-                    QMessageBox.warning(self, "الصلاحيات", "ليس لديك صلاحية تنفيذ هذه العملية.")
+                code = "permission.manage" if base == "permission" else f"{base}.{action}"
+                if not PermissionService.has_in_session(s, uid, code):
+                    QMessageBox.warning(self, "الصلاحيات", "لا تمتلك صلاحية تنفيذ هذه العملية.")
                     return False
         except Exception as exc:
             QMessageBox.critical(self, "الصلاحيات", str(exc))
