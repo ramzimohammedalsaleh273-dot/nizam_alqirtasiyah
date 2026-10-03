@@ -55,9 +55,36 @@ def field_label(name: str) -> str:
     key = str(name or "")
     if key in FIELD_LABELS:
         return FIELD_LABELS[key]
-    # Safe fallback: never expose snake_case identifiers as UI labels.
-    words = key.replace("-", "_").split("_")
-    return " ".join(words) if len(words) == 1 else " ".join(words).title()
+    # Generic Arabic fallback: internal identifiers must never leak into the UI.
+    token_labels = {
+        "account": "الحساب", "accounts": "الحسابات", "customer": "العميل", "supplier": "المورد",
+        "product": "الصنف", "products": "الأصناف", "warehouse": "المستودع", "branch": "الفرع",
+        "company": "الشركة", "user": "المستخدم", "employee": "الموظف", "role": "الدور",
+        "permission": "الصلاحية", "category": "التصنيف", "unit": "الوحدة", "brand": "العلامة التجارية",
+        "fiscal": "مالي", "period": "الفترة", "year": "السنة", "date": "التاريخ", "time": "الوقت",
+        "number": "الرقم", "no": "الرقم", "type": "النوع", "code": "الكود", "amount": "المبلغ",
+        "total": "الإجمالي", "subtotal": "الإجمالي قبل الضريبة", "tax": "الضريبة", "rate": "النسبة",
+        "debit": "مدين", "credit": "دائن", "balance": "الرصيد", "opening": "الافتتاحي",
+        "closing": "الإغلاق", "current": "الحالي", "expected": "المتوقع", "actual": "الفعلي",
+        "difference": "الفرق", "quantity": "الكمية", "price": "السعر", "cost": "التكلفة",
+        "payment": "الدفع", "receipt": "القبض", "purchase": "المشتريات", "sale": "المبيعات",
+        "invoice": "الفاتورة", "return": "المرتجع", "movement": "الحركة", "stock": "المخزون",
+        "transaction": "الحركة المالية", "reference": "المرجع", "request": "الطلب",
+        "action": "الإجراء", "comment": "التعليق", "message": "الرسالة", "title": "العنوان",
+        "description": "الوصف", "notes": "الملاحظات", "name": "الاسم", "path": "المسار",
+        "file": "الملف", "version": "الإصدار", "status": "الحالة", "active": "نشط",
+        "created": "الإنشاء", "updated": "التحديث", "closed": "الإغلاق", "opened": "الفتح",
+        "start": "البداية", "end": "النهاية", "min": "الحد الأدنى", "max": "الحد الأعلى",
+        "reorder": "إعادة الطلب", "salary": "الراتب", "bank": "البنك", "currency": "العملة",
+        "iban": "الآيبان", "phone": "الهاتف", "email": "البريد الإلكتروني", "address": "العنوان",
+        "source": "المصدر", "entity": "الكيان", "document": "المستند", "workflow": "سير العمل",
+        "step": "الخطوة", "approval": "الاعتماد", "notification": "التنبيه", "severity": "الخطورة",
+        "kind": "النوع", "value": "القيمة", "key": "المفتاح", "count": "العدد", "period": "الفترة",
+    }
+    tokens = [t for t in key.replace("-", "_").split("_") if t]
+    translated = [token_labels.get(t.lower()) for t in tokens]
+    translated = [x for x in translated if x]
+    return " / ".join(translated) if translated else "حقل غير معرّف"
 
 def display_value(value):
     if value is None:
