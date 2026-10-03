@@ -597,13 +597,14 @@ class MainWindow(QMainWindow):
         window = self._child_windows.get(key)
         try:
             if window is None:
-                try:
-                    window = window_class(user=self.current_user, parent=self)
-                except TypeError:
+                # مصفوفة الصلاحيات لا تعتمد على تمرير المستخدم عند الإنشاء.
+                if key == "permissions":
+                    window = PermissionsWindow(parent=self)
+                else:
                     try:
-                        window = window_class(parent=self)
+                        window = window_class(user=self.current_user, parent=self)
                     except TypeError:
-                        window = window_class()
+                        window = window_class(parent=self)
                 self._prepare_child_window(window)
                 self._child_windows[key] = window
             else:
@@ -612,7 +613,11 @@ class MainWindow(QMainWindow):
             window.raise_()
             window.activateWindow()
         except Exception as exc:
-            QMessageBox.critical(self, "خطأ في فتح النافذة", f"تعذر فتح «{key}»:\n{exc}")
+            QMessageBox.critical(
+                self,
+                "خطأ في فتح النافذة",
+                f"تعذر فتح «{key}»:\n{type(exc).__name__}: {exc}"
+            )
 
     def open_data(self, table_name, title=None, columns=None, editable=True):
         table_permissions = {
