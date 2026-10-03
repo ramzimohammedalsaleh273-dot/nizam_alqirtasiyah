@@ -137,46 +137,22 @@ class PermissionService:
                 text("INSERT OR IGNORE INTO erp_roles(" + ",".join(role_fields) + ") VALUES(" + ",".join(":"+k for k in role_fields) + ")"),
                 role_params,
             )
-        admin_role = s.execute(text("SELECT id FROM erp_roles WHERE code='admin' AND COALESCE(is_active,1)=1")).scalar()
-        if admin_role is None:
-            raise RuntimeError("تعذر إنشاء دور مدير النظام")
+        # لا تُمنح أي صلاحيات تلقائيًا للأدوار.
+        # يتم تنظيف التعيينات القديمة مرة واحدة بعد هذا التغيير، ثم يحدد المدير
+        # الصلاحيات يدويًا من شاشة الأدوار والصلاحيات.
         s.execute(text("""
-            INSERT OR IGNORE INTO erp_role_permissions(role_id,permission_id)
-            SELECT :role,id FROM erp_permissions WHERE is_active=1
-        """), {"role": admin_role})
-
-        # أدوار جاهزة للاستخدام مع أقل صلاحيات لازمة لكل وظيفة.
-        presets = {
-            "cashier": ["sale.view", "sale.create", "sale.print", "customer.view", "inventory.view", "treasury.cashier.open", "treasury.cashier.close"],
-            "sales": ["sale.view", "sale.create", "sale.edit", "sale.print", "customer.view", "customer.create", "customer.edit", "report.view"],
-            "inventory": ["inventory.view", "inventory.create", "inventory.edit", "inventory.adjust", "inventory.transfer", "inventory.stocktake"],
-            "accountant": ["accounting.view", "accounting.edit", "accounting.post", "report.view", "report.export", "report.print", "treasury.view", "treasury.payment", "treasury.receipt"],
-            "purchasing": ["purchase.view", "purchase.create", "purchase.edit", "purchase.print", "purchase.request.create", "purchase.order.create", "purchase.order.receive", "purchase.return.create", "supplier.view", "supplier.create", "supplier.edit"],
-            "viewer": ["sale.view", "purchase.view", "inventory.view", "customer.view", "supplier.view", "report.view"],
-        }
-        for role_code, codes in presets.items():
-            role_id = s.execute(text("SELECT id FROM erp_roles WHERE code=:code"), {"code": role_code}).scalar()
-            if role_id:
-                for code in codes:
-                    s.execute(text("""
-                        INSERT OR IGNORE INTO erp_role_permissions(role_id,permission_id)
-                        SELECT :role,id FROM erp_permissions WHERE code=:code AND is_active=1
-                    """), {"role": int(role_id), "code": code})
-
-        count = int(s.execute(text("SELECT COUNT(*) FROM erp_user_roles")).scalar() or 0)
-        if count == 0:
-            tables = {r[0] for r in s.execute(text("SELECT name FROM sqlite_master WHERE type='table'")).fetchall()}
-            if "users" in tables:
-                cols = cls._columns(s, "users")
-                active = "is_active" if "is_active" in cols else ("active" if "active" in cols else None)
-                sql = "SELECT id FROM users"
-                if active:
-                    sql += f" WHERE COALESCE({active},1)=1"
-                sql += " ORDER BY id LIMIT 1"
-                user_id = s.execute(text(sql)).scalar()
-                if user_id is not None:
-                    s.execute(text("INSERT OR IGNORE INTO erp_user_roles(user_id,role_id) VALUES(:user,:role)"),
-                              {"user": int(user_id), "role": int(admin_role)})
+            CREATE TABLE IF NOT EXISTS permission_seed_state (
+                id INTEGER PRIMARY KEY CHECK(id=1),
+                manual_assignment_mode INTEGER NOT NULL DEFAULT 1
+            )
+        """))
+        marker = s.execute(text("SELECT manual_assignment_mode FROM permission_seed_state WHERE id=1")).scalar()
+        if marker is None:
+            s.execute(text("DELETE FROM erp_role_permissions"))
+            s.execute(text("""
+                INSERT INTO permission_seed_state(id, manual_assignment_mode)
+                VALUES(1,1)
+            """))
 
     @classmethod
     def default_user_id(cls):
