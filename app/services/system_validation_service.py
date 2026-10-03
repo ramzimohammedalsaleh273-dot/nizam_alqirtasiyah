@@ -22,23 +22,15 @@ class SystemValidationService:
             c = s.connection()
             EnterpriseCompletionService.ensure(s)
             EnterpriseCompletionService.sync_inventory_mirror(s)
-            s.commit()
 
             integrity = c.exec_driver_sql("PRAGMA integrity_check").scalar()
             checks.append(("سلامة SQLite", integrity == "ok", str(integrity)))
             fk = c.exec_driver_sql("PRAGMA foreign_key_check").fetchall()
             checks.append(("المفاتيح الأجنبية", not fk, f"{len(fk)} أخطاء"))
 
-            tables = {
-                r[0] for r in c.exec_driver_sql(
-                    "SELECT name FROM sqlite_master WHERE type='table'"
-                ).fetchall()
-            }
+            tables = {r[0] for r in c.exec_driver_sql("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
             for table in SystemValidationService.REQUIRED_TABLES:
-                checks.append((
-                    f"جدول {table}", table in tables,
-                    "موجود" if table in tables else "مفقود",
-                ))
+                checks.append((f"جدول {table}", table in tables, "موجود" if table in tables else "مفقود"))
 
             if "journal_entries" in tables and "journal_entry_lines" in tables:
                 bad = c.exec_driver_sql("""
@@ -93,8 +85,6 @@ class SystemValidationService:
 
             audit_count = c.exec_driver_sql("SELECT COUNT(*) FROM audit_logs").scalar() if "audit_logs" in tables else -1
             checks.append(("سجل التدقيق قابل للقراءة", int(audit_count) >= 0, f"{int(audit_count)} سجل"))
+            s.commit()
 
-        return {
-            "healthy": all(x[1] for x in checks),
-            "checks": [{"name": x[0], "ok": x[1], "detail": x[2]} for x in checks],
-        }
+        return {"healthy": all(x[1] for x in checks), "checks": [{"name": x[0], "ok": x[1], "detail": x[2]} for x in checks]}
