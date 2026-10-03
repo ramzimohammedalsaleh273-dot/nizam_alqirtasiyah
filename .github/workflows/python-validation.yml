@@ -30,6 +30,10 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: python scripts/headless_ui_smoke.py
+      - name: Full UI windows acceptance
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python scripts/ui_windows_acceptance.py
       - name: Enterprise acceptance
         run: python scripts/run_enterprise_acceptance.py
       - name: Operational acceptance
