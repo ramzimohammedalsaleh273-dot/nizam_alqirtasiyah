@@ -88,7 +88,7 @@ class PermissionsWindow(QWidget):
     def load_roles(self):
         with get_session() as s:
             rows = s.execute(text(
-                "SELECT id,code,COALESCE(name_ar,name,code) AS display_name "
+                "SELECT id,code,COALESCE(NULLIF(name_ar,''),code) AS display_name "
                 "FROM erp_roles WHERE COALESCE(is_active,1)=1 ORDER BY id"
             )).all()
         current = self.role.currentData()
@@ -126,8 +126,8 @@ class PermissionsWindow(QWidget):
             return
         with get_session() as s:
             perms = s.execute(text(
-                "SELECT id,code,COALESCE(name_ar,name,description,code) AS name_ar,"
-                "COALESCE(description,name_ar,name,code) AS description "
+                "SELECT id,code,COALESCE(NULLIF(name_ar,''),code) AS name_ar,"
+                "COALESCE(NULLIF(name_ar,''),code) AS description "
                 "FROM erp_permissions WHERE COALESCE(is_active,1)=1 "
                 "ORDER BY code,id"
             )).mappings().all()
@@ -217,7 +217,7 @@ class PermissionsWindow(QWidget):
             return
         with get_session() as s:
             rows = s.execute(text(
-                "SELECT COALESCE(r.name_ar,r.name,r.code) "
+                "SELECT COALESCE(NULLIF(r.name_ar,''),r.code) "
                 "FROM erp_user_roles ur JOIN erp_roles r ON r.id=ur.role_id "
                 "WHERE ur.user_id=:u ORDER BY r.id"
             ), {"u": int(uid)}).all()
