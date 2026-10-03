@@ -15,6 +15,24 @@ def _quote(name: str) -> str:
     return '"' + str(name).replace('"', '""') + '"'
 
 
+def _ensure_legacy_columns(session) -> None:
+    """يضيف أعمدة التشغيل إلى الجداول القديمة دون إسقاط أو إعادة إنشاء."""
+    tables = {r[0] for r in session.execute(text("SELECT name FROM sqlite_master WHERE type='table'")).fetchall()}
+    if "workflow_steps" in tables:
+        cols = {r[1] for r in session.connection().exec_driver_sql("PRAGMA table_info(workflow_steps)").fetchall()}
+        additions = {
+            "workflow_code": "TEXT",
+            "step_no": "INTEGER",
+            "step_name": "TEXT",
+            "role_code": "TEXT",
+            "is_required": "INTEGER DEFAULT 1",
+            "created_at": "TEXT",
+        }
+        for column, typ in additions.items():
+            if column not in cols:
+                session.execute(text(f"ALTER TABLE workflow_steps ADD COLUMN {_quote(column)} {typ}"))
+
+
 def ensure_reference_schema(session) -> int:
     created = 0
     if SCHEMA_FILE.exists():
@@ -63,8 +81,7 @@ def ensure_reference_schema(session) -> int:
                 )
                 created += 1
 
-    # الطبقة التشغيلية لا تحذف أو تعدل البيانات الموجودة، وتُستخدم أيضًا
-    # أثناء الاختبارات وفتح الواجهة حتى لا تكون هناك نسخة ناقصة من المخطط.
+    _ensure_legacy_columns(session)
     EnterpriseCompletionService.ensure(session)
     EnterpriseCompletionService.sync_inventory_mirror(session)
     return created
