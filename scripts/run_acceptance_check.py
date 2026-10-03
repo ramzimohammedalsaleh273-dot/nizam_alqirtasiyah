@@ -6,6 +6,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from app.services.system_validation_service import SystemValidationService
+from app.services.enterprise_completion_service import EnterpriseCompletionService
 from app.database.connection import get_session
 from sqlalchemy import text
 from app.services.treasury_schema_service import TreasurySchemaService
@@ -23,19 +24,19 @@ def main():
         with get_session() as s:
             from app.services.accounting_control_service import AccountingControlService
             AccountingControlService.ensure_schema(s)
-            s.commit()
             TreasurySchemaService.ensure(s)
             TreasuryOperationsService.ensure_schema(s)
+            EnterpriseCompletionService.ensure(s)
+            EnterpriseCompletionService.sync_inventory_mirror(s)
             s.commit()
-            tables = {
-                r[0] for r in s.execute(text(
-                    "SELECT name FROM sqlite_master WHERE type='table'"
-                )).fetchall()
-            }
-            add("جلسات الكاشير", "cashier_sessions" in tables,
-                "جدول cashier_sessions موجود" if "cashier_sessions" in tables else "جدول cashier_sessions غير موجود")
+            tables = {r[0] for r in s.execute(text("SELECT name FROM sqlite_master WHERE type='table'")).fetchall()}
+
+            add("جلسات الكاشير", "cashier_sessions" in tables, "الجدول موجود" if "cashier_sessions" in tables else "الجدول غير موجود")
             for table in ("treasury_accounts", "bank_accounts", "cash_registers", "treasury_movements", "treasury_transfers"):
                 add(f"بنية {table}", table in tables, "الجدول موجود" if table in tables else "الجدول غير موجود")
+
+            for table in EnterpriseCompletionService.REQUIRED_TABLES:
+                add(f"وحدة المؤسسة/{table}", table in tables, "الجدول موجود" if table in tables else "الجدول غير موجود")
 
             cashier_cols = {r[1] for r in s.connection().exec_driver_sql("PRAGMA table_info(cashier_sessions)").fetchall()}
             for column in ("opened_by", "closed_by", "close_notes"):
@@ -43,19 +44,25 @@ def main():
 
             for table in ("customer_payments", "supplier_payments"):
                 if table in tables:
-                    cols = {r[1] for r in s.connection().exec_driver_sql(
-                        f"PRAGMA table_info({table})"
-                    ).fetchall()}
-                    add(f"ربط {table} بجلسة الكاشير", "cashier_session_id" in cols,
-                        "العمود موجود" if "cashier_session_id" in cols else "العمود غير موجود")
+                    cols = {r[1] for r in s.connection().exec_driver_sql(f"PRAGMA table_info({table})").fetchall()}
+                    add(f"ربط {table} بجلسة الكاشير", "cashier_session_id" in cols, "العمود موجود" if "cashier_session_id" in cols else "العمود غير موجود")
                 else:
                     add(f"جدول {table}", False, "الجدول غير موجود")
+
+            parity = EnterpriseCompletionService.inventory_parity(s)
+            add("تطابق أرصدة المخزون", parity["ok"], parity["detail"])
+
+            workflow_count = s.execute(text("SELECT COUNT(*) FROM workflow_steps")).scalar() or 0
+            add("خطوات سير العمل", workflow_count >= 4, f"{workflow_count} خطوة معرفة")
+
+            onboarding = s.execute(text("SELECT COUNT(*) FROM onboarding_state WHERE id=1")).scalar() or 0
+            add("حالة معالج الإعداد الأول", onboarding == 1, "السجل الأساسي موجود" if onboarding == 1 else "السجل مفقود")
     except Exception as exc:
-        add("فحص بنية الخزينة", False, str(exc))
+        add("فحص البنية التشغيلية", False, str(exc))
 
     healthy = all(item["ok"] for item in checks)
     print("=" * 72)
-    print("فحص قبول نظام القرطاسية")
+    print("فحص قبول نظام القرطاسية — النسخة التشغيلية النهائية")
     print("=" * 72)
     for item in checks:
         mark = "PASS" if item["ok"] else "FAIL"
