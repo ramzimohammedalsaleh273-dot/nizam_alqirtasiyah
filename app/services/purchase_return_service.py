@@ -31,6 +31,15 @@ class PurchaseReturnService:
                 line_total NUMERIC NOT NULL DEFAULT 0
             )
         """))
+        columns = cls._columns(s, "purchase_return_items")
+        migrations = {
+            "purchase_invoice_item_id": "ALTER TABLE purchase_return_items ADD COLUMN purchase_invoice_item_id INTEGER NULL",
+            "unit_cost": "ALTER TABLE purchase_return_items ADD COLUMN unit_cost NUMERIC NOT NULL DEFAULT 0",
+            "line_total": "ALTER TABLE purchase_return_items ADD COLUMN line_total NUMERIC NOT NULL DEFAULT 0",
+        }
+        for column, statement in migrations.items():
+            if column not in columns:
+                s.execute(text(statement))
 
     @classmethod
     def create_return(cls, purchase_id, items, reason="إرجاع مشتريات",
