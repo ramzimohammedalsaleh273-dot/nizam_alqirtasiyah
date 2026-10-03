@@ -548,7 +548,23 @@ class MainWindow(QMainWindow):
             except RuntimeError:
                 self._child_windows.pop(key, None)
 
+    def _prepare_child_window(self, window):
+        """يجعل الوحدة نافذة حقيقية مستقلة مع أزرار التصغير والتكبير والإغلاق."""
+        window.setWindowFlags(
+            Qt.Window
+            | Qt.WindowTitleHint
+            | Qt.WindowSystemMenuHint
+            | Qt.WindowMinimizeButtonHint
+            | Qt.WindowMaximizeButtonHint
+            | Qt.WindowCloseButtonHint
+        )
+        window.setAttribute(Qt.WA_DeleteOnClose, False)
+        window.setWindowModality(Qt.NonModal)
+        window.setLayoutDirection(Qt.RightToLeft)
+        return window
+
     def open_window(self, key, window_class):
+        # تبقى وحدة واحدة فقط مفتوحة في كل مرة، ويمكن إغلاقها ثم العودة للرئيسية.
         self._close_other_windows(key)
         window = self._child_windows.get(key)
         if window is None:
@@ -559,7 +575,10 @@ class MainWindow(QMainWindow):
                     window = window_class(parent=self)
                 except TypeError:
                     window = window_class()
+            self._prepare_child_window(window)
             self._child_windows[key] = window
+        else:
+            self._prepare_child_window(window)
         window.show()
         window.raise_()
         window.activateWindow()
@@ -569,8 +588,12 @@ class MainWindow(QMainWindow):
         self._close_other_windows(key)
         window = self._child_windows.get(key)
         if window is None:
-            window = AccessDataWindow(table_name, title, columns, editable=editable, user=self.current_user, parent=self)
+            window = AccessDataWindow(
+                table_name, title, columns,
+                editable=editable, user=self.current_user, parent=self
+            )
             self._child_windows[key] = window
+        self._prepare_child_window(window)
         window.show()
         window.raise_()
         window.activateWindow()
