@@ -13,6 +13,7 @@ from app.services.party_service import PartyService
 from app.services.pos_service import POSService
 from app.services.tax_service import TaxService
 from app.services.pos_hold_service import POSHoldService
+from app.services.permission_service import PermissionService
 from app.services.pos_search_service import POSProductSearch
 from app.services.cashier_session_service import CashierSessionService
 from app.ui.theme import APP_STYLE
@@ -501,14 +502,14 @@ class POSWindow(QWidget):
     def current_total(self):
         return Decimal(str(self.total.text().split(":")[-1].strip()))
 
-    def remove_selected(self):
+    def _allowed(self, code):\n        uid = self.user.get("id")\n        if uid is None:\n            QMessageBox.warning(self, "الصلاحيات", "لا يوجد مستخدم مسجل للدورة الحالية.")\n            return False\n        try:\n            with get_session() as s:\n                PermissionService.ensure_schema(s)\n                ok = PermissionService.has_in_session(s, int(uid), code)\n        except Exception as exc:\n            QMessageBox.critical(self, "الصلاحيات", str(exc))\n            return False\n        if not ok:\n            QMessageBox.warning(self, "الصلاحيات", "لا تمتلك الصلاحية لتنفيذ هذا الإجراء.")\n        return bool(ok)\n\n    def remove_selected(self):\n        if not self._allowed("sale.edit"):\n            return
         index = self.selected_index()
         if index is not None:
             self.cart.pop(index)
             self.refresh()
             self._focus_product_cell(min(index, len(self.cart)))
 
-    def discount_selected(self):
+    def discount_selected(self):\n        if not self._allowed("sale.discount_edit"):\n            return
         index = self.selected_index()
         if index is None:
             return
@@ -522,7 +523,7 @@ class POSWindow(QWidget):
             self.refresh()
             self._focus_product_cell(index)
 
-    def complete_sale(self):
+    def complete_sale(self):\n        if not self._allowed("sale.create"):\n            return
         if not self.cart:
             QMessageBox.warning(self, "تنبيه", "الفاتورة فارغة.")
             return
@@ -559,7 +560,7 @@ class POSWindow(QWidget):
         )
         return sid
 
-    def open_cashier_session(self):
+    def open_cashier_session(self):\n        if not self._allowed("treasury.cashier.open"):\n            return
         cashier_id = self.user.get("id")
         if not cashier_id:
             QMessageBox.warning(self, "الوردية", "لا يوجد مستخدم مسجل للجلسة الحالية.")
@@ -583,7 +584,7 @@ class POSWindow(QWidget):
         except Exception as exc:
             QMessageBox.critical(self, "فشل فتح الوردية", str(exc))
 
-    def close_cashier_session(self):
+    def close_cashier_session(self):\n        if not self._allowed("treasury.cashier.close"):\n            return
         cashier_id = self.user.get("id")
         if not cashier_id:
             return
@@ -612,7 +613,7 @@ class POSWindow(QWidget):
         except Exception as exc:
             QMessageBox.critical(self, "فشل إغلاق الوردية", str(exc))
 
-    def hold_sale(self):
+    def hold_sale(self):\n        if not self._allowed("sale.edit"):\n            return
         if not self.cart:
             return
         import copy
@@ -623,7 +624,7 @@ class POSWindow(QWidget):
         except Exception as exc:
             QMessageBox.critical(self, "فشل التعليق", str(exc))
 
-    def resume_sale(self):
+    def resume_sale(self):\n        if not self._allowed("sale.edit"):\n            return
         try:
             rows = POSHoldService.list_held()
             if not rows:
