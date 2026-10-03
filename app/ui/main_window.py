@@ -131,7 +131,7 @@ class MainWindow(QMainWindow):
         "inventory": "inventory.view", "stocktake": "inventory.stocktake", "parties": "customer.view",
         "reports": "report.view", "accounting": "accounting.view", "treasury": "treasury.view",
         "treasury_accounts": "treasury.view", "expenses": "treasury.payment", "analytics": "report.view",
-        "documents": "document.view", "permissions": "permission.manage", "settings": "settings.view",
+        "documents": "document.view", "permissions": None, "settings": "settings.view",
         "backup": "backup.create", "smart_operations": "report.view",
     }
     def __init__(self):
