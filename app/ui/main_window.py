@@ -590,26 +590,30 @@ class MainWindow(QMainWindow):
         return False
 
     def open_window(self, key, window_class):
-        permission_code = self.WINDOW_PERMISSIONS.get(key)
-        if permission_code and not self._allowed(permission_code):
-            return
+        # وضع التهيئة: لا تُمنع أي نافذة بسبب الصلاحيات حتى يتمكن المدير
+        # من فتح مصفوفة الصلاحيات وتحديد الصلاحيات يدويًا.
+        # شاشة مصفوفة الصلاحيات نفسها تبقى متاحة دائمًا.
         self._close_other_windows(key)
         window = self._child_windows.get(key)
-        if window is None:
-            try:
-                window = window_class(user=self.current_user, parent=self)
-            except TypeError:
+        try:
+            if window is None:
                 try:
-                    window = window_class(parent=self)
+                    window = window_class(user=self.current_user, parent=self)
                 except TypeError:
-                    window = window_class()
-            self._prepare_child_window(window)
-            self._child_windows[key] = window
-        else:
-            self._prepare_child_window(window)
-        window.show()
-        window.raise_()
-        window.activateWindow()
+                    try:
+                        window = window_class(parent=self)
+                    except TypeError:
+                        window = window_class()
+                self._prepare_child_window(window)
+                self._child_windows[key] = window
+            else:
+                self._prepare_child_window(window)
+            window.show()
+            window.raise_()
+            window.activateWindow()
+        except Exception as exc:
+            QMessageBox.critical(self, "خطأ في فتح النافذة", f"تعذر فتح «{key}»:\n{exc}")
+
     def open_data(self, table_name, title=None, columns=None, editable=True):
         table_permissions = {
             "products": "inventory.view", "product_categories": "inventory.view", "units": "inventory.view",
@@ -623,9 +627,8 @@ class MainWindow(QMainWindow):
             "employees": "user.view", "employee_attendance": "user.view", "payroll_runs": "user.view",
             "system_settings": "settings.view", "companies": "settings.view", "branches": "settings.view",
         }
-        permission_code = table_permissions.get(table_name)
-        if permission_code and not self._allowed(permission_code):
-            return
+        # لا تُفرض الصلاحيات أثناء وضع التهيئة؛ يستطيع المدير الوصول إلى
+        # جميع الجداول وتحديد الصلاحيات لاحقًا من مصفوفة الصلاحيات.
         key = "data:" + table_name
         self._close_other_windows(key)
         window = self._child_windows.get(key)
