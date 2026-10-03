@@ -28,7 +28,8 @@ class AnalyticsWindow(QWidget):
             ("قيمة المخزون",stock[0],stock[1],0,"القيمة بالتكلفة المتوسطة"),
             ("أرصدة العملاء",customers[0],customers[1],0,"الرصيد الحالي"),
         ]
-        for n,q,v,a,m in top: rows.append((f"الأكثر مبيعًا: {n}",q,v,0,"حسب الكمية"))
+        for name,qty,value in top:
+            rows.append((f"الأكثر مبيعًا: {name}",qty,value,0,"حسب الكمية"))
         self.table.setRowCount(0)
         for vals in rows:
             r=self.table.rowCount(); self.table.insertRow(r)
