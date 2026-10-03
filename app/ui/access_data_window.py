@@ -15,6 +15,7 @@ from app.database.connection import get_session
 from app.services.permission_service import PermissionService
 from app.services.audit_service import AuditService
 from app.ui.theme import APP_STYLE
+from app.ui.i18n import field_label, display_value
 from openpyxl import Workbook
 
 FIELD_LABELS={
@@ -85,7 +86,7 @@ class RecordDialog(QDialog):
             else:
                 w=QLineEdit(); w.setText("" if values.get(n) is None else str(values[n]))
                 w.setPlaceholderText(FIELD_LABELS.get(n,n))
-            self.widgets[n]=w; form.addRow(FIELD_LABELS.get(n,n),w)
+            self.widgets[n]=w; form.addRow(field_label(n),w)
         root.addLayout(form); root.addStretch()
         b=QDialogButtonBox(QDialogButtonBox.Save|QDialogButtonBox.Cancel)
         b.accepted.connect(self.accept); b.rejected.connect(self.reject); root.addWidget(b)
@@ -151,19 +152,19 @@ class AccessDataWindow(QWidget):
                 self.columns=[]
                 self.table.setColumnCount(1)
                 self.table.setHorizontalHeaderLabels(["الحالة"])
-                self.status.setText(f"الجدول غير موجود: {self.table_name}")
+                self.status.setText(f"الجدول غير موجود: {self.title_text}")
                 for b in self.findChildren(QPushButton):
                     if b.text() in {"جديد","تعديل","حذف","فتح"}: b.setEnabled(False)
                 return
             rows=s.execute(text(f'PRAGMA table_info("{self.table_name}")')).mappings().all()
         self.columns=[dict(x) for x in rows if x["name"] not in HIDDEN]
         if self.requested_columns: self.columns=[x for x in self.columns if x["name"] in set(self.requested_columns)]
-        self.table.setColumnCount(len(self.columns)); self.table.setHorizontalHeaderLabels([FIELD_LABELS.get(x["name"],x["name"]) for x in self.columns])
+        self.table.setColumnCount(len(self.columns)); self.table.setHorizontalHeaderLabels([field_label(x["name"]) for x in self.columns])
         st=next((x["name"] for x in self.columns if x["name"] in {"status","is_active","is_read"}),None)
         if st:
             with get_session() as s: vals=[r[0] for r in s.execute(text(f'SELECT DISTINCT "{st}" FROM "{self.table_name}" WHERE "{st}" IS NOT NULL ORDER BY 1')).all()]
             self.filter.clear(); self.filter.addItem("كل الحالات","")
-            for v in vals:self.filter.addItem(str(v),str(v))
+            for v in vals:self.filter.addItem(display_value(v),str(v))
         else:self.filter.hide()
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents); self.table.horizontalHeader().setStretchLastSection(True)
     def _where(self):
@@ -211,7 +212,7 @@ class AccessDataWindow(QWidget):
         for row in rows:
             r=self.table.rowCount(); self.table.insertRow(r)
             for c,v in enumerate(row):
-                it=QTableWidgetItem("" if v is None else str(v))
+                it=QTableWidgetItem(display_value(v))
                 if isinstance(v,(int,float,Decimal)):it.setTextAlignment(Qt.AlignCenter)
                 self.table.setItem(r,c,it)
         self.table.setSortingEnabled(True); pages=max(1,(self.total+self.page_size-1)//self.page_size); self.page=min(self.page,pages-1)
@@ -251,7 +252,7 @@ class AccessDataWindow(QWidget):
             ws = wb.active
             ws.title = self.title_text[:31]
             for col, x in enumerate(self.columns, 1):
-                ws.cell(1, col, FIELD_LABELS.get(x["name"], x["name"]))
+                ws.cell(1, col, field_label(x["name"]))
             for row in range(self.table.rowCount()):
                 for col in range(self.table.columnCount()):
                     it = self.table.item(row, col)
@@ -442,7 +443,7 @@ class AccessDataWindow(QWidget):
         if not self.columns:return
         printer=QPrinter(QPrinter.HighResolution); dlg=QPrintDialog(printer,self)
         if dlg.exec()!=QPrintDialog.Accepted:return
-        headers=[FIELD_LABELS.get(x["name"],x["name"]) for x in self.columns]
+        headers=[field_label(x["name"]) for x in self.columns]
         html="<html dir='rtl'><meta charset='utf-8'><h2>"+self.title_text+"</h2><table border='1' cellspacing='0' cellpadding='4'><tr>"+''.join(f"<th>{h}</th>" for h in headers)+"</tr>"
         for r in range(self.table.rowCount()):
             html+="<tr>"+''.join(f"<td>{self.table.item(r,col).text() if self.table.item(r,col) else ''}</td>" for col in range(self.table.columnCount()))+"</tr>"
