@@ -502,7 +502,23 @@ class POSWindow(QWidget):
     def current_total(self):
         return Decimal(str(self.total.text().split(":")[-1].strip()))
 
-    def _allowed(self, code):\n        uid = self.user.get("id")\n        if uid is None:\n            QMessageBox.warning(self, "الصلاحيات", "لا يوجد مستخدم مسجل للدورة الحالية.")\n            return False\n        try:\n            with get_session() as s:\n                PermissionService.ensure_schema(s)\n                ok = PermissionService.has_in_session(s, int(uid), code)\n        except Exception as exc:\n            QMessageBox.critical(self, "الصلاحيات", str(exc))\n            return False\n        if not ok:\n            QMessageBox.warning(self, "الصلاحيات", "لا تمتلك الصلاحية لتنفيذ هذا الإجراء.")\n        return bool(ok)\n\n    def remove_selected(self):\n        if not self._allowed("sale.edit"):\n            return
+    def _allowed(self, code):
+        uid = self.user.get("id")
+        if uid is None:
+            QMessageBox.warning(self, "الصلاحيات", "لا يوجد مستخدم مسجل للدورة الحالية.")
+            return False
+        try:
+            with get_session() as s:
+                PermissionService.ensure_schema(s)
+                ok = PermissionService.has_in_session(s, int(uid), code)
+        except Exception as exc:
+            QMessageBox.critical(self, "الصلاحيات", str(exc))
+            return False
+        if not ok:
+            QMessageBox.warning(self, "الصلاحيات", "لا تمتلك الصلاحية لتنفيذ هذا الإجراء.")
+        return bool(ok)
+
+    def remove_selected(self):\n        if not self._allowed("sale.edit"):\n            return
         index = self.selected_index()
         if index is not None:
             self.cart.pop(index)
