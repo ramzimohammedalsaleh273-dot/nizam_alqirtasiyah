@@ -119,13 +119,24 @@ class PermissionService:
             )
 
         role_cols = cls._columns(s, "erp_roles")
-        role_values = {"code": "admin", "name": "مدير النظام", "name_ar": "مدير النظام", "is_active": 1}
+        role_defs = [
+            ("admin", "مدير النظام"),
+            ("cashier", "كاشير نقطة البيع"),
+            ("sales", "موظف مبيعات"),
+            ("inventory", "موظف مخزون"),
+            ("accountant", "محاسب"),
+            ("purchasing", "موظف مشتريات"),
+            ("viewer", "مستخدم للعرض فقط"),
+        ]
+        role_cols = cls._columns(s, "erp_roles")
         role_fields = [k for k in ("code", "name", "name_ar", "is_active") if k in role_cols]
-        role_params = {k: role_values[k] for k in role_fields}
-        s.execute(
-            text(f"INSERT OR IGNORE INTO erp_roles({",".join(role_fields)}) VALUES({",".join(":"+k for k in role_fields)})"),
-            role_params,
-        )
+        for role_code, role_name in role_defs:
+            role_values = {"code": role_code, "name": role_name, "name_ar": role_name, "is_active": 1}
+            role_params = {k: role_values[k] for k in role_fields}
+            s.execute(
+                text("INSERT OR IGNORE INTO erp_roles(" + ",".join(role_fields) + ") VALUES(" + ",".join(":"+k for k in role_fields) + ")"),
+                role_params,
+            )
         admin_role = s.execute(text("SELECT id FROM erp_roles WHERE code='admin' AND COALESCE(is_active,1)=1")).scalar()
         if admin_role is None:
             raise RuntimeError("تعذر إنشاء دور مدير النظام")
@@ -133,6 +144,24 @@ class PermissionService:
             INSERT OR IGNORE INTO erp_role_permissions(role_id,permission_id)
             SELECT :role,id FROM erp_permissions WHERE is_active=1
         """), {"role": admin_role})
+
+        # أدوار جاهزة للاستخدام مع أقل صلاحيات لازمة لكل وظيفة.
+        presets = {
+            "cashier": ["sale.view", "sale.create", "sale.print", "customer.view", "inventory.view", "treasury.cashier.open", "treasury.cashier.close"],
+            "sales": ["sale.view", "sale.create", "sale.edit", "sale.print", "customer.view", "customer.create", "customer.edit", "report.view"],
+            "inventory": ["inventory.view", "inventory.create", "inventory.edit", "inventory.adjust", "inventory.transfer", "inventory.stocktake"],
+            "accountant": ["accounting.view", "accounting.edit", "accounting.post", "report.view", "report.export", "report.print", "treasury.view", "treasury.payment", "treasury.receipt"],
+            "purchasing": ["purchase.view", "purchase.create", "purchase.edit", "purchase.print", "purchase.request.create", "purchase.order.create", "purchase.order.receive", "purchase.return.create", "supplier.view", "supplier.create", "supplier.edit"],
+            "viewer": ["sale.view", "purchase.view", "inventory.view", "customer.view", "supplier.view", "report.view"],
+        }
+        for role_code, codes in presets.items():
+            role_id = s.execute(text("SELECT id FROM erp_roles WHERE code=:code"), {"code": role_code}).scalar()
+            if role_id:
+                for code in codes:
+                    s.execute(text("""
+                        INSERT OR IGNORE INTO erp_role_permissions(role_id,permission_id)
+                        SELECT :role,id FROM erp_permissions WHERE code=:code AND is_active=1
+                    """), {"role": int(role_id), "code": code})
 
         count = int(s.execute(text("SELECT COUNT(*) FROM erp_user_roles")).scalar() or 0)
         if count == 0:
