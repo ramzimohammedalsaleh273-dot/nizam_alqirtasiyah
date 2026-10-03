@@ -1,11 +1,11 @@
 from pathlib import Path
 import ast
+import json
 import re
-import sqlite3
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-DB = ROOT / "database" / "nizam_alqirtasiyah.db"
+SCHEMA = ROOT / "database" / "metadata" / "database_schema.json"
 
 required_files = [
     "app/ui/main_window.py", "app/ui/pos_window.py", "app/ui/access_data_window.py",
@@ -59,7 +59,6 @@ for path in required_files:
         if token not in source:
             errors.append(f"TOKEN_MISSING:{path}:{token}")
 
-# المواصفة المرجعية لا تسمح بواجهة تجميلية بلا بيانات حقيقية أو أرقام ثابتة.
 main_text = (ROOT / "app/ui/main_window.py").read_text(encoding="utf-8-sig")
 for forbidden in ["HealthWindow", "صحة النظام", '("العقود"']:
     if forbidden in main_text:
@@ -68,41 +67,37 @@ for pattern in [r"25,000\s*=", r"25000\s*=", r"1000000\s*=", r"30000\s*="]:
     if re.search(pattern, main_text):
         errors.append(f"STATIC_DEMO_NUMBER:{pattern}")
 
-# الجداول المطلوبة في الـPDF تقبل أسماء المشروع الحالية عندما تكون نفس الوظيفة ممثلة باسم أدق.
-if DB.exists():
-    try:
-        con = sqlite3.connect(DB)
-        tables = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-        con.close()
-        table_groups = {
-            "companies": {"companies"}, "branches": {"branches"}, "users": {"users"},
-            "roles": {"roles"}, "permissions": {"permissions"}, "user_roles": {"user_roles"},
-            "role_permissions": {"role_permissions"}, "products": {"products"},
-            "product_barcodes": {"product_barcodes"}, "categories": {"categories", "product_categories"},
-            "units": {"units"}, "warehouses": {"warehouses"},
-            "warehouse_locations": {"warehouse_locations", "warehouse_zones", "warehouse_bins"},
-            "customers": {"customers"}, "suppliers": {"suppliers"}, "sales": {"sales"},
-            "sale_items": {"sale_items"}, "purchases": {"purchases", "purchase_invoices"},
-            "purchase_items": {"purchase_items", "purchase_invoice_items"},
-            "returns": {"returns", "sales_returns", "purchase_returns"},
-            "inventory_transactions": {"inventory_transactions", "stock_movements"},
-            "stocktakes": {"stocktakes"}, "cashboxes": {"cashboxes", "cash_registers"},
-            "cash_transactions": {"cash_transactions"}, "bank_accounts": {"bank_accounts"},
-            "bank_transactions": {"bank_transactions"}, "expenses": {"expenses"},
-            "accounts": {"accounts", "chart_of_accounts"}, "journal_entries": {"journal_entries"},
-            "journal_entry_lines": {"journal_entry_lines", "journalentrylines"},
-            "taxes": {"taxes", "tax_rates"}, "documents": {"documents"},
-            "document_sequences": {"document_sequences"}, "notifications": {"notifications"},
-            "audit_logs": {"audit_logs", "audit_log"}, "system_settings": {"system_settings", "settings"},
-            "schema_versions": {"schema_versions"},
-        }
-        for canonical, aliases in table_groups.items():
-            if not (tables & aliases):
-                errors.append(f"TABLE_GROUP_MISSING:{canonical}:{sorted(aliases)}")
-    except Exception as exc:
-        errors.append(f"DATABASE_AUDIT_ERROR:{exc}")
-else:
-    errors.append(f"DATABASE_MISSING:{DB}")
+# نتحقق من مخطط قاعدة البيانات المرجعي، لأن قاعدة SQLite المحلية قد لا تكون مخزنة في Git.
+try:
+    spec = json.loads(SCHEMA.read_text(encoding="utf-8"))
+    tables = set((spec.get("tables") or {}).keys())
+    table_groups = {
+        "companies": {"companies"}, "branches": {"branches"}, "users": {"users"},
+        "roles": {"roles"}, "permissions": {"permissions"}, "user_roles": {"user_roles"},
+        "role_permissions": {"role_permissions"}, "products": {"products"},
+        "product_barcodes": {"product_barcodes"}, "categories": {"categories", "product_categories"},
+        "units": {"units"}, "warehouses": {"warehouses"},
+        "warehouse_locations": {"warehouse_locations", "warehouse_zones", "warehouse_bins"},
+        "customers": {"customers"}, "suppliers": {"suppliers"}, "sales": {"sales"},
+        "sale_items": {"sale_items"}, "purchases": {"purchases", "purchase_invoices"},
+        "purchase_items": {"purchase_items", "purchase_invoice_items"},
+        "returns": {"returns", "sales_returns", "purchase_returns"},
+        "inventory_transactions": {"inventory_transactions", "stock_movements"},
+        "stocktakes": {"stocktakes"}, "cashboxes": {"cashboxes", "cash_registers"},
+        "cash_transactions": {"cash_transactions"}, "bank_accounts": {"bank_accounts"},
+        "bank_transactions": {"bank_transactions"}, "expenses": {"expenses"},
+        "accounts": {"accounts", "chart_of_accounts"}, "journal_entries": {"journal_entries"},
+        "journal_entry_lines": {"journal_entry_lines", "journalentrylines"},
+        "taxes": {"taxes", "tax_rates"}, "documents": {"documents"},
+        "document_sequences": {"document_sequences"}, "notifications": {"notifications"},
+        "audit_logs": {"audit_logs", "audit_log"}, "system_settings": {"system_settings", "settings"},
+        "schema_versions": {"schema_versions"},
+    }
+    for canonical, aliases in table_groups.items():
+        if not (tables & aliases):
+            errors.append(f"TABLE_GROUP_MISSING:{canonical}:{sorted(aliases)}")
+except Exception as exc:
+    errors.append(f"SCHEMA_AUDIT_ERROR:{exc}")
 
 print("REFERENCE_FILES:", len(required_files))
 print("REFERENCE_TOKEN_CHECKS:", sum(len(v) for v in required_tokens.values()))
