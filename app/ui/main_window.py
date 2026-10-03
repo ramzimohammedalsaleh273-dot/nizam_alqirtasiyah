@@ -573,7 +573,7 @@ class MainWindow(QMainWindow):
         window.setLayoutDirection(Qt.RightToLeft)
         return window
 
-    def _allowed(self, permission_code):\n        uid = self.current_user.get("id")\n        if uid is None:\n            QMessageBox.warning(self, "الصلاحيات", "لا يوجد مستخدم مسجل الدخول.")\n            return False\n        try:\n            with get_session() as s:\n                PermissionService.ensure_schema(s)\n                if PermissionService.has_in_session(s, int(uid), permission_code):\n                    return True\n        except Exception as exc:\n            QMessageBox.critical(self, "الصلاحيات", f"تعذر التحقق من الصلاحية: {exc}")\n            return False\n        QMessageBox.warning(self, "الصلاحيات", "لا تمتلك الصلاحية لتنفيذ هذا الإجراء.")\n        return False\n\n    def _allowed(self, permission_code):
+    def _allowed(self, permission_code):
         uid = self.current_user.get("id")
         if uid is None:
             QMessageBox.warning(self, "الصلاحيات", "لا يوجد مستخدم مسجل الدخول.")
