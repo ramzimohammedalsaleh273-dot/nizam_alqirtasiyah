@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QTabWidget,QTableW
 from sqlalchemy import text
 from app.database.connection import get_session
 from app.ui.theme import APP_STYLE
+from app.ui.i18n import field_label, display_value
 
 class PartyDialog(QDialog):
     def __init__(self,supplier=False,party=None,parent=None):
@@ -23,13 +24,7 @@ class PartyCardDialog(QDialog):
         try:
             with get_session() as s: return s.execute(text(sql),params).mappings().all()
         except Exception: return []
-    def _tab(self,title,rows,empty="لا توجد سجلات"):
-        headers=list(rows[0].keys()) if rows else [empty]; t=QTableWidget(0,len(headers)); t.setHorizontalHeaderLabels(headers); t.setEditTriggers(QAbstractItemView.NoEditTriggers); t.setSelectionBehavior(QAbstractItemView.SelectRows); t.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents); t.horizontalHeader().setStretchLastSection(True)
-        for row in rows:
-            r=t.rowCount(); t.insertRow(r)
-            for c,v in enumerate(row.values()): t.setItem(r,c,QTableWidgetItem("" if v is None else str(v)))
-        self.tabs.addTab(t,title)
-    def _build(self):
+    def _tab(self,title,rows,empty="لا توجد سجلات"):\n        headers=list(rows[0].keys()) if rows else [empty]\n        t=QTableWidget(0,len(headers))\n        t.setHorizontalHeaderLabels([field_label(h) for h in headers])\n        t.setEditTriggers(QAbstractItemView.NoEditTriggers)\n        t.setSelectionBehavior(QAbstractItemView.SelectRows)\n        t.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)\n        t.horizontalHeader().setStretchLastSection(True)\n        for row in rows:\n            r=t.rowCount(); t.insertRow(r)\n            for c,v in enumerate(row.values()):\n                t.setItem(r,c,QTableWidgetItem("" if v is None else display_value(v)))\n        self.tabs.addTab(t,title)\n\n    def _build(self):
         table="suppliers" if self.supplier else "customers"
         with get_session() as s: p=s.execute(text(f'SELECT * FROM "{table}" WHERE id=:id'),{"id":self.party_id}).mappings().first()
         if not p: self.title.setText("السجل غير موجود"); self.meta.setText("لم يتم العثور على الطرف المحدد."); return
