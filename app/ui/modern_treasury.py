@@ -43,22 +43,22 @@ class TreasuryOperationsWindow(QWidget,BackMixin):
         d=TreasuryVoucherDialog(kind,self)
         if d.exec()!=QDialog.Accepted:return
         v=d.values()
-        if not v['treasury_account_id'] or not v['related_account_id']:return QMessageBox.warning(self,'بيانات ناقصة','اختر حساب الخزينة والحساب المقابل.')
+        if not v['treasury_account_id'] or not v['related_account_id']:
+            return QMessageBox.warning(self,'بيانات ناقصة','اختر حساب الخزينة والحساب المقابل.')
         try:
-            with get_session() as s:
-                TreasuryOperationsService.ensure_schema(s);ta=s.execute(text('SELECT * FROM treasury_accounts WHERE id=:id'),{'id':v['treasury_account_id']}).mappings().first()
-                if not ta:raise ValueError('حساب الخزينة غير موجود.')
-                gl=s.execute(text('SELECT id,account_code FROM accounts WHERE id=:id'),{'id':v['related_account_id']}).mappings().first()
-                if not gl:raise ValueError('الحساب المقابل غير موجود.')
-                cash_id=AccountingService.get_account_id(s,ta['gl_account_code']);counter_id=int(gl['id']);number=DocumentNumberService.next_number(s,'TREASURY_MOVEMENT','RCV' if kind=='قبض' else 'PAY',width=6);entry_no=AccountingService.next_entry_number(s)
-                s.execute(text("INSERT INTO journal_entries (entry_number,entry_date,description,source_type,status,created_by,created_at) VALUES (:n,CURRENT_DATE,:d,'TREASURY_VOUCHER','POSTED',:u,CURRENT_TIMESTAMP)"),{'n':entry_no,'d':f'سند {kind} {number}','u':self.user.get('id') or self.user.get('user_id')})
-                eid=int(s.execute(text('SELECT last_insert_rowid()')).scalar())
-                debit,credit=(cash_id,counter_id) if kind=='قبض' else (counter_id,cash_id)
-                s.execute(text("INSERT INTO journal_entry_lines (journal_entry_id,account_id,cost_center_id,description,debit,credit) VALUES (:e,:a,NULL,:d,:de,0)"),{'e':eid,'a':debit,'d':f'سند {kind} {number}','de':v['amount']})
-                s.execute(text("INSERT INTO journal_entry_lines (journal_entry_id,account_id,cost_center_id,description,debit,credit) VALUES (:e,:a,NULL,:d,0,:cr)"),{'e':eid,'a':credit,'d':f'سند {kind} {number}','cr':v['amount']})
-                s.execute(text("INSERT INTO treasury_movements (document_number,treasury_account_id,movement_type,amount,reference_number,user_id,journal_entry_id,status,notes) VALUES (:n,:a,:t,:amt,:ref,:u,:j,'POSTED',:notes)"),{'n':number,'a':v['treasury_account_id'],'t':'RECEIPT' if kind=='قبض' else 'PAYMENT','amt':v['amount'],'ref':v['reference'],'u':self.user.get('id') or self.user.get('user_id'),'j':eid,'notes':v['notes']})
-                AuditService.log(s,'TREASURY_VOUCHER','treasury_movement',number,username=str(self.user.get('id') or 'system'));s.commit()
-            self.load();QMessageBox.information(self,'تم الترحيل',f'تم حفظ وترحيل سند {kind} برقم {number}.')
-        except Exception as exc:QMessageBox.critical(self,'فشل حفظ سند '+kind,human_error(exc))
+            uid=self.user.get('id') or self.user.get('user_id')
+            result=TreasuryOperationsService.post_voucher(
+                kind=kind,
+                treasury_account_id=v['treasury_account_id'],
+                related_account_id=v['related_account_id'],
+                amount=v['amount'],
+                user_id=uid,
+                reference=v['reference'],
+                notes=v['notes'],
+            )
+            self.load()
+            QMessageBox.information(self,'تم الترحيل',f"تم حفظ وترحيل سند {kind} برقم {result['number']}.")
+        except Exception as exc:
+            QMessageBox.critical(self,'فشل حفظ سند '+kind,human_error(exc))
 
 VoucherDialog=TreasuryVoucherDialog

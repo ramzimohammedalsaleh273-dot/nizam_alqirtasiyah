@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 from sqlalchemy import inspect
 from app.database.connection import engine
 from app.models.core import Base

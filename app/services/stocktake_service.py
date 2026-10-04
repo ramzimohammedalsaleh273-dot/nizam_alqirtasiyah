@@ -2,6 +2,7 @@ from decimal import Decimal
 from sqlalchemy import text
 from app.database.connection import get_session
 from app.services.audit_service import AuditService
+from app.services.permission_service import PermissionService
 
 class StocktakeService:
     @staticmethod
@@ -29,9 +30,10 @@ class StocktakeService:
         """))
 
     @classmethod
-    def create(cls, warehouse_id=1, notes=None):
+    def create(cls, warehouse_id=1, notes=None, user_id=None):
         with get_session() as s:
             cls._ensure(s)
+            PermissionService.require_in_session(s, user_id, 'inventory.stocktake')
             r=s.execute(text("""
                 INSERT INTO stocktakes(warehouse_id,status,notes)
                 VALUES(:w,'DRAFT',:n)
@@ -40,11 +42,12 @@ class StocktakeService:
             return int(r)
 
     @classmethod
-    def add_count(cls, stocktake_id, product_id, counted_quantity):
+    def add_count(cls, stocktake_id, product_id, counted_quantity, user_id=None):
         q=Decimal(str(counted_quantity))
         if q<0: raise ValueError("الكمية المعدودة لا يمكن أن تكون سالبة")
         with get_session() as s:
             cls._ensure(s)
+            PermissionService.require_in_session(s, user_id, 'inventory.stocktake')
             st=s.execute(text("SELECT warehouse_id,status FROM stocktakes WHERE id=:id"),{"id":stocktake_id}).fetchone()
             if not st: raise ValueError("الجرد غير موجود")
             if st.status!="DRAFT": raise ValueError("الجرد مغلق")
@@ -73,9 +76,10 @@ class StocktakeService:
             return {"system_quantity":float(system),"counted_quantity":float(q),"difference":float(diff)}
 
     @classmethod
-    def finalize(cls, stocktake_id, reason="إقفال الجرد"):
+    def finalize(cls, stocktake_id, reason="إقفال الجرد", user_id=None):
         with get_session() as s:
             cls._ensure(s)
+            PermissionService.require_in_session(s, user_id, 'inventory.adjust')
             st=s.execute(text("SELECT warehouse_id,status FROM stocktakes WHERE id=:id"),{"id":stocktake_id}).fetchone()
             if not st: raise ValueError("الجرد غير موجود")
             if st.status!="DRAFT": raise ValueError("الجرد مغلق مسبقًا")

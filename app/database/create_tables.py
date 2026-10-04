@@ -1,4 +1,4 @@
-﻿from app.database.connection import engine
+from app.database.connection import engine
 from app.models.core import Base
 
 def create_all_tables():

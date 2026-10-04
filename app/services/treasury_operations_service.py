@@ -203,6 +203,71 @@ class TreasuryOperationsService:
             return float(result)
 
     @classmethod
+    def post_voucher(cls, kind, treasury_account_id, related_account_id, amount,
+                     user_id=None, reference=None, notes=None):
+        amount = cls.money(amount)
+        if amount <= 0:
+            raise ValueError("مبلغ السند يجب أن يكون أكبر من صفر")
+        permission = "treasury.receipt" if kind == "قبض" else "treasury.payment"
+        if kind not in {"قبض", "صرف"}:
+            raise ValueError("نوع سند الخزينة غير مدعوم")
+        with get_session() as s:
+            try:
+                cls.ensure_schema(s)
+                if not PermissionService.has_in_session(s, user_id, permission):
+                    raise PermissionError("لا توجد صلاحية لتنفيذ سند الخزينة")
+                account = cls._account(s, treasury_account_id)
+                gl = s.execute(text(
+                    "SELECT id FROM accounts WHERE id=:id AND COALESCE(is_active,1)=1"
+                ), {"id": int(related_account_id)}).scalar()
+                if gl is None:
+                    raise ValueError("الحساب المقابل غير موجود أو غير نشط")
+                cash_id = AccountingService.get_account_id(s, account["gl_account_code"])
+                counter_id = int(gl)
+                number = DocumentNumberService.next_number(
+                    s, "TREASURY_MOVEMENT", "RCV" if kind == "قبض" else "PAY", width=6
+                )
+                entry_no = AccountingService.next_entry_number(s)
+                s.execute(text("""
+                    INSERT INTO journal_entries
+                    (entry_number,entry_date,description,source_type,status,created_by,created_at)
+                    VALUES(:n,CURRENT_DATE,:d,'TREASURY_VOUCHER','POSTED',:u,CURRENT_TIMESTAMP)
+                """), {"n": entry_no, "d": f"سند {kind} {number}", "u": user_id})
+                entry_id = int(s.execute(text("SELECT last_insert_rowid()")).scalar())
+                debit, credit = (cash_id, counter_id) if kind == "قبض" else (counter_id, cash_id)
+                s.execute(text("""
+                    INSERT INTO journal_entry_lines
+                    (journal_entry_id,account_id,cost_center_id,description,debit,credit)
+                    VALUES(:e,:a,NULL,:d,:de,0)
+                """), {"e": entry_id, "a": debit, "d": f"سند {kind} {number}", "de": float(amount)})
+                s.execute(text("""
+                    INSERT INTO journal_entry_lines
+                    (journal_entry_id,account_id,cost_center_id,description,debit,credit)
+                    VALUES(:e,:a,NULL,:d,0,:cr)
+                """), {"e": entry_id, "a": credit, "d": f"سند {kind} {number}", "cr": float(amount)})
+                movement_id = int(s.execute(text("""
+                    INSERT INTO treasury_movements
+                    (document_number,treasury_account_id,movement_type,amount,reference_number,
+                     user_id,journal_entry_id,status,notes)
+                    VALUES(:n,:a,:t,:amt,:ref,:u,:j,'POSTED',:notes)
+                    RETURNING id
+                """), {
+                    "n": number, "a": int(treasury_account_id),
+                    "t": "RECEIPT" if kind == "قبض" else "PAYMENT",
+                    "amt": float(amount), "ref": reference, "u": user_id,
+                    "j": entry_id, "notes": notes,
+                }).scalar())
+                AuditService.log(
+                    s, "TREASURY_VOUCHER", "treasury_movement", movement_id,
+                    username=str(user_id) if user_id else None
+                )
+                s.commit()
+                return {"id": movement_id, "number": number, "journal_entry_id": entry_id}
+            except Exception:
+                s.rollback()
+                raise
+
+    @classmethod
     def transfer(cls, source_account_id, destination_account_id, amount,
                  user_id=None, notes=None):
         amount = cls.money(amount)

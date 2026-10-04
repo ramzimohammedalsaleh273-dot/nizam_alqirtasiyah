@@ -22,8 +22,9 @@ class PermissionsWindow(QWidget):
         "admin": "مدير النظام",
     }
 
-    def __init__(self, parent=None):
+    def __init__(self, user=None, parent=None):
         super().__init__(parent)
+        self.user = dict(user or {})
         self.setStyleSheet(APP_STYLE)
         self.setWindowTitle("الأدوار والصلاحيات")
         self.setMinimumSize(1250, 760)
@@ -159,11 +160,8 @@ class PermissionsWindow(QWidget):
             return
         code = code.strip().lower().replace(" ", "_")
         try:
-            with get_session() as s:
-                s.execute(text(
-                    "INSERT INTO erp_roles(code,name_ar,is_active) VALUES(:c,:n,1)"
-                ), {"c": code, "n": name.strip()})
-                s.commit()
+            uid=self.user.get('id') or self.user.get('user_id')
+            rid=PermissionService.create_role(uid, code, name.strip())
             self.load_roles()
             idx = self.role.findText(name.strip())
             if idx >= 0:
@@ -177,16 +175,13 @@ class PermissionsWindow(QWidget):
         if rid is None:
             return
         try:
-            with get_session() as s:
-                s.execute(text("DELETE FROM erp_role_permissions WHERE role_id=:r"), {"r": int(rid)})
-                for row in range(self.table.rowCount()):
-                    box = self.table.cellWidget(row, 2)
-                    if box and box.isChecked():
-                        s.execute(text(
-                            "INSERT INTO erp_role_permissions(role_id,permission_id) "
-                            "VALUES(:r,:p)"
-                        ), {"r": int(rid), "p": int(box.property("permission_id"))})
-                s.commit()
+            uid=self.user.get('id') or self.user.get('user_id')
+            permission_ids=[]
+            for row in range(self.table.rowCount()):
+                box=self.table.cellWidget(row,2)
+                if box and box.isChecked():
+                    permission_ids.append(int(box.property("permission_id")))
+            PermissionService.set_role_permissions(uid, int(rid), permission_ids)
             QMessageBox.information(self, "تم", "تم حفظ صلاحيات الدور.")
             self.load()
         except Exception as exc:
@@ -199,12 +194,8 @@ class PermissionsWindow(QWidget):
             QMessageBox.warning(self, "الصلاحيات", "حدد المستخدم والدور أولًا.")
             return
         try:
-            with get_session() as s:
-                s.execute(text("DELETE FROM erp_user_roles WHERE user_id=:u"), {"u": int(uid)})
-                s.execute(text(
-                    "INSERT INTO erp_user_roles(user_id,role_id) VALUES(:u,:r)"
-                ), {"u": int(uid), "r": int(rid)})
-                s.commit()
+            actor=self.user.get('id') or self.user.get('user_id')
+            PermissionService.assign_role(actor, int(uid), int(rid))
             self.update_user_status()
             QMessageBox.information(self, "تم", "تم إسناد الدور للمستخدم.")
         except Exception as exc:

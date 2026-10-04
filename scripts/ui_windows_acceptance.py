@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication,QWidget,QMessageBox
 UI_ROOT=ROOT/'app'/'ui'
-SAFE_ARGS={'table_name':'products','title':'فحص الواجهة','fields':[],'sections':[],'product_id':1,'party_id':1,'total':10,'data':{},'session_id':1}
+SAFE_ARGS={'table_name':'products','title':'فحص الواجهة','fields':[],'sections':[],'product_id':1,'party_id':1,'total':10,'data':{},'session_id':1,'mode':'view','kind':'sale','document_id':1,'party_type':'customer','sale_id':1,'cart':[],'payments':[]}
 BLOCKED=[]
 SKIP_MODULES={'app.ui.final_ui'}
 

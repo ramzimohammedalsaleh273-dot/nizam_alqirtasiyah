@@ -33,8 +33,11 @@ def isolated_db(tmp_path):
 def _first_ids():
     with connection.get_session() as s:
         PermissionService.ensure_schema(s)
+        s.execute(__import__("sqlalchemy").text(
+            "INSERT OR IGNORE INTO erp_roles(code,name_ar,is_active) VALUES('admin','مدير النظام',1)"
+        ))
         admin_role = s.execute(__import__("sqlalchemy").text(
-            "SELECT id FROM erp_roles WHERE code='admin' LIMIT 1"
+            "SELECT id FROM erp_roles WHERE LOWER(code)='admin' LIMIT 1"
         )).scalar()
         user = s.execute(__import__("sqlalchemy").text(
             "SELECT id FROM users ORDER BY id LIMIT 1"
@@ -43,6 +46,10 @@ def _first_ids():
             s.execute(__import__("sqlalchemy").text(
                 "INSERT OR IGNORE INTO erp_user_roles(user_id,role_id) VALUES(:u,:r)"
             ), {"u": int(user), "r": int(admin_role)})
+            s.execute(__import__("sqlalchemy").text(
+                "INSERT OR IGNORE INTO erp_role_permissions(role_id,permission_id) "
+                "SELECT :r,id FROM erp_permissions WHERE COALESCE(is_active,1)=1"
+            ), {"r": int(admin_role)})
         s.commit()
         product = s.execute(__import__("sqlalchemy").text(
             "SELECT id FROM products WHERE is_active=1 ORDER BY id LIMIT 1"
@@ -53,7 +60,8 @@ def _first_ids():
         customer = s.execute(__import__("sqlalchemy").text(
             "SELECT id FROM customers WHERE is_active=1 ORDER BY id LIMIT 1"
         )).scalar()
-    assert user and product and warehouse and customer
+    assert user and product and warehouse and customer and admin_role
+    assert PermissionService.has(int(user), 'sale.create'), 'admin permission mapping was not established'
     return int(user), int(product), int(warehouse), int(customer)
 
 
@@ -229,11 +237,11 @@ def test_purchase_return_reverses_inventory_and_balances(isolated_db):
 
 
 def test_stocktake_service_uses_operational_stock_and_finalizes(isolated_db):
-    _, product, warehouse, _ = _first_ids()
-    stocktake_id = StocktakeService.create(warehouse)
-    result = StocktakeService.add_count(stocktake_id, product, 0)
+    user, product, warehouse, _ = _first_ids()
+    stocktake_id = StocktakeService.create(warehouse, user_id=user)
+    result = StocktakeService.add_count(stocktake_id, product, 0, user_id=user)
     assert "difference" in result
-    final = StocktakeService.finalize(stocktake_id)
+    final = StocktakeService.finalize(stocktake_id, user_id=user)
     assert final["status"] == "COMPLETED"
     with connection.get_session() as s:
         qty = s.execute(__import__("sqlalchemy").text(

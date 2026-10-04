@@ -1,4 +1,4 @@
-﻿import sqlite3
+import sqlite3
 from decimal import Decimal
 from app.database.connection import get_session
 from app.services.pos_service import POSService

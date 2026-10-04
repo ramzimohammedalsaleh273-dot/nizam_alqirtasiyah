@@ -1,4 +1,4 @@
-﻿from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from sqlalchemy import text
 from app.database.connection import get_session

@@ -84,8 +84,9 @@ class LoginDialog(QDialog):
             with get_session() as s:
                 for row in s.execute(text("SELECT id,name FROM branches WHERE COALESCE(is_active,1)=1 ORDER BY id")).all():
                     self.branch.addItem(str(row[1]), int(row[0]))
-        except Exception:
-            pass
+        except Exception as exc:
+            self._branch_load_error = str(exc)
+            self.branch.setToolTip("تعذر تحميل الفروع: " + str(exc))
         layout.addWidget(self.branch)
 
         self.message = QLabel("")
@@ -131,7 +132,7 @@ class MainWindow(QMainWindow):
         "inventory": "inventory.view", "stocktake": "inventory.stocktake", "parties": "customer.view",
         "reports": "report.view", "accounting": "accounting.view", "treasury": "treasury.view",
         "treasury_accounts": "treasury.view", "expenses": "treasury.payment", "analytics": "report.view",
-        "documents": "document.view", "permissions": None, "settings": "settings.view",
+        "documents": "document.view", "permissions": "permission.manage", "settings": "settings.view",
         "backup": "backup.create", "smart_operations": "report.view",
     }
     def __init__(self):
@@ -590,16 +591,16 @@ class MainWindow(QMainWindow):
         return False
 
     def open_window(self, key, window_class):
-        # وضع التهيئة: لا تُمنع أي نافذة بسبب الصلاحيات حتى يتمكن المدير
-        # من فتح مصفوفة الصلاحيات وتحديد الصلاحيات يدويًا.
-        # شاشة مصفوفة الصلاحيات نفسها تبقى متاحة دائمًا.
+        permission = self.WINDOW_PERMISSIONS.get(key)
+        if permission and not self._allowed(permission):
+            return
         self._close_other_windows(key)
         window = self._child_windows.get(key)
         try:
             if window is None:
                 # مصفوفة الصلاحيات لا تعتمد على تمرير المستخدم عند الإنشاء.
                 if key == "permissions":
-                    window = PermissionsWindow(parent=self)
+                    window = PermissionsWindow(user=self.current_user, parent=self)
                 else:
                     try:
                         window = window_class(user=self.current_user, parent=self)
@@ -632,8 +633,9 @@ class MainWindow(QMainWindow):
             "employees": "user.view", "employee_attendance": "user.view", "payroll_runs": "user.view",
             "system_settings": "settings.view", "companies": "settings.view", "branches": "settings.view",
         }
-        # لا تُفرض الصلاحيات أثناء وضع التهيئة؛ يستطيع المدير الوصول إلى
-        # جميع الجداول وتحديد الصلاحيات لاحقًا من مصفوفة الصلاحيات.
+        view_permission = table_permissions.get(table_name)
+        if view_permission and not self._allowed(view_permission):
+            return
         key = "data:" + table_name
         self._close_other_windows(key)
         window = self._child_windows.get(key)

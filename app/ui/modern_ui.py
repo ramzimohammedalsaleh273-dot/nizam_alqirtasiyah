@@ -204,8 +204,8 @@ class RecordDialog(QDialog):
                 if value is not None:
                     idx = w.findData(value)
                     if idx >= 0: w.setCurrentIndex(idx)
-            except Exception:
-                pass
+            except Exception as exc:
+                self._lookup_error = str(exc)
             return w
         if 'BOOL' in typ or name in {'is_active','is_read','allow_posting','is_locked','is_group','approved'}:
             w = QCheckBox('مفعل / نعم')
@@ -240,6 +240,42 @@ class RecordDialog(QDialog):
             else: out[name] = w.text().strip() or None
         return out
 
+
+DIRECT_WRITE_FORBIDDEN = {
+    'sales','sale_items','purchase_invoices','purchase_invoice_items','journal_entries',
+    'journal_entry_lines','stock','stock_balances','stock_movements','cash_transactions',
+    'cash_sessions','customer_transactions','supplier_transactions','audit_logs','audit_log',
+    'erp_permissions','erp_roles','erp_role_permissions','erp_user_roles','permissions',
+    'roles','user_roles','role_permissions','login_sessions','erp_login_sessions',
+}
+
+TABLE_PERMISSIONS = {
+    'products': ('inventory.view','inventory.create','inventory.edit','inventory.delete'),
+    'product_categories': ('inventory.view','inventory.create','inventory.edit','inventory.delete'),
+    'units': ('inventory.view','inventory.create','inventory.edit','inventory.delete'),
+    'warehouses': ('inventory.view','inventory.create','inventory.edit','inventory.delete'),
+    'stock_movements': ('inventory.view',None,None,None),
+    'stocktakes': ('inventory.stocktake','inventory.stocktake','inventory.stocktake',None),
+    'customers': ('customer.view','customer.create','customer.edit','customer.delete'),
+    'suppliers': ('supplier.view','supplier.create','supplier.edit','supplier.delete'),
+    'users': ('user.view','user.create','user.edit','user.delete'),
+    'roles': ('permission.manage','permission.manage','permission.manage','permission.manage'),
+    'permissions': ('permission.manage',None,None,None),
+    'accounts': ('accounting.view','accounting.edit','accounting.edit','accounting.edit'),
+    'journal_entries': ('accounting.view',None,None,None),
+    'journal_entry_lines': ('accounting.view',None,None,None),
+    'cash_registers': ('treasury.view','treasury.payment','treasury.payment','treasury.payment'),
+    'cash_transactions': ('treasury.view',None,None,None),
+    'cash_sessions': ('treasury.view',None,None,None),
+    'bank_accounts': ('treasury.view','treasury.payment','treasury.payment','treasury.payment'),
+    'tax_rates': ('accounting.view','accounting.edit','accounting.edit','accounting.edit'),
+    'tax_invoices': ('sale.view',None,None,None),
+    'audit_logs': ('audit.view',None,None,None),
+    'audit_log': ('audit.view',None,None,None),
+    'companies': ('settings.view','settings.edit','settings.edit','settings.edit'),
+    'branches': ('settings.view','settings.edit','settings.edit','settings.edit'),
+    'system_settings': ('settings.view','settings.edit','settings.edit','settings.edit'),
+}
 
 class AccessDataWindow(QWidget, BackMixin):
     """جدول عربي حقيقي: بحث، فرز، فتح للعرض، تعديل، جديد، حذف، رجوع."""
@@ -288,12 +324,35 @@ class AccessDataWindow(QWidget, BackMixin):
         if rid is None:return QMessageBox.information(self,'فتح السجل','حدد السجل الذي تريد فتحه أولًا.')
         with get_session() as s: rec=s.execute(text(f'SELECT * FROM "{self.table_name}" WHERE id=:id'),{'id':rid}).mappings().first()
         if rec: RecordDialog(self.table_name,rec,True,self).exec()
+    def _permission_for(self, action):
+        defaults = ('settings.view','settings.edit','settings.edit','settings.edit')
+        return TABLE_PERMISSIONS.get(self.table_name, defaults)[{'view':0,'create':1,'edit':2,'delete':3}[action]]
+
+    def _allowed(self, action):
+        code = self._permission_for(action)
+        if not code:
+            return False
+        from app.services.permission_service import PermissionService
+        uid = self.user.get('id')
+        with get_session() as s:
+            PermissionService.ensure_schema(s)
+            return PermissionService.has_in_session(s, uid, code)
+
+    def _deny(self, action):
+        QMessageBox.warning(self, 'الصلاحيات', f'لا توجد صلاحية لتنفيذ: {action}')
+        return False
+
     def add(self):
-        if not self.editable:return
+        if not self.editable or self.table_name in DIRECT_WRITE_FORBIDDEN:
+            return self._deny('الإضافة المباشرة')
+        if not self._allowed('create'): return self._deny('الإضافة')
         d=RecordDialog(self.table_name,parent=self)
         if d.exec()==QDialog.Accepted:self._write(d.values(),None)
+
     def edit(self):
-        if not self.editable:return
+        if not self.editable or self.table_name in DIRECT_WRITE_FORBIDDEN:
+            return self._deny('التعديل المباشر')
+        if not self._allowed('edit'): return self._deny('التعديل')
         rid=self._id()
         if rid is None:return QMessageBox.information(self,'التعديل','حدد السجل الذي تريد تعديله أولًا.')
         with get_session() as s: rec=s.execute(text(f'SELECT * FROM "{self.table_name}" WHERE id=:id'),{'id':rid}).mappings().first()
@@ -312,6 +371,10 @@ class AccessDataWindow(QWidget, BackMixin):
             self.load()
         except Exception as exc: QMessageBox.critical(self,'فشل الحفظ',human_error(exc))
     def delete(self):
+        if self.table_name in DIRECT_WRITE_FORBIDDEN:
+            return self._deny('الحذف المباشر')
+        if not self._allowed('delete'):
+            return self._deny('الحذف')
         rid=self._id()
         if rid is None:return QMessageBox.information(self,'الحذف','حدد السجل الذي تريد حذفه أولًا.')
         if QMessageBox.question(self,'تأكيد الحذف','هل أنت متأكد من حذف السجل؟\nسيتم منع الحذف إذا كان السجل مرتبطًا بمستندات أخرى.',QMessageBox.Yes|QMessageBox.No)==QMessageBox.Yes:
@@ -393,16 +456,34 @@ class SalesWindow(QWidget, BackMixin):
         self.table=QTableWidget(); self.table.setSelectionBehavior(QAbstractItemView.SelectRows); self.table.setSelectionMode(QAbstractItemView.SingleSelection); self.table.setSortingEnabled(True); self.table.doubleClicked.connect(lambda *_:self.open_selected()); root.addWidget(self.table,1)
     def load(self):
         with get_session() as s:
-            if not table_exists(s,'sales'):return
-            cs=columns(s,'sales'); self.cols=[x for x in ('id','invoice_number','created_at','subtotal','discount_amount','tax_amount','total_amount','paid_amount','due_amount','status','customer_id') if x in cs]; q=self.search.text().strip(); params={}; where=''
+            if not table_exists(s,'sales'):
+                return
+            cs=columns(s,'sales')
+            self.cols=[x for x in ('id','invoice_number','created_at','subtotal','discount_amount','tax_amount','total_amount','paid_amount','due_amount','status','customer_id') if x in cs]
+            customer_expr="'بدون عميل'"
+            if table_exists(s,'customers'):
+                cc=columns(s,'customers')
+                parts=[f'c."{x}"' for x in ('name_ar','name','name_en') if x in cc]
+                if parts:
+                    customer_expr="COALESCE("+",".join(parts)+",'بدون عميل')"
+            q=self.search.text().strip(); params={}; where=''
             if q:
-                ors=[f'CAST(s."{x}" AS TEXT) LIKE :q' for x in self.cols if x!='id' and x!='customer_id']; ors.append("CAST(COALESCE(c.name_ar,c.name,c.name_en,'') AS TEXT) LIKE :q"); where=' WHERE '+' OR '.join(ors); params['q']=f'%{q}%'
-            rows=s.execute(text(f'SELECT s."{self.cols[0]}" AS id, s.invoice_number, s.created_at, s.subtotal, s.discount_amount, s.tax_amount, s.total_amount, s.paid_amount, s.due_amount, s.status, COALESCE(c.name_ar,c.name,c.name_en,\'بدون عميل\') AS customer FROM sales s LEFT JOIN customers c ON c.id=s.customer_id{where} ORDER BY s.id DESC LIMIT 1000'),params).all()
-        headers=['id','invoice_number','created_at','subtotal','discount_amount','tax_amount','total_amount','paid_amount','due_amount','status','customer']; labels=['الرقم','رقم الفاتورة','التاريخ','قبل الضريبة','الخصم','الضريبة','الإجمالي','المدفوع','المتبقي','الحالة','العميل']; self.table.setColumnCount(len(headers)); self.table.setHorizontalHeaderLabels(labels); self.table.setRowCount(0)
+                ors=[f'CAST(s."{x}" AS TEXT) LIKE :q' for x in self.cols if x not in {'id','customer_id'}]
+                if table_exists(s,'customers'):
+                    ors.append(f'CAST({customer_expr} AS TEXT) LIKE :q')
+                where=' WHERE '+' OR '.join(ors); params['q']=f'%{q}%'
+            wanted=[x for x in ('id','invoice_number','created_at','subtotal','discount_amount','tax_amount','total_amount','paid_amount','due_amount','status') if x in cs]
+            select=', '.join(f's."{x}"' for x in wanted)
+            join=' LEFT JOIN customers c ON c.id=s.customer_id' if table_exists(s,'customers') and 'customer_id' in cs else ''
+            extra=f', {customer_expr} AS customer' if join else ", 'بدون عميل' AS customer"
+            rows=s.execute(text(f'SELECT {select}{extra} FROM sales s{join}{where} ORDER BY s.id DESC LIMIT 1000'),params).all()
+        labels=['الرقم' if x=='id' else label(x) for x in wanted]+['العميل']
+        self.table.setColumnCount(len(labels)); self.table.setHorizontalHeaderLabels(labels); self.table.setRowCount(0)
         for row in rows:
             r=self.table.rowCount(); self.table.insertRow(r)
-            for c,v in enumerate(row):self.table.setItem(r,c,QTableWidgetItem(display_value(v)))
+            for col,v in enumerate(row): self.table.setItem(r,col,QTableWidgetItem(display_value(v)))
         self.table.horizontalHeader().setStretchLastSection(True)
+
     def selected_id(self):
         r=self.table.currentRow();
         if r<0:return None
@@ -425,17 +506,32 @@ class PurchasesWindow(SalesWindow):
         actions.addStretch();root.addLayout(actions);self.table=QTableWidget();self.table.setSelectionBehavior(QAbstractItemView.SelectRows);self.table.setSelectionMode(QAbstractItemView.SingleSelection);self.table.doubleClicked.connect(lambda *_:self.open_purchase());root.addWidget(self.table,1)
     def load_purchase(self):
         with get_session() as s:
-            if not table_exists(s,'purchase_invoices'):self.table.setRowCount(0);return
-            cs=columns(s,'purchase_invoices'); number=next((x for x in ('invoice_number','number','document_no') if x in cs),'id'); supplier='supplier_id' if 'supplier_id' in cs else None; q=self.search.text().strip(); params={}; where=''
+            if not table_exists(s,'purchase_invoices'):
+                self.table.setRowCount(0); return
+            cs=columns(s,'purchase_invoices')
+            number=next((x for x in ('invoice_number','number','document_no') if x in cs),'id')
+            supplier='supplier_id' if 'supplier_id' in cs else None
+            supplier_expr="'غير محدد'"
+            if supplier and table_exists(s,'suppliers'):
+                sc=columns(s,'suppliers')
+                parts=[f'sp."{x}"' for x in ('name_ar','name','name_en') if x in sc]
+                if parts: supplier_expr="COALESCE("+",".join(parts)+",'غير محدد')"
+            q=self.search.text().strip(); params={}; where=''
             if q:
-                ors=[f'CAST(p."{x}" AS TEXT) LIKE :q' for x in cs if x not in {'id'}];
-                if supplier and table_exists(s,'suppliers'):ors.append("COALESCE(sp.name_ar,sp.name,sp.name_en,'') LIKE :q"); where=' WHERE '+' OR '.join(ors); params['q']=f'%{q}%'
-            join=" LEFT JOIN suppliers sp ON sp.id=p.supplier_id" if supplier and table_exists(s,'suppliers') else ''
-            wanted=[x for x in ('id',number,'created_at','subtotal','discount_amount','tax_amount','total_amount','paid_amount','due_amount','status') if x in cs]; rows=s.execute(text(f'SELECT p."{wanted[0]}" AS id, '+','.join(f'p."{x}"' for x in wanted[1:])+f", COALESCE(sp.name_ar,sp.name,sp.name_en,'غير محدد') AS supplier FROM purchase_invoices p{join}{where} ORDER BY p.id DESC LIMIT 1000"),params).all()
-        labels=['الرقم','رقم الفاتورة','التاريخ','قبل الضريبة','الخصم','الضريبة','الإجمالي','المدفوع','المتبقي','الحالة','المورد']; self.table.setColumnCount(len(labels));self.table.setHorizontalHeaderLabels(labels);self.table.setRowCount(0)
+                ors=[f'CAST(p."{x}" AS TEXT) LIKE :q' for x in cs if x!='id']
+                if supplier and table_exists(s,'suppliers'): ors.append(f'CAST({supplier_expr} AS TEXT) LIKE :q')
+                where=' WHERE '+' OR '.join(ors); params['q']=f'%{q}%'
+            wanted=[x for x in ('id',number,'created_at','invoice_date','subtotal','discount_amount','tax_amount','total_amount','paid_amount','due_amount','status') if x in cs]
+            select=', '.join(f'p."{x}"' for x in wanted)
+            join=' LEFT JOIN suppliers sp ON sp.id=p.supplier_id' if supplier and table_exists(s,'suppliers') else ''
+            extra=f', {supplier_expr} AS supplier' if join else ", 'غير محدد' AS supplier"
+            rows=s.execute(text(f'SELECT {select}{extra} FROM purchase_invoices p{join}{where} ORDER BY p.id DESC LIMIT 1000'),params).all()
+        labels=[('الرقم' if x=='id' else label(x)) for x in wanted]+['المورد']
+        self.table.setColumnCount(len(labels)); self.table.setHorizontalHeaderLabels(labels); self.table.setRowCount(0)
         for row in rows:
-            r=self.table.rowCount();self.table.insertRow(r)
-            for c,v in enumerate(row):self.table.setItem(r,c,QTableWidgetItem(display_value(v)))
+            r=self.table.rowCount(); self.table.insertRow(r)
+            for col,v in enumerate(row): self.table.setItem(r,col,QTableWidgetItem(display_value(v)))
+
     def open_purchase(self):
         r=self.table.currentRow();
         if r<0:return QMessageBox.information(self,'فتح الفاتورة','حدد فاتورة أولًا.')
@@ -488,13 +584,25 @@ class InventoryWindow(QWidget, BackMixin):
         d=RecordDialog('products',rec,False,self)
         if d.exec()==QDialog.Accepted:self.write_product(d.values(),rid)
     def write_product(self,values,rid=None):
-        values={k:v for k,v in values.items() if k not in {'id','created_at','updated_at'}}
         try:
-            with get_session() as s:
-                if rid is None:
-                    keys=[k for k,v in values.items() if v is not None];s.execute(text(f'INSERT INTO products ({",".join(chr(34)+k+chr(34) for k in keys)}) VALUES ({",".join(":"+k for k in keys)})'),{k:values[k] for k in keys})
-                else:s.execute(text(f'UPDATE products SET {",".join(chr(34)+k+chr(34)+"=:"+k for k in values)} WHERE id=:id'),{**values,'id':rid})
-                s.commit()
+            from app.services.product_service import ProductService
+            uid=self.user.get('id') or self.user.get('user_id')
+            sku=values.get('sku') or values.get('product_code') or values.get('code')
+            name=values.get('name_ar') or values.get('name') or values.get('product_name')
+            cost=values.get('cost_price',values.get('purchase_price',0))
+            sale=values.get('sale_price',values.get('selling_price',0))
+            barcode=values.get('barcode')
+            if rid is None:
+                ProductService.create_product(
+                    sku=sku,name_ar=name,cost_price=cost,sale_price=sale,
+                    barcode=barcode,opening_quantity=values.get('quantity',0) or values.get('opening_quantity',0),
+                    warehouse_id=int(values.get('warehouse_id') or 1),user_id=uid
+                )
+            else:
+                ProductService.update_product(
+                    product_id=int(rid),sku=sku,name_ar=name,
+                    cost_price=cost,sale_price=sale,user_id=uid
+                )
             self.load();QMessageBox.information(self,'تم حفظ المنتج','تم حفظ الصنف بنجاح. يمكنك الآن متابعة العمل.')
         except Exception as exc:QMessageBox.critical(self,'لم يتم حفظ المنتج',human_error(exc))
     def delete_product(self):
@@ -660,7 +768,7 @@ class SettingsWindow(QWidget, BackMixin):
                 s.execute(text(f'INSERT INTO system_settings ({",".join(chr(34)+x+chr(34) for x in fields)}) VALUES ({",".join(":"+x for x in fields)})'),vals)
             s.commit()
     def page(self,title):
-        p=QWidget();l=QVBoxLayout(p);h=QLabel(title);h.setObjectName('PageTitle');l.addWidget(h);return p,l
+        p=QWidget();l=QFormLayout(p);h=QLabel(title);h.setObjectName('PageTitle');l.addWidget(h);return p,l
     def field(self,l,name,w):l.addRow(name,w);return w
     def _build_pages(self):
         p,l=self.page('بيانات المنشأة');self.company=QLineEdit(self._setting_get('company_name','قرطاسية لؤلؤة الأربعين النموذجية'));self.address=QLineEdit(self._setting_get('company_address',''));self._add_save(l,[('اسم المنشأة',self.company,'company_name'),('العنوان',self.address,'company_address')]);self.stack.addWidget(p)

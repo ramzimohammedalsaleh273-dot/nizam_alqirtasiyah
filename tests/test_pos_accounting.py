@@ -1,4 +1,4 @@
-﻿import sqlite3
+import sqlite3
 from decimal import Decimal
 
 from app.services.accounting_service import AccountingService
