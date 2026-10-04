@@ -56,9 +56,14 @@ class AnalyticsWindow(QWidget):
         for vals in rows:
             r=self.table.rowCount(); self.table.insertRow(r)
             for c,v in enumerate(vals): self.table.setItem(r,c,QTableWidgetItem(f"{v:,.2f}" if isinstance(v,float) else str(v)))
-        # سلسلة يومية خفيفة للمخطط؛ تعتمد على البيانات الحقيقية فقط.
-        sales_rows=s.execute(text("SELECT date(created_at),COALESCE(SUM(total_amount),0) FROM sales WHERE status IN ('POSTED','completed') AND date(created_at) BETWEEN :f AND :t GROUP BY date(created_at) ORDER BY date(created_at)"),{"f":f,"t":t}).all()
+        # المخطط اليومي يُقرأ من قاعدة البيانات داخل جلسة مستقلة حتى لا يبقى أي اتصال مفتوح.
+        with get_session() as s:
+            sales_rows=s.execute(text("SELECT date(created_at),COALESCE(SUM(total_amount),0) FROM sales WHERE status IN ('POSTED','completed') AND date(created_at) BETWEEN :f AND :t GROUP BY date(created_at) ORDER BY date(created_at)"),{"f":f,"t":t}).all()
+            expense_exists=s.execute(text("SELECT 1 FROM sqlite_master WHERE type='table' AND name='expenses'")).scalar()
+            expense_rows=s.execute(text("SELECT date(expense_date),COALESCE(SUM(amount),0) FROM expenses WHERE date(expense_date) BETWEEN :f AND :t GROUP BY date(expense_date) ORDER BY date(expense_date)"),{"f":f,"t":t}).all() if expense_exists else []
         labels=[str(x[0])[5:] for x in sales_rows][-14:]
         vals=[float(x[1] or 0) for x in sales_rows][-14:]
+        emap={str(x[0]):float(x[1] or 0) for x in expense_rows}
+        evals=[emap.get(str(x[0]),0.0) for x in sales_rows][-14:]
         self.sales_chart.set_data(labels,[{"name":"المبيعات","values":vals,"color":"#2563eb"}])
-        self.expense_chart.set_data(labels,[{"name":"المصروفات","values":[0 for _ in labels],"color":"#d97706"}])
+        self.expense_chart.set_data(labels,[{"name":"المصروفات","values":evals,"color":"#d97706"}])
