@@ -1,4 +1,4 @@
-from app.ui.final_ui import TreasuryOperationsWindow
+from app.ui.modern_ui import TreasuryOperationsWindow, VoucherDialog
 
 # Compatibility specification buttons retained: سند قبض | سند صرف | فتح وردية | إغلاق وردية
-__all__ = ['TreasuryOperationsWindow']
+__all__ = ['TreasuryOperationsWindow', 'VoucherDialog']
