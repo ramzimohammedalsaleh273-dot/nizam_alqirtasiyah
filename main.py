@@ -15,7 +15,12 @@ def initialize_operational_layer():
         session.commit()
 
 
-from app.ui.main_window import run
+from app.ui import main_window as _main_window
+from app.ui.modern_dashboard import install as install_modern_shell
+
+# استبدال الغلاف المرئي القديم بغلاف حديث، مع إبقاء وظائف الوحدات والخدمات الحالية.
+install_modern_shell(_main_window.MainWindow)
+run = _main_window.run
 
 if __name__ == "__main__":
     initialize_operational_layer()
