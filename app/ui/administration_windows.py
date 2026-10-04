@@ -1,6 +1,6 @@
 from app.ui.final_ui import accounting_window, treasury_window, employees_window
 from app.ui.access_data_window import AccessDataWindow
-from app.ui.modern_ui import SettingsWindow
+from app.ui.settings_window import SettingsWindow
 
 settings_window = SettingsWindow
 
