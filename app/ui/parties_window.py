@@ -1,4 +1,4 @@
-from app.ui.modern_ui import PartiesWindow, PartyProfileDialog
+from app.ui.modern_ui_runtime import PartiesWindow, PartyProfileDialog
 
 PartyCardDialog = PartyProfileDialog
 
