@@ -1,4 +1,4 @@
-from app.ui.modern_ui import SettingsWindow
+from app.ui.modern_ui_runtime import SettingsWindow
 
 FinalSettingsWindow = SettingsWindow
 
