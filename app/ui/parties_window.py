@@ -1,3 +1,5 @@
-from app.ui.final_ui import PartiesWindow, PartyCardDialog
+from app.ui.modern_ui import PartiesWindow, PartyProfileDialog
 
-__all__ = ['PartiesWindow', 'PartyCardDialog']
+PartyCardDialog = PartyProfileDialog
+
+__all__ = ['PartiesWindow', 'PartyProfileDialog', 'PartyCardDialog']
