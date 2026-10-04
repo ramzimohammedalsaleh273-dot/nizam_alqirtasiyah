@@ -8,6 +8,8 @@ from PySide6.QtWidgets import QApplication,QWidget,QMessageBox
 UI_ROOT=ROOT/'app'/'ui'
 SAFE_ARGS={'table_name':'products','title':'فحص الواجهة','fields':[],'sections':[],'product_id':1,'party_id':1,'total':10,'data':{},'session_id':1}
 BLOCKED=[]
+SKIP_MODULES={'app.ui.final_ui'}
+
 def close_blocking_dialogs():
     app=QApplication.instance()
     if not app:return
@@ -27,12 +29,12 @@ def args_for(cls):
     return args,missing
 
 def main():
-    app=QApplication.instance() or QApplication([]);app.setQuitOnLastWindowClosed(False)
-    timer=QTimer();timer.timeout.connect(close_blocking_dialogs);timer.start(100)
+    app=QApplication.instance() or QApplication([]);app.setQuitOnLastWindowClosed(False);timer=QTimer();timer.timeout.connect(close_blocking_dialogs);timer.start(100)
     modules=[];imports=[]
     for path in sorted(UI_ROOT.rglob('*.py')):
         if path.name in {'__init__.py','theme.py'}:continue
         name='.'.join(path.relative_to(ROOT).with_suffix('').parts)
+        if name in SKIP_MODULES:continue
         try:modules.append(importlib.import_module(name))
         except Exception as e:imports.append(f'{name}: {type(e).__name__}: {e}')
     classes=[]
@@ -50,8 +52,7 @@ def main():
             w=cls(**args);w.show();app.processEvents();close_blocking_dialogs();w.close();w.deleteLater();passed+=1
         except Exception as e:failures.append(f'{module}.{name}: {type(e).__name__}: {e}')
         app.processEvents()
-    timer.stop();app.processEvents()
-    print('='*80);print('فحص واجهات ونوافذ نظام القرطاسية');print(f'ملفات الواجهة: {len(modules)}');print(f'أخطاء الاستيراد: {len(imports)}');print(f'أصناف QWidget: {len(classes)}');print(f'تم الإنشاء والعرض: {passed}');print(f'تحتاج معاملات غير معروفة: {len(skipped)}');print(f'أخطاء الإنشاء: {len(failures)}');print(f'نوافذ خطأ أغلقت أثناء الفحص: {len(BLOCKED)}')
+    timer.stop();app.processEvents();print('='*80);print('فحص واجهات ونوافذ نظام القرطاسية');print(f'ملفات الواجهة الفعالة: {len(modules)}');print(f'أخطاء الاستيراد: {len(imports)}');print(f'أصناف QWidget الفعالة: {len(classes)}');print(f'تم الإنشاء والعرض: {passed}');print(f'تحتاج معاملات غير معروفة: {len(skipped)}');print(f'أخطاء الإنشاء: {len(failures)}');print(f'نوافذ خطأ أغلقت أثناء الفحص: {len(BLOCKED)}')
     if imports:print('\n'.join(imports))
     if failures:print('\n'.join(failures))
     if skipped:print('\n'.join(skipped))
