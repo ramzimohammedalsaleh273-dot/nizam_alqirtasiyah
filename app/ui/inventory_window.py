@@ -1,3 +1,3 @@
-from app.ui.modern_ui import InventoryWindow, ProductCardDialog
+from app.ui.modern_ui_runtime import InventoryWindow, ProductCardDialog
 
 __all__ = ['InventoryWindow', 'ProductCardDialog']
