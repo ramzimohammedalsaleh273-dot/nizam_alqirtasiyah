@@ -1,3 +1,3 @@
-from app.ui.modern_ui import PurchasesWindow, InvoiceViewDialog
+from app.ui.modern_ui_runtime import PurchasesWindow, InvoiceViewDialog
 
 __all__ = ['PurchasesWindow', 'InvoiceViewDialog']
