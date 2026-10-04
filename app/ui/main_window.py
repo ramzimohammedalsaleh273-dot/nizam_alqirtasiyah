@@ -644,6 +644,10 @@ class MainWindow(QMainWindow):
         window.show()
         window.raise_()
         window.activateWindow()
+    def open_permissions(self):
+        """فتح نافذة إدارة الأدوار والصلاحيات الفعلية."""
+        self.open_window("permissions", PermissionsWindow)
+
     def open_universal_search(self):
         self.open_window("universal_search", UniversalSearchWindow)
 
