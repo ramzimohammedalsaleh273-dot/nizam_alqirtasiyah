@@ -502,8 +502,6 @@ class MainWindow(QMainWindow):
                 ("إجمالي ديون العملاء", f"{float(customer_debt):,.2f} ر.س", "الرصيد الحالي للعملاء", "◉", "#d97706"),
                 ("الأصناف منخفضة المخزون", f"{int(summary.get('low_stock',0)):,}", "يحتاج إلى متابعة", "!", "#dc2626"),
             ]
-            for data in kpi_data:
-                kpis.addWidget(KpiCard(*data), 0, len(kpis) if False else 0)
             for i,data in enumerate(kpi_data):
                 kpis.addWidget(KpiCard(*data),0,i)
             self.content_layout.addLayout(kpis)
