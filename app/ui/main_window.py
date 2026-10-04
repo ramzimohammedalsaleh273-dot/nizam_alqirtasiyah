@@ -33,6 +33,7 @@ from app.database.schema_bootstrap import ensure_reference_schema
 from app.services.treasury_schema_service import TreasurySchemaService
 from app.services.reference_compatibility_service import ReferenceCompatibilityService
 from app.ui.theme import APP_STYLE
+from app.ui.dashboard_widgets import DashboardCard, KpiCard, TrendChart, DataTableCard
 from app.ui.access_data_window import AccessDataWindow
 from app.ui.expense_window import ExpenseWindow
 from app.ui.analytics_window import AnalyticsWindow
@@ -436,117 +437,112 @@ class MainWindow(QMainWindow):
     def show_dashboard(self):
         self.clear_content()
         self._set_active_nav("الرئيسية")
-
-        head = QHBoxLayout()
-        box = QVBoxLayout()
-        title = QLabel("لوحة التحكم")
-        title.setObjectName("SectionTitle")
-        sub = QLabel("بيانات تشغيلية وجداول فعلية — بدون تكديس بطاقات كبيرة.")
-        sub.setObjectName("SectionSubTitle")
-        box.addWidget(title)
-        box.addWidget(sub)
-        head.addLayout(box)
-        head.addStretch()
-        refresh = QPushButton("تحديث")
-        refresh.setObjectName("Primary")
-        refresh.clicked.connect(self.show_dashboard)
-        head.addWidget(refresh)
-        self.content_layout.addLayout(head)
-
         try:
             health = get_health()
             summary = get_system_summary()
             financial = get_financial_summary()
-            self.db_meta.setText(
-                "قاعدة البيانات: سليمة" if health["healthy"] else "قاعدة البيانات: تحتاج مراجعة"
-            )
-
-            info = QFrame()
-            info.setObjectName("Card")
-            il = QHBoxLayout(info)
-            il.setContentsMargins(12, 8, 12, 8)
-            data = [
-                ("المستخدم", getattr(self, "current_user", {}).get("username", "—")),
-                ("الفرع", getattr(self, "current_user", {}).get("branch_name", "—")),
-                ("التاريخ", datetime.now().strftime("%Y-%m-%d")),
-                ("الوقت", datetime.now().strftime("%H:%M")),
-                ("الحالة", "سليم" if health["healthy"] else "مراجعة"),
-            ]
-            for name, value in data:
-                b = QVBoxLayout()
-                a = QLabel(name)
-                a.setStyleSheet("color:#64748b;font-size:11px;")
-                v = QLabel(str(value))
-                v.setStyleSheet("font-weight:700;color:#0f172a;")
-                b.addWidget(a)
-                b.addWidget(v)
-                il.addLayout(b)
-            self.content_layout.addWidget(info)
-
-            summary_line = QLabel(
-                f"السجلات الحالية — المنتجات: {summary['products']:,} | "
-                f"العملاء: {summary['customers']:,} | الموردون: {summary['suppliers']:,} | "
-                f"المبيعات: {summary['sales']:,} | المشتريات: {summary['purchase_invoices']:,}"
-            )
-            summary_line.setObjectName("SectionSubTitle")
-            self.content_layout.addWidget(summary_line)
-
             with get_session() as session:
-                sales = self._preview_table(
-                    session, "sales",
-                    ["invoice_number", "created_at", "customer_id", "total_amount", "status"],
-                )
-                purchases = self._preview_table(
-                    session, "purchase_invoices",
-                    ["invoice_number", "invoice_date", "supplier_id", "total_amount", "status"],
-                )
-                alerts = self._preview_table(
-                    session, "notifications",
-                    ["type", "title", "message", "created_at", "status"],
-                )
-                low = session.execute(text("""
-                    SELECT p.sku, p.name_ar,
-                           COALESCE(st.quantity - st.reserved_quantity,0),
-                           COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)
-                    FROM products p
-                    LEFT JOIN stock_balances st ON st.product_id=p.id
-                    WHERE p.is_active=1
-                      AND COALESCE(st.quantity - st.reserved_quantity,0)
-                          <= COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)
-                    ORDER BY COALESCE(st.quantity - st.reserved_quantity,0), p.name_ar
-                    LIMIT 8
+                sales_today = session.execute(text("SELECT COALESCE(SUM(total_amount),0) FROM sales WHERE status IN ('POSTED','completed') AND date(created_at)=date('now','localtime')")).scalar() or 0
+                cash = financial.get("cash", 0)
+                customer_debt = financial.get("customers", 0)
+                sales_rows = session.execute(text("""
+                    SELECT date(created_at), COALESCE(SUM(total_amount),0)
+                    FROM sales
+                    WHERE status IN ('POSTED','completed')
+                      AND date(created_at) >= date('now','localtime','-6 day')
+                    GROUP BY date(created_at) ORDER BY date(created_at)
                 """)).all()
+                expense_exists = session.execute(text("SELECT 1 FROM sqlite_master WHERE type='table' AND name='expenses'")).scalar()
+                expense_rows = session.execute(text("""
+                    SELECT date(expense_date), COALESCE(SUM(amount),0)
+                    FROM expenses
+                    WHERE date(expense_date) >= date('now','localtime','-6 day')
+                    GROUP BY date(expense_date) ORDER BY date(expense_date)
+                """)).all() if expense_exists else []
+                low = session.execute(text("""
+                    SELECT p.sku,p.name_ar,COALESCE(SUM(st.quantity-st.reserved_quantity),0),
+                           COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)
+                    FROM products p LEFT JOIN stock_balances st ON st.product_id=p.id
+                    WHERE p.is_active=1
+                    GROUP BY p.id,p.sku,p.name_ar,p.reorder_point,p.min_stock
+                    HAVING COALESCE(SUM(st.quantity-st.reserved_quantity),0)
+                           <= COALESCE(NULLIF(p.reorder_point,0),p.min_stock,0)
+                    ORDER BY 3,p.name_ar LIMIT 8
+                """)).all()
+                due = []
+                try:
+                    due = session.execute(text("""
+                        SELECT invoice_number, invoice_date, due_amount, status
+                        FROM purchase_invoices
+                        WHERE COALESCE(due_amount,0)>0
+                          AND date(invoice_date)<=date('now','localtime')
+                        ORDER BY invoice_date LIMIT 8
+                    """)).all()
+                except Exception:
+                    due = []
+            self.db_meta.setText("قاعدة البيانات: سليمة" if health["healthy"] else "قاعدة البيانات: تحتاج مراجعة")
 
-            top = QHBoxLayout()
-            top.addWidget(self._dashboard_section(
-                "آخر المبيعات",
-                ["رقم الفاتورة", "التاريخ", "العميل", "الإجمالي", "الحالة"],
-                sales,
-            ), 1)
-            top.addWidget(self._dashboard_section(
-                "آخر المشتريات",
-                ["رقم الفاتورة", "التاريخ", "المورد", "الإجمالي", "الحالة"],
-                purchases,
-            ), 1)
-            self.content_layout.addLayout(top)
+            head = QHBoxLayout()
+            title_box = QVBoxLayout()
+            title = QLabel("لوحة التحكم التنفيذية")
+            title.setObjectName("SectionTitle")
+            subtitle = QLabel("نظرة موحدة على الأداء المالي والتشغيلي والتنبيهات — بتصميم Multi-Widget وتحليل سريع.")
+            subtitle.setObjectName("SectionSubTitle")
+            title_box.addWidget(title); title_box.addWidget(subtitle)
+            head.addLayout(title_box); head.addStretch()
+            refresh = QPushButton("↻ تحديث البيانات")
+            refresh.setObjectName("Primary"); refresh.clicked.connect(self.show_dashboard)
+            head.addWidget(refresh)
+            self.content_layout.addLayout(head)
 
-            bottom = QHBoxLayout()
-            bottom.addWidget(self._dashboard_section(
-                "التنبيهات",
-                ["النوع", "العنوان", "التفاصيل", "التاريخ", "الحالة"],
-                alerts,
-            ), 1)
-            bottom.addWidget(self._dashboard_section(
-                "الأصناف منخفضة المخزون",
-                ["رمز الصنف", "الصنف", "الرصيد الحالي", "الحد الأدنى"],
-                low,
-            ), 1)
+            kpis = QGridLayout(); kpis.setSpacing(10)
+            kpi_data = [
+                ("مبيعات اليوم", f"{float(sales_today):,.2f} ر.س", "إجمالي الفواتير المرحلة اليوم", "↗", "#2563eb"),
+                ("السيولة النقدية", f"{float(cash):,.2f} ر.س", "الرصيد المحاسبي للصندوق", "▣", "#0f766e"),
+                ("إجمالي ديون العملاء", f"{float(customer_debt):,.2f} ر.س", "الرصيد الحالي للعملاء", "◉", "#d97706"),
+                ("الأصناف منخفضة المخزون", f"{int(summary.get('low_stock',0)):,}", "يحتاج إلى متابعة", "!", "#dc2626"),
+            ]
+            for data in kpi_data:
+                kpis.addWidget(KpiCard(*data), 0, len(kpis) if False else 0)
+            for i,data in enumerate(kpi_data):
+                kpis.addWidget(KpiCard(*data),0,i)
+            self.content_layout.addLayout(kpis)
+
+            labels = [str(x[0])[-5:] for x in sales_rows]
+            sales_vals = [float(x[1] or 0) for x in sales_rows]
+            expense_map = {str(x[0]):float(x[1] or 0) for x in expense_rows}
+            expense_vals = [expense_map.get(str(x[0]),0.0) for x in sales_rows]
+            trend = DashboardCard("الإيرادات والمصروفات", "آخر 7 أيام")
+            chart = TrendChart()
+            chart.set_data(labels,[{"name":"الإيرادات","values":sales_vals,"color":"#2563eb"},{"name":"المصروفات","values":expense_vals,"color":"#d97706"}])
+            trend.layout.addWidget(chart)
+
+            alerts = DashboardCard("التنبيهات التشغيلية", "يتطلب الانتباه")
+            alerts_table = self._make_table(["الصنف","الرصيد","الحد الأدنى"], [(r[1],r[2],r[3]) for r in low], 205)
+            alerts.layout.addWidget(alerts_table)
+
+            charts_row = QHBoxLayout(); charts_row.setSpacing(10)
+            charts_row.addWidget(trend,2); charts_row.addWidget(alerts,1)
+            self.content_layout.addLayout(charts_row)
+
+            bottom = QHBoxLayout(); bottom.setSpacing(10)
+            recent = DashboardCard("الفواتير المستحقة اليوم","متابعة الالتزامات")
+            recent.layout.addWidget(self._make_table(["الفاتورة","التاريخ","المتبقي","الحالة"], due, 190))
+            health_card = DashboardCard("مؤشرات النظام","الحالة التشغيلية")
+            health_rows = [
+                ("المنتجات",summary.get("products",0)),
+                ("العملاء",summary.get("customers",0)),
+                ("الموردون",summary.get("suppliers",0)),
+                ("المبيعات",summary.get("sales",0)),
+                ("المشتريات",summary.get("purchase_invoices",0)),
+            ]
+            health_card.layout.addWidget(self._make_table(["المؤشر","القيمة"],health_rows,190))
+            bottom.addWidget(recent,1); bottom.addWidget(health_card,1)
             self.content_layout.addLayout(bottom)
-
         except Exception as exc:
-            QMessageBox.critical(self, "خطأ في لوحة التحكم", str(exc))
-
+            QMessageBox.critical(self, "خطأ في لوحة التحكم", f"تعذر بناء اللوحة التنفيذية:\n{type(exc).__name__}: {exc}")
         self.content_layout.addStretch()
+
 
     def _close_other_windows(self, keep_key):
         """يحافظ على نافذة تشغيل فرعية واحدة مفتوحة في كل مرة."""
