@@ -1,3 +1,3 @@
-from app.ui.final_ui import SalesWindow
+from app.ui.modern_ui import SalesWindow, InvoiceViewDialog
 
-__all__ = ['SalesWindow']
+__all__ = ['SalesWindow', 'InvoiceViewDialog']
