@@ -1,3 +1,3 @@
-from app.ui.modern_ui import UniversalSearchWindow
+from app.ui.modern_ui_runtime import UniversalSearchWindow
 
 __all__ = ['UniversalSearchWindow']
