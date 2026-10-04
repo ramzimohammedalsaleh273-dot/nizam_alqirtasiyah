@@ -1,93 +1,36 @@
-from app.ui.theme import APP_STYLE
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, QMessageBox
-from app.services.smart_operations_service import SmartOperationsService
-
+from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QPushButton,QLabel,QLineEdit,QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QMessageBox
+from sqlalchemy import text
+from app.database.connection import get_session
+from app.ui.theme import APP_STYLE
+from app.ui.i18n import display_value
 
 class SmartOperationsWindow(QWidget):
-    """مركز التشغيل الذكي: لقطة فورية لما يحتاج المتابعة."""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setStyleSheet(APP_STYLE)
-        self.setWindowTitle("مركز التشغيل الذكي")
-        self.setMinimumSize(1000, 650)
-        self.setLayoutDirection(Qt.RightToLeft)
-
-        root = QVBoxLayout(self)
-        title = QLabel("مركز التشغيل الذكي")
-        title.setStyleSheet("font-size:28px;font-weight:bold;padding:10px;")
-        root.addWidget(title)
-
-        subtitle = QLabel("بدل البحث في عشرات الشاشات: هنا ترى أهم الأشياء التي تستحق الانتباه الآن.")
-        subtitle.setStyleSheet("color:#8ea6c2;padding:0 10px 10px;")
-        root.addWidget(subtitle)
-
-        self.cards = QHBoxLayout()
-        root.addLayout(self.cards)
-
-        actions = QHBoxLayout()
-        refresh = QPushButton("تحديث المؤشرات")
-        refresh.clicked.connect(self.load)
-        search = QPushButton("فتح البحث 360°")
-        search.clicked.connect(self.open_search)
-        actions.addWidget(refresh)
-        actions.addWidget(search)
-        actions.addStretch()
-        root.addLayout(actions)
-
-        self.message = QLabel("")
-        self.message.setWordWrap(True)
-        self.message.setStyleSheet("font-size:16px;padding:16px;")
-        root.addWidget(self.message)
-        root.addStretch()
-        self.load()
-
+    """مركز التنبيهات في شكل جدول تشغيلي واضح."""
+    def __init__(self,user=None,parent=None):
+        super().__init__(parent);self.setWindowTitle('التنبيهات');self.setMinimumSize(1200,720);self.setLayoutDirection(Qt.RightToLeft);self.setStyleSheet(APP_STYLE);root=QVBoxLayout(self);h=QHBoxLayout();h.addWidget(QLabel('التنبيهات'));h.addStretch();self.search=QLineEdit();self.search.setPlaceholderText('بحث في التنبيهات');h.addWidget(self.search);b=QPushButton('تحديث');b.clicked.connect(self.load);h.addWidget(b);read=QPushButton('تحديد كمقروء');read.clicked.connect(self.mark_read);h.addWidget(read);root.addLayout(h);self.table=QTableWidget();self.table.setSelectionBehavior(QAbstractItemView.SelectRows);self.table.setAlternatingRowColors(True);root.addWidget(self.table,1);self.status=QLabel('جاهز');root.addWidget(self.status);self.search.textChanged.connect(lambda *_:self.load());self.load()
     def load(self):
         try:
-            data = SmartOperationsService.snapshot()
-            while self.cards.count():
-                item = self.cards.takeAt(0)
-                if item.widget():
-                    item.widget().deleteLater()
-
-            values = [
-                ("أصناف تحتاج متابعة", data["low_stock"]),
-                ("ذمم العملاء", f"{data['customer_due']:.2f}"),
-                ("ذمم الموردين", f"{data['supplier_due']:.2f}"),
-                ("قيود غير متوازنة", data["unbalanced"]),
-            ]
-            for label, value in values:
-                card = QFrame()
-                card.setStyleSheet("QFrame{background:#101F33;border:1px solid #1E3856;border-radius:14px;}")
-                layout = QVBoxLayout(card)
-                l = QLabel(label)
-                l.setAlignment(Qt.AlignCenter)
-                n = QLabel(str(value))
-                n.setAlignment(Qt.AlignCenter)
-                n.setStyleSheet("font-size:25px;font-weight:bold;")
-                layout.addWidget(l)
-                layout.addWidget(n)
-                self.cards.addWidget(card)
-
-            warnings = []
-            if data["low_stock"]:
-                warnings.append(f"يوجد {data['low_stock']} صنفًا عند/دون نقطة إعادة الطلب.")
-            if data["customer_due"] > 0:
-                warnings.append(f"إجمالي الذمم المدينة الحالية: {data['customer_due']:.2f}.")
-            if data["supplier_due"] > 0:
-                warnings.append(f"إجمالي الذمم الدائنة الحالية: {data['supplier_due']:.2f}.")
-            if data["unbalanced"]:
-                warnings.append("يوجد قيد محاسبي غير متوازن ويجب عدم تجاهله.")
-            if not warnings:
-                warnings.append("لا توجد مؤشرات حرجة في اللقطة الحالية.")
-            self.message.setText("\n".join("• " + x for x in warnings))
-        except Exception as exc:
-            QMessageBox.critical(self, "فشل مركز التشغيل", str(exc))
-
-    def open_search(self):
-        from app.ui.universal_search_window import UniversalSearchWindow
-        self.search_window = UniversalSearchWindow()
-        self.search_window.show()
-        self.search_window.raise_()
-        self.search_window.activateWindow()
+            with get_session() as s:
+                cols=[r[1] for r in s.connection().exec_driver_sql('PRAGMA table_info(notifications)').fetchall()]
+                if not cols:self.status.setText('جدول التنبيهات غير موجود');return
+                preferred=[x for x in ['id','type','title','message','severity','status','is_read','created_at'] if x in cols]
+                q=self.search.text().strip();where='';params={}
+                if q:
+                    textcols=[x for x in preferred if x not in {'id','created_at','is_read'}];where=' WHERE '+' OR '.join(f'CAST("{x}" AS TEXT) LIKE :q' for x in textcols);params['q']=f'%{q}%'
+                rows=s.execute(text(f'SELECT {",".join(chr(34)+x+chr(34) for x in preferred)} FROM notifications{where} ORDER BY rowid DESC LIMIT 500'),params).all()
+            self.table.setColumnCount(len(preferred));self.table.setHorizontalHeaderLabels([{'id':'الرقم','type':'النوع','title':'العنوان','message':'التفاصيل','severity':'الخطورة','status':'الحالة','is_read':'مقروء','created_at':'التاريخ'}.get(x,x) for x in preferred]);self.table.setRowCount(0)
+            for row in rows:
+                r=self.table.rowCount();self.table.insertRow(r)
+                for c,v in enumerate(row):self.table.setItem(r,c,QTableWidgetItem(display_value(v)))
+            self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents);self.table.horizontalHeader().setStretchLastSection(True);self.status.setText(f'عدد التنبيهات: {len(rows)}')
+        except Exception as e:QMessageBox.critical(self,'التنبيهات',str(e))
+    def mark_read(self):
+        r=self.table.currentRow();
+        if r<0:return
+        id_col=next((i for i in range(self.table.columnCount()) if self.table.horizontalHeaderItem(i).text()=='الرقم'),None)
+        if id_col is None:return
+        rid=int(self.table.item(r,id_col).text())
+        try:
+            with get_session() as s:s.execute(text('UPDATE notifications SET is_read=1,status=COALESCE(status,\'READ\') WHERE id=:id'),{'id':rid});s.commit();self.load()
+        except Exception as e:QMessageBox.critical(self,'فشل تحديث التنبيه',str(e))
