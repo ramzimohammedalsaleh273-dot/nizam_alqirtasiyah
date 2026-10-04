@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QDialog, QMessageBox
 
 from app.ui.final_ui import POSWindow as _BasePOSWindow
 from app.ui.final_ui import PaymentDialog
@@ -18,7 +18,7 @@ class POSWindow(_BasePOSWindow):
             self.user.get("customer_id"),
             self,
         )
-        if payment_dialog.exec() != payment_dialog.Accepted:
+        if payment_dialog.exec() != QDialog.Accepted:
             return
 
         payments = payment_dialog.payments()
@@ -30,7 +30,7 @@ class POSWindow(_BasePOSWindow):
             self.current_total(),
             self,
         )
-        if confirmation.exec() != confirmation.Accepted:
+        if confirmation.exec() != QDialog.Accepted:
             return
 
         try:
